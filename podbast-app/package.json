@@ -9,7 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "preact": "^10.19.3"
+    "@reduxjs/toolkit": "^2.0.1",
+    "@tanstack/react-router": "^0.0.1-beta.279",
+    "@tanstack/router-cli": "^0.0.1-beta.29",
+    "preact": "^10.19.3",
+    "react-redux": "^9.0.4"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.7.0",
