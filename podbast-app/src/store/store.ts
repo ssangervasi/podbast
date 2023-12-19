@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 
 import { slice as commonSlice } from "/src/features/common/slice";
+import { slice as rssSlice } from "/src/features/rss/slice";
 
 export const store = configureStore({
   reducer: {
     [commonSlice.name]: commonSlice.reducer,
+    [rssSlice.name]: rssSlice.reducer,
   },
 });
 
