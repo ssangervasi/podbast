@@ -1,24 +1,22 @@
-import { useMemo } from "preact/hooks";
-import {
-  selectors as rssSelectors,
-  actions as rssActions,
-  selectSlice as rssSelectSlice,
-} from "./slice";
-import { useAppDispatch, useAppSelector } from "/src/selectors";
-// import { createSelector } from "@reduxjs/toolkit";
+import { useMemo, useReducer } from "preact/hooks";
+import { selectUrlsByStatus } from "./selectors";
+import { addUrl, makeReady } from "./slice";
+import { useAppDispatch, useAppSelector } from "/src/store";
 
 export const Rss = () => {
   // const selectReady = useMemo(() => {
-  //   rssSelectors.selectSlice;
+  //   selectSlice;
   // }, []);
 
+  const [_, rerender] = useReducer((p) => p + 1, 0)
+
   const requestedUrls = useAppSelector((state) =>
-    rssSelectors.selectUrlsByStatus(state, "requested")
+    selectUrlsByStatus(state, "requested")
   );
   const readyUrls = useAppSelector((state) =>
-    rssSelectors.selectUrlsByStatus(state, "ready")
+    selectUrlsByStatus(state, "ready")
   );
-  // const urls = useAppSelector(rssSelectors.selectUrls);
+  // const urls = useAppSelector(selectUrls);
   const dispatch = useAppDispatch();
 
   const localUrls = useMemo(
@@ -34,13 +32,15 @@ export const Rss = () => {
       <div>
         <h1>RSS Stuff</h1>
 
+        <button onClick={() => rerender(0)}>Rerender</button>
+
         <div>
           <form
             onSubmit={(evt) => {
               evt.preventDefault();
               const urlEl = evt.currentTarget.elements.namedItem("url");
               const url = (urlEl as HTMLInputElement).value;
-              dispatch(rssActions.addUrl(url));
+              dispatch(addUrl(url));
             }}
           >
             <input type="text" name="url" placeholder="rss.url.com"></input>
@@ -73,7 +73,7 @@ export const Rss = () => {
               [{ru.status}] {ru.url}
               <button
                 onClick={() => {
-                  dispatch(rssActions.makeReady(ru.url));
+                  dispatch(makeReady(ru.url));
                 }}
               >
                 Make ready
@@ -89,7 +89,7 @@ export const Rss = () => {
               [{ru.status}] {ru.url}
               {/* <button
                 onClick={() => {
-                  dispatch(rssActions.makeReady(ru.url));
+                  dispatch(makeReady(ru.url));
                 }}
               >
                 Make ready

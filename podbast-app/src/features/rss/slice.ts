@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-
-import { wrapEmpty } from "/src/selectors";
+import { EMPTY_ARRAY } from "/src/store";
 
 export interface RssUrl {
   url: string;
@@ -13,7 +12,7 @@ export interface RssState {
 }
 
 export const initialState: RssState = {
-  urls: wrapEmpty.EMPTY_ARRAY,
+  urls: EMPTY_ARRAY,
 };
 
 export const slice = createSlice({
@@ -42,17 +41,7 @@ export const slice = createSlice({
       }
     },
   },
-  selectors: {
-    selectUrls: (state): RssUrl[] => state.urls,
-    selectUrlsByStatus: (state, status: RssUrl["status"]): RssUrl[] => {
-      return wrapEmpty(
-        slice
-          .getSelectors()
-          .selectUrls(state)
-          .filter((ru) => ru.status === status)
-      );
-    },
-  },
 });
 
-export const { actions, reducer, selectors, selectSlice } = slice;
+export const { actions, reducer, selectSlice } = slice;
+export const { makeReady, addUrl } = actions;
