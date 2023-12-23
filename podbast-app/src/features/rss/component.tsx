@@ -1,5 +1,5 @@
 import { useMemo, useReducer } from "preact/hooks";
-import { selectUrlsByStatus } from "./selectors";
+import { createSelectUrlsByStatus, rawSelectUrlsByStatus } from "./selectors";
 import { addUrl, makeReady } from "./slice";
 import { useAppDispatch, useAppSelector } from "/src/store";
 
@@ -8,13 +8,15 @@ export const Rss = () => {
   //   selectSlice;
   // }, []);
 
-  const [_, rerender] = useReducer((p) => p + 1, 0)
+  const [_, rerender] = useReducer((p) => p + 1, 0);
 
-  const requestedUrls = useAppSelector((state) =>
-    selectUrlsByStatus(state, "requested")
-  );
+  const requestedUrls = useAppSelector((state) => {
+    const s = Math.random() > 0.5 ? "requested" : "snorp";
+    console.log("s", s, rawSelectUrlsByStatus);
+    return rawSelectUrlsByStatus(state, s);
+  });
   const readyUrls = useAppSelector((state) =>
-    selectUrlsByStatus(state, "ready")
+    rawSelectUrlsByStatus(state, "ready")
   );
   // const urls = useAppSelector(selectUrls);
   const dispatch = useAppDispatch();

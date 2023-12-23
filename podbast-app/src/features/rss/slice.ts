@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { EMPTY_ARRAY } from "/src/store";
+import { EMPTY_ARRAY } from "/src/store/utils";
 
 export interface RssUrl {
   url: string;
@@ -41,7 +41,12 @@ export const slice = createSlice({
       }
     },
   },
+  selectors: {
+    selectSlice: (slice) => slice,
+  },
 });
 
-export const { actions, reducer, selectSlice } = slice;
+export const { actions, reducer } = slice;
 export const { makeReady, addUrl } = actions;
+// Note: slice.selectSlice is provided by Reduxoolkit but cannot be  exported unbound from the Slice instance.
+export const { selectSlice } = slice.selectors;
