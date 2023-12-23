@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
+import { wrapEmpty } from "/src/selectors";
+
 export interface RssUrl {
   url: string;
   status: "requested" | "ready";
@@ -11,7 +13,7 @@ export interface RssState {
 }
 
 export const initialState: RssState = {
-  urls: [],
+  urls: wrapEmpty.EMPTY_ARRAY,
 };
 
 export const slice = createSlice({
@@ -19,13 +21,22 @@ export const slice = createSlice({
   initialState,
   reducers: {
     addUrl: (state, action: PayloadAction<string>) => {
+      const url = action.payload;
+
+      const existing = state.urls.find((ru) => ru.url == url);
+      if (existing) {
+        existing.status = "requested";
+        return;
+      }
+
       state.urls.push({
-        url: action.payload,
+        url,
         status: "requested",
       });
     },
     makeReady: (state, action: PayloadAction<string>) => {
-      const ru = state.urls.find((ruc) => ruc.url === action.payload);
+      const url = action.payload;
+      const ru = state.urls.find((ruc) => ruc.url === url);
       if (ru) {
         ru.status = "ready";
       }
@@ -34,12 +45,14 @@ export const slice = createSlice({
   selectors: {
     selectUrls: (state): RssUrl[] => state.urls,
     selectUrlsByStatus: (state, status: RssUrl["status"]): RssUrl[] => {
-      return slice
-        .getSelectors()
-        .selectUrls(state)
-        .filter((ru) => ru.status === status);
+      return wrapEmpty(
+        slice
+          .getSelectors()
+          .selectUrls(state)
+          .filter((ru) => ru.status === status)
+      );
     },
   },
 });
 
-export const { actions, reducer, selectors } = slice;
+export const { actions, reducer, selectors, selectSlice } = slice;
