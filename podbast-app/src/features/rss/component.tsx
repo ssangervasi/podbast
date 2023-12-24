@@ -1,33 +1,20 @@
-import { useMemo, useReducer } from "preact/hooks";
-import { createSelectUrlsByStatus, rawSelectUrlsByStatus } from "./selectors";
-import { addUrl, makeReady } from "./slice";
+import { useReducer } from "preact/hooks";
+import { addUrl, makeReady, selectUrlsByStatus } from "./slice";
 import { useAppDispatch, useAppSelector } from "/src/store";
+import { LOCAL_URLS } from "./rssClient";
+import { fetchFeed } from "./thunks";
 
 export const Rss = () => {
-  // const selectReady = useMemo(() => {
-  //   selectSlice;
-  // }, []);
-
   const [_, rerender] = useReducer((p) => p + 1, 0);
 
-  const requestedUrls = useAppSelector((state) => {
-    const s = Math.random() > 0.5 ? "requested" : "snorp";
-    console.log("s", s, rawSelectUrlsByStatus);
-    return rawSelectUrlsByStatus(state, s);
-  });
-  const readyUrls = useAppSelector((state) =>
-    rawSelectUrlsByStatus(state, "ready")
+  const requestedUrls = useAppSelector((state) =>
+    selectUrlsByStatus(state, "requested")
   );
-  // const urls = useAppSelector(selectUrls);
+  const readyUrls = useAppSelector((state) =>
+    selectUrlsByStatus(state, "ready")
+  );
   const dispatch = useAppDispatch();
 
-  const localUrls = useMemo(
-    () =>
-      `${import.meta.env.VITE_LOCAL_RSS_FEEDS}`
-        .split(/\s/)
-        .filter((u) => u.length && URL.canParse(u)),
-    []
-  );
 
   return (
     <>
@@ -43,6 +30,9 @@ export const Rss = () => {
               const urlEl = evt.currentTarget.elements.namedItem("url");
               const url = (urlEl as HTMLInputElement).value;
               dispatch(addUrl(url));
+              const ff = fetchFeed(url);
+              console.log('ff', ff)
+              dispatch(ff)
             }}
           >
             <input type="text" name="url" placeholder="rss.url.com"></input>
@@ -50,7 +40,7 @@ export const Rss = () => {
           </form>
 
           <ul>
-            {localUrls.map((u) => (
+            {LOCAL_URLS.map((u) => (
               <li key={u}>
                 <pre style={{ display: "inline" }}>{u}</pre>
 
@@ -96,6 +86,10 @@ export const Rss = () => {
               >
                 Make ready
               </button> */}
+
+              <pre>
+                {JSON.stringify(ru.feed, null, 2)}
+              </pre>
             </li>
           ))}
         </ul>

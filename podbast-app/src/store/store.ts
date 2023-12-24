@@ -11,6 +11,13 @@ export const store = configureStore({
     [commonSlice.name]: commonSlice.reducer,
     [rssSlice.name]: rssSlice.reducer,
   },
+  middleware: (getDefaultMiddleware) => {
+    const m = getDefaultMiddleware({
+      thunk: true,
+    });
+    console.log("middle", m);
+    return m;
+  },
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

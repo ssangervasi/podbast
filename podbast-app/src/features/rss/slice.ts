@@ -1,10 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { EMPTY_ARRAY } from "/src/store/utils";
+
+import { EMPTY_ARRAY, wrapEmpty } from "/src/store/utils";
+import { fetchFeed } from "./thunks";
 
 export interface RssUrl {
   url: string;
   status: "requested" | "ready";
+  feed?: Record<string, unknown>;
 }
 
 export interface RssState {
@@ -38,15 +41,44 @@ export const slice = createSlice({
       const ru = state.urls.find((ruc) => ruc.url === url);
       if (ru) {
         ru.status = "ready";
+        ru.feed = {
+          title: "Dummy content",
+        };
       }
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchFeed.pending, () => {})
+      .addCase(fetchFeed.fulfilled, (state, action) => {
+        const ru = state.urls.find((ruc) => ruc.url === action.meta.arg);
+
+        const attrs = {
+          status: "ready",
+          feed: action.payload,
+        };
+
+        if (ru) {
+          Object.assign(ru, attrs);
+        } else {
+          console.error("No RU for feed fulf");
+        }
+      })
+      .addCase(fetchFeed.rejected, () => {});
+  },
   selectors: {
-    selectSlice: (slice) => slice,
+    selectUrls: (state): RssUrl[] => state.urls,
+    selectUrlsByStatus: (state, status: RssUrl["status"]): RssUrl[] => {
+      return wrapEmpty(
+        slice
+          .getSelectors()
+          .selectUrls(state)
+          .filter((ru) => ru.status === status)
+      );
+    },
   },
 });
 
 export const { actions, reducer } = slice;
 export const { makeReady, addUrl } = actions;
-// Note: slice.selectSlice is provided by Reduxoolkit but cannot be  exported unbound from the Slice instance.
-export const { selectSlice } = slice.selectors;
+export const { selectUrls, selectUrlsByStatus } = slice.selectors;
