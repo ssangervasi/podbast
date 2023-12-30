@@ -1,0 +1,12 @@
+{
+  "name": "podbast",
+  "version": "0.0.1",
+  "description": "dev",
+  "type": "module",
+  "scripts": {},
+  "author": "ssangervasi",
+  "license": "ISC",
+  "devDependencies": {
+    "pm2": "^5.3.0"
+  }
+}
