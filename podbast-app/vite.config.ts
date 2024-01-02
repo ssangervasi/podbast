@@ -6,6 +6,13 @@ import preact from "@preact/preset-vite";
 export default defineConfig({
   server: {
     port: 42994,
+    proxy: {
+      "/api": {
+        target: "http://localhost:42993",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
   },
   plugins: [preact()],
   resolve: {

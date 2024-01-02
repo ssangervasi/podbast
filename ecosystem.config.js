@@ -35,6 +35,9 @@ module.exports = {
       cwd: "./podbast-server",
       script: "dist/index.js",
       watch: "dist/",
+      env: {
+        NODE_ENV: "development",
+      },
     },
   ],
 };
