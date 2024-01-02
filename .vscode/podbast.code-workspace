@@ -5,6 +5,7 @@
     }
   ],
   "settings": {
+    "workbench.colorTheme": "One Dark Pro Monokai Darker",
     "files.exclude": {
       "podbast-app/*/**": true,
       "podbast-server/*/**": true,

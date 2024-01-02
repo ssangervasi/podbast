@@ -19,6 +19,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@tinyhttp/app": "^2.2.1"
+    "@tinyhttp/app": "^2.2.1",
+    "narrow-minded": "^1.2.1"
   }
 }

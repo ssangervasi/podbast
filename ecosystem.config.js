@@ -1,31 +1,40 @@
-// import * as x from "pm2/types";
-
 /**
+ * PM2 needs a patch:
+ *
+ * ```
+ * // pm2/lib/Common.js#340
+ * } else if (filename.indexOf(".config.mjs") > -1) {
+ *    var confPath = Url.pathToFileURL(path.resolve(filename));
+ *    return import(confPath);
+ *  }
+ * ```
+ * See: https://github.com/Unitech/pm2/issues/4591
+ *
  * @typedef {import('pm2').StartOptions} StartOptions
  * @type {{ apps: StartOptions[] }}
  */
-export default {
+module.exports = {
   apps: [
     {
-      name: "app",
+      name: "app-dev",
       cwd: "./podbast-app",
-      interpreter: "npm",
-      interpreter_args: "run dev",
-      // watch: ".",
+      interpreter: "bash",
+      interpreter: "bash",
+      script: "bin/runner.sh",
+      args: "dev",
     },
     {
-      name: "server-builder",
+      name: "server-dev",
       cwd: "./podbast-server",
-      interpreter: "npm",
-      interpreter_args: "run dev",
+      interpreter: "bash",
+      script: "bin/runner.sh",
+      args: "dev",
     },
     {
       name: "server",
       cwd: "./podbast-server",
       script: "dist/index.js",
       watch: "dist/",
-      // interpreter: "npm",
-      // interpreter_args: "run dev",
     },
   ],
 };

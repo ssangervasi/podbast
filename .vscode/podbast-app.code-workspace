@@ -1,8 +1,10 @@
 {
-	"folders": [
-		{
-			"path": "../podbast-app"
-		}
-	],
-	"settings": {}
+  "folders": [
+    {
+      "path": "../podbast-app"
+    }
+  ],
+  "settings": {
+    "workbench.colorTheme": "Dracula Soft"
+  }
 }
