@@ -1,3 +1,5 @@
+import { narrow } from "narrow-minded";
+
 const LOCAL_URLS_VAR = `${import.meta.env.VITE_LOCAL_RSS_FEEDS ?? ""}`;
 
 export const LOCAL_URLS = LOCAL_URLS_VAR.split(/\s+/).filter(
@@ -12,7 +14,14 @@ export const getFeed = async (url: string) => {
 
   try {
     const res = await fetch(proxu);
-    return res.text();
+    const json = await res.json();
+
+    if (narrow({ content: "object" }, json)) {
+      return json.content;
+    } else {
+      //
+      return "No content";
+    }
   } catch (e) {
     console.error("Feed error", e);
     throw e;
