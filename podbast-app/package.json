@@ -12,9 +12,7 @@
     "@reduxjs/toolkit": "^2.0.1",
     "immer": "^10.0.3",
     "preact": "^10.19.3",
-    "react-redux": "^9.0.4",
-    "rss-parser": "^3.13.0",
-    "xml2js": "^0.6.2"
+    "react-redux": "^9.0.4"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.7.0",

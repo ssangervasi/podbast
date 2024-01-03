@@ -2,13 +2,13 @@ import process from "node:process";
 import { App } from "@tinyhttp/app";
 import { narrow } from "narrow-minded";
 
+import { app as rssApp } from "./rss.js";
+
 export const PORT = Number(process.env.PORT) || 42993;
 
 const app = new App();
 
-app.get("/", (req, res) => {
-  res.send("hello world 999999");
-});
+app.use(rssApp);
 
 app.get("/debug", async (req, res) => {
   console.log("/debug requested ");
@@ -37,11 +37,10 @@ app.get("/debug", async (req, res) => {
   res.send(await fres.text());
 });
 
-app.get("/rss/?.*", (req, res) => {
-  res.json({
-    url: req.url,
-  });
+app.get("/", (req, res) => {
+  res.send("Index");
 });
 
 app.listen(PORT);
-console.debug("We still good again");
+
+console.debug("Listening on", PORT);

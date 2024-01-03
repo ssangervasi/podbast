@@ -11,15 +11,17 @@
   },
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "rss-parser": "^3.13.0",
+    "xml2js": "^0.6.2",
+    "@tinyhttp/app": "^2.2.1",
+    "narrow-minded": "^1.2.1"
+  },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.5",
     "@types/node": "^20.10.5",
     "rollup": "^4.9.1",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3"
-  },
-  "dependencies": {
-    "@tinyhttp/app": "^2.2.1",
-    "narrow-minded": "^1.2.1"
   }
 }

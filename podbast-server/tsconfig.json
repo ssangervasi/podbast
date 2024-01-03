@@ -2,9 +2,11 @@
   "compilerOptions": {
     // "composite": true,
     "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "outDir": "dist"
   },
   "include": ["src/**/*", "rollup.config.ts"]
