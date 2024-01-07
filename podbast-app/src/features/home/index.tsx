@@ -3,7 +3,7 @@ import { Rss } from "/src/features/rss";
 
 export const Home = () => {
   return (
-    <div style={{ minWidth: 400, maxWidth: 1000 }}>
+    <div>
       <Rss />
       <Player />
     </div>
