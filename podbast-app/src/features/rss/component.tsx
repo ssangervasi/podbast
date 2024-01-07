@@ -1,20 +1,41 @@
 import { useReducer } from "preact/hooks";
-import { addUrl, makeReady, selectUrlsByStatus } from "./slice";
+import {
+  addSubscription,
+  makeReady,
+  selectSubscriptionsByStatus,
+} from "./slice";
 import { useAppDispatch, useAppSelector } from "/src/store";
 import { LOCAL_URLS } from "./rssClient";
 import { fetchFeed } from "./thunks";
+import { Feed } from "/src/features/rss/guards";
+
+const FeedViewer = ({ feed }: { feed: Feed }) => {
+  return (
+    <div>
+      <p>
+        <strong>{feed.title}</strong>
+      </p>
+      <ul>
+        {feed.items.map((fi) => (
+          <li>
+            <pre>{fi.enclosure.url}</pre>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
 export const Rss = () => {
   const [_, rerender] = useReducer((p) => p + 1, 0);
 
-  const requestedUrls = useAppSelector((state) =>
-    selectUrlsByStatus(state, "requested")
+  const requestedSubs = useAppSelector((state) =>
+    selectSubscriptionsByStatus(state, "requested")
   );
-  const readyUrls = useAppSelector((state) =>
-    selectUrlsByStatus(state, "ready")
+  const readySubs = useAppSelector((state) =>
+    selectSubscriptionsByStatus(state, "ready")
   );
   const dispatch = useAppDispatch();
-
 
   return (
     <>
@@ -24,21 +45,7 @@ export const Rss = () => {
         <button onClick={() => rerender(0)}>Rerender</button>
 
         <div>
-          <form
-            onSubmit={(evt) => {
-              evt.preventDefault();
-              const urlEl = evt.currentTarget.elements.namedItem("url");
-              const url = (urlEl as HTMLInputElement).value;
-              dispatch(addUrl(url));
-              const ff = fetchFeed(url);
-              console.log('ff', ff)
-              dispatch(ff)
-            }}
-          >
-            <input type="text" name="url" placeholder="rss.url.com"></input>
-            <button type="submit">Request</button>
-          </form>
-
+          <p> Previous URLS:</p>
           <ul>
             {LOCAL_URLS.map((u) => (
               <li key={u}>
@@ -56,11 +63,26 @@ export const Rss = () => {
               </li>
             ))}
           </ul>
+
+          <form
+            onSubmit={(evt) => {
+              evt.preventDefault();
+              const urlEl = evt.currentTarget.elements.namedItem("url");
+              const url = (urlEl as HTMLInputElement).value;
+              dispatch(addSubscription(url));
+              const ff = fetchFeed(url);
+              console.log("ff", ff);
+              dispatch(ff);
+            }}
+          >
+            <input type="text" name="url" placeholder="rss.url.com"></input>
+            <button type="submit">Request</button>
+          </form>
         </div>
 
         <h2>Requested</h2>
         <ul>
-          {requestedUrls.map((ru) => (
+          {requestedSubs.map((ru) => (
             <li key={ru.url}>
               [{ru.status}] {ru.url}
               <button
@@ -75,24 +97,20 @@ export const Rss = () => {
         </ul>
 
         <h2>Ready</h2>
-        <ul>
-          {readyUrls.map((ru) => (
-            <li key={ru.url}>
-              [{ru.status}] {ru.url}
-              {/* <button
-                onClick={() => {
-                  dispatch(makeReady(ru.url));
-                }}
-              >
-                Make ready
-              </button> */}
-
-              <pre>
-                {JSON.stringify(ru.feed, null, 2)}
-              </pre>
-            </li>
-          ))}
-        </ul>
+        <div
+          style={{
+            maxHeight: "40vh",
+            overflowY: "auto",
+          }}
+        >
+          <ul>
+            {readySubs.map((ru) => (
+              <li key={ru.url}>
+                <FeedViewer feed={ru.feed!} />
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </>
   );

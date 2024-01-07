@@ -1,24 +1,43 @@
 import { enableMapSet } from "immer";
 import { configureStore } from "@reduxjs/toolkit";
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
-import { slice as commonSlice } from "/src/features/common/slice";
-import { slice as rssSlice } from "/src/features/rss/slice";
+import { rootReducer } from "/src/store/reducers";
 
+// Immer plugin
 enableMapSet();
 
+// Persistence
+const persistedReducer = persistReducer(
+  {
+    key: "root",
+    storage,
+  },
+  rootReducer
+);
+
+// Actual store
 export const store = configureStore({
-  reducer: {
-    [commonSlice.name]: commonSlice.reducer,
-    [rssSlice.name]: rssSlice.reducer,
-  },
-  middleware: (getDefaultMiddleware) => {
-    const m = getDefaultMiddleware({
-      thunk: true,
-    });
-    console.log("middle", m);
-    return m;
-  },
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
 });
+
+export const persistor = persistStore(store);
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;

@@ -13,7 +13,8 @@
     "immer": "^10.0.3",
     "narrow-minded": "^1.2.1",
     "preact": "^10.19.3",
-    "react-redux": "^9.0.4"
+    "react-redux": "^9.0.4",
+    "redux-persist": "^6.0.0"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.7.0",
