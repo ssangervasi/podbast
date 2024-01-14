@@ -9,8 +9,11 @@ import { useAppDispatch, useAppSelector } from "/src/store";
 import { LOCAL_URLS } from "./rssClient";
 import { fetchFeed } from "./thunks";
 import { Feed } from "/src/features/rss/guards";
+import { play } from "/src/features/player/slice";
 
 const FeedViewer = ({ feed }: { feed: Feed }) => {
+  const dispatch = useAppDispatch();
+
   return (
     <div>
       <p>
@@ -19,6 +22,18 @@ const FeedViewer = ({ feed }: { feed: Feed }) => {
       <ul>
         {feed.items.map((fi) => (
           <li>
+            <button
+              onClick={() => {
+                dispatch(
+                  play({
+                    title: fi.title,
+                    url: fi.enclosure.url,
+                  })
+                );
+              }}
+            >
+              Play dis
+            </button>
             <pre>{fi.enclosure.url}</pre>
           </li>
         ))}

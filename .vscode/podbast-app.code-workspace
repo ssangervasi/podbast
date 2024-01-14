@@ -5,6 +5,7 @@
     }
   ],
   "settings": {
-    "workbench.colorTheme": "Dracula Soft"
+    "workbench.colorTheme": "Dracula Soft",
+    "cSpell.words": ["vidstack"]
   }
 }

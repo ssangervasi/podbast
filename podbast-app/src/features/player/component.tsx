@@ -1,10 +1,19 @@
-import { play, selectStatus } from "./slice";
+import { MediaPlayer, MediaProvider } from "@vidstack/react";
+import {
+  DefaultAudioLayout,
+  defaultLayoutIcons,
+} from "@vidstack/react/player/layouts/default";
+
+import { play, selectStatus, selectMedia } from "./slice";
 import { useAppDispatch, useAppSelector } from "/src/store";
+
+import "@vidstack/react/player/styles/default/theme.css";
 
 export const Player = () => {
   const dispatch = useAppDispatch();
 
   const status = useAppSelector(selectStatus);
+  const media = useAppSelector(selectMedia);
 
   return (
     <>
@@ -13,13 +22,13 @@ export const Player = () => {
         style={{
           position: "relative",
           overflow: "hidden",
-          height: 120,
+          // height: 120,
         }}
       />
 
       <div
         style={{
-          height: 120,
+          // height: 120,
           position: "fixed",
           right: 0,
           bottom: 0,
@@ -44,18 +53,15 @@ export const Player = () => {
         >
           <div>Player</div>
           <div>{status}</div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              placeContent: "center",
-              placeItems: "center",
-              gap: "8px",
-            }}
+
+          <MediaPlayer
+            title={media?.title ?? ""}
+            src={media?.url ?? ""}
+            viewType="audio"
           >
-            <button>⏯</button>
-            <button>▶</button>
-          </div>
+            <MediaProvider />
+            <DefaultAudioLayout icons={defaultLayoutIcons} smallLayoutWhen />
+          </MediaPlayer>
         </div>
       </div>
     </>
