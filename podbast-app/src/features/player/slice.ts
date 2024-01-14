@@ -1,14 +1,28 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, prepareAutoBatched } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 export type Media = {
   title: string;
   url: string;
+  currentTime?: number;
 };
 
+type ReceiveMediaPlayer = {
+  currentTime: number;
+};
+
+/**
+ * Would be called "state" except that's confusing with RTK state.
+ */
+type Status = "stopped" | "paused" | "playing";
+
 export type PlayerState = {
-  status: "stopped" | "paused" | "playing";
+  status: Status;
   media?: Media;
+  pendingRequest?: {
+    status: Status;
+    media?: Media;
+  };
 };
 
 export const initialState: PlayerState = {
@@ -20,16 +34,33 @@ export const slice = createSlice({
   initialState,
   reducers: {
     play: (state, action: PayloadAction<Media>) => {
-      state.status = "playing";
-      state.media = action.payload;
+      state.pendingRequest = {
+        status: "playing",
+        media: action.payload,
+      };
+    },
+    _clearRequest(state) {
+      // Race condition?
+      state.pendingRequest = undefined;
+    },
+    _receiveMediaPlayer: {
+      reducer: (state, action: PayloadAction<ReceiveMediaPlayer>) => {
+        if (!state.media) {
+          return;
+        }
+        state.media.currentTime = action.payload.currentTime;
+      },
+      prepare: prepareAutoBatched<ReceiveMediaPlayer>(),
     },
   },
   selectors: {
     selectStatus: (state) => state.status,
     selectMedia: (state) => state.media,
+    selectPendingRequest: (state) => state.pendingRequest,
   },
 });
 
 export const { actions, reducer } = slice;
-export const { play } = actions;
-export const { selectStatus, selectMedia } = slice.selectors;
+export const { play, _receiveMediaPlayer, _clearRequest } = actions;
+export const { selectStatus, selectMedia, selectPendingRequest } =
+  slice.selectors;

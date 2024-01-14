@@ -1,20 +1,85 @@
-import { MediaPlayer, MediaProvider } from "@vidstack/react";
+import { useCallback, useEffect, useRef } from "preact/hooks";
+
+import {
+  MediaPlayer,
+  MediaPlayerInstance,
+  MediaProvider,
+  MediaPlayRequestEvent,
+} from "@vidstack/react";
 import {
   DefaultAudioLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
 
-import { play, selectStatus, selectMedia } from "./slice";
+import {
+  selectStatus,
+  selectMedia,
+  _receiveMediaPlayer,
+  _clearRequest,
+  selectPendingRequest,
+} from "./slice";
 import { useAppDispatch, useAppSelector } from "/src/store";
 
 import "@vidstack/react/player/styles/default/theme.css";
 
-export const Player = () => {
+const CorePlayer = () => {
   const dispatch = useAppDispatch();
 
-  const status = useAppSelector(selectStatus);
   const media = useAppSelector(selectMedia);
+  const pendingRequest = useAppSelector(selectPendingRequest);
 
+  const mediaStateRef = useRef({
+    media,
+    pendingRequest,
+  });
+  mediaStateRef.current.media = media;
+  mediaStateRef.current.pendingRequest = pendingRequest;
+
+  const mediaPlayerRef = useRef<MediaPlayerInstance>(null);
+
+  useEffect(() => {
+    const mediaPlayer = mediaPlayerRef.current;
+    if (!mediaPlayer) {
+      return () => {};
+    }
+
+    return mediaPlayer.subscribe((mediaPlayerState) => {
+      mediaPlayerState.source.src;
+      const { currentTime } = mediaPlayerState;
+      dispatch(_receiveMediaPlayer({ currentTime }));
+    });
+  }, []);
+
+  // useEffect(() => {
+  //   if (!pendingRequest) {
+  //     return;
+  //   }
+
+  //   const mediaPlayer = mediaPlayerRef.current;
+  //   if (!mediaPlayer) {
+  //     return;
+  //   }
+
+  //   if (pendingRequest.status == "playing") {
+  //     mediaPlayer.play();
+  //   }
+  //   mediaPlayer.play();
+  // }, [dispatch, pendingRequest]);
+
+  return (
+    <MediaPlayer
+      ref={mediaPlayerRef}
+      src={media?.url ?? ""}
+      title={media?.title ?? ""}
+      viewType="audio"
+    >
+      <MediaProvider />
+      <DefaultAudioLayout icons={defaultLayoutIcons} smallLayoutWhen />
+    </MediaPlayer>
+  );
+};
+
+export const Player = () => {
   return (
     <>
       {/* Spacer to ensure fixed content position doesn't hide main content*/}
@@ -52,16 +117,8 @@ export const Player = () => {
           }}
         >
           <div>Player</div>
-          <div>{status}</div>
 
-          <MediaPlayer
-            title={media?.title ?? ""}
-            src={media?.url ?? ""}
-            viewType="audio"
-          >
-            <MediaProvider />
-            <DefaultAudioLayout icons={defaultLayoutIcons} smallLayoutWhen />
-          </MediaPlayer>
+          <CorePlayer />
         </div>
       </div>
     </>
