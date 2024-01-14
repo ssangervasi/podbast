@@ -1,4 +1,5 @@
 import { useReducer } from "preact/hooks";
+
 import {
   addSubscription,
   makeReady,
@@ -27,7 +28,7 @@ const FeedViewer = ({ feed }: { feed: Feed }) => {
 };
 
 export const Rss = () => {
-  const [_, rerender] = useReducer((p) => p + 1, 0);
+  const dispatch = useAppDispatch();
 
   const requestedSubs = useAppSelector((state) =>
     selectSubscriptionsByStatus(state, "requested")
@@ -35,7 +36,8 @@ export const Rss = () => {
   const readySubs = useAppSelector((state) =>
     selectSubscriptionsByStatus(state, "ready")
   );
-  const dispatch = useAppDispatch();
+
+  const [_, rerender] = useReducer((p) => p + 1, 0);
 
   return (
     <>

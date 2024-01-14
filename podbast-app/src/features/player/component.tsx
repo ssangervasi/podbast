@@ -1,4 +1,11 @@
+import { play, selectStatus } from "./slice";
+import { useAppDispatch, useAppSelector } from "/src/store";
+
 export const Player = () => {
+  const dispatch = useAppDispatch();
+
+  const status = useAppSelector(selectStatus);
+
   return (
     <>
       {/* Spacer to ensure fixed content position doesn't hide main content*/}
@@ -36,6 +43,7 @@ export const Player = () => {
           }}
         >
           <div>Player</div>
+          <div>{status}</div>
           <div
             style={{
               display: "flex",

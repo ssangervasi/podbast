@@ -6,6 +6,7 @@ import preact from "@preact/preset-vite";
 export default defineConfig({
   server: {
     port: 42994,
+    strictPort: true,
     proxy: {
       "/api": {
         target: "http://localhost:42993",
