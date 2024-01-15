@@ -7,6 +7,11 @@ export type Media = {
   currentTime?: number;
 };
 
+export type PlayRequest = {
+  status: Status;
+  media?: Media;
+};
+
 type ReceiveMediaPlayer = {
   currentTime: number;
 };
@@ -14,15 +19,12 @@ type ReceiveMediaPlayer = {
 /**
  * Would be called "state" except that's confusing with RTK state.
  */
-type Status = "stopped" | "paused" | "playing";
+export type Status = "stopped" | "paused" | "playing";
 
 export type PlayerState = {
   status: Status;
   media?: Media;
-  pendingRequest?: {
-    status: Status;
-    media?: Media;
-  };
+  pendingRequest?: PlayRequest;
 };
 
 export const initialState: PlayerState = {
@@ -34,9 +36,12 @@ export const slice = createSlice({
   initialState,
   reducers: {
     play: (state, action: PayloadAction<Media>) => {
+      const media = action.payload;
+
+      state.media = media;
       state.pendingRequest = {
         status: "playing",
-        media: action.payload,
+        media,
       };
     },
     _clearRequest(state) {

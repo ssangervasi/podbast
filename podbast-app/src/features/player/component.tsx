@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useRef } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 
 import {
   MediaPlayer,
   MediaPlayerInstance,
   MediaProvider,
   MediaPlayRequestEvent,
+  useMediaState,
+  MediaPlayerState,
 } from "@vidstack/react";
 import {
   DefaultAudioLayout,
@@ -17,10 +19,67 @@ import {
   _receiveMediaPlayer,
   _clearRequest,
   selectPendingRequest,
+  Status,
+  PlayRequest,
 } from "./slice";
 import { useAppDispatch, useAppSelector } from "/src/store";
+import { useUpdatingRef } from "/src/utils";
 
 import "@vidstack/react/player/styles/default/theme.css";
+
+const stateToStatus = (mediaPlayerState: MediaPlayerState): Status => {
+  const { paused, playing } = mediaPlayerState;
+  if (paused) {
+    return "paused";
+  }
+  if (playing) {
+    return "playing";
+  }
+  return "stopped";
+};
+
+const isInSync = ({
+  pendingRequest,
+  mediaPlayerState,
+}: {
+  pendingRequest: PlayRequest;
+  mediaPlayerState: MediaPlayerState;
+}): boolean => {
+  const src = mediaPlayerState.source.src;
+  const status = stateToStatus(mediaPlayerState);
+
+  const statusIsSync = pendingRequest.status == status;
+
+  const srcIsSync = !pendingRequest.media || pendingRequest.media.url === src;
+
+  return statusIsSync && srcIsSync;
+};
+
+const needsPlay = ({
+  pendingRequest,
+  mediaPlayerState,
+}: {
+  pendingRequest: PlayRequest;
+  mediaPlayerState: MediaPlayerState;
+}): boolean => {
+  if (pendingRequest.status !== "playing") {
+    return false;
+  }
+  return stateToStatus(mediaPlayerState) !== "playing";
+};
+
+const needsPause = ({
+  pendingRequest,
+  mediaPlayerState,
+}: {
+  pendingRequest: PlayRequest;
+  mediaPlayerState: MediaPlayerState;
+}): boolean => {
+  if (pendingRequest.status !== "paused") {
+    return false;
+  }
+  return stateToStatus(mediaPlayerState) !== "paused";
+};
 
 const CorePlayer = () => {
   const dispatch = useAppDispatch();
@@ -28,12 +87,10 @@ const CorePlayer = () => {
   const media = useAppSelector(selectMedia);
   const pendingRequest = useAppSelector(selectPendingRequest);
 
-  const mediaStateRef = useRef({
+  const sliceMediaRef = useUpdatingRef({
     media,
     pendingRequest,
   });
-  mediaStateRef.current.media = media;
-  mediaStateRef.current.pendingRequest = pendingRequest;
 
   const mediaPlayerRef = useRef<MediaPlayerInstance>(null);
 
@@ -44,27 +101,41 @@ const CorePlayer = () => {
     }
 
     return mediaPlayer.subscribe((mediaPlayerState) => {
-      mediaPlayerState.source.src;
+      const sliceMedia = sliceMediaRef.current;
+      // Beauuuutiful lol
+      if (sliceMedia.pendingRequest) {
+        if (
+          isInSync({
+            pendingRequest: sliceMedia.pendingRequest,
+            mediaPlayerState,
+          })
+        ) {
+          dispatch(_clearRequest());
+        }
+
+        if (
+          needsPause({
+            pendingRequest: sliceMedia.pendingRequest,
+            mediaPlayerState,
+          })
+        ) {
+          mediaPlayer.paused = true;
+        }
+
+        if (
+          needsPlay({
+            pendingRequest: sliceMedia.pendingRequest,
+            mediaPlayerState,
+          })
+        ) {
+          mediaPlayer.paused = false;
+        }
+      }
+
       const { currentTime } = mediaPlayerState;
       dispatch(_receiveMediaPlayer({ currentTime }));
     });
   }, []);
-
-  // useEffect(() => {
-  //   if (!pendingRequest) {
-  //     return;
-  //   }
-
-  //   const mediaPlayer = mediaPlayerRef.current;
-  //   if (!mediaPlayer) {
-  //     return;
-  //   }
-
-  //   if (pendingRequest.status == "playing") {
-  //     mediaPlayer.play();
-  //   }
-  //   mediaPlayer.play();
-  // }, [dispatch, pendingRequest]);
 
   return (
     <MediaPlayer

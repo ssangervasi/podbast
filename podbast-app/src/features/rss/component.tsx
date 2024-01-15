@@ -19,7 +19,7 @@ const FeedViewer = ({ feed }: { feed: Feed }) => {
       <p>
         <strong>{feed.title}</strong>
       </p>
-      <ul>
+      <ul style={{ lineHeight: "2.1rem" }}>
         {feed.items.map((fi) => (
           <li>
             <button
@@ -32,9 +32,9 @@ const FeedViewer = ({ feed }: { feed: Feed }) => {
                 );
               }}
             >
-              Play dis
+              ▶
             </button>
-            <pre>{fi.enclosure.url}</pre>
+            <span style={{ fontStyle: "italic" }}>{fi.title}</span>
           </li>
         ))}
       </ul>
