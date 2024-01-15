@@ -1,10 +1,6 @@
 import { useReducer } from "preact/hooks";
 
-import {
-  addSubscription,
-  makeReady,
-  selectSubscriptionsByStatus,
-} from "./slice";
+import { requestPull, makeReady, selectPullsByStatus } from "./slice";
 import { useAppDispatch, useAppSelector } from "/src/store";
 import { LOCAL_URLS } from "./rssClient";
 import { fetchFeed } from "./thunks";
@@ -45,11 +41,11 @@ const FeedViewer = ({ feed }: { feed: Feed }) => {
 export const Rss = () => {
   const dispatch = useAppDispatch();
 
-  const requestedSubs = useAppSelector((state) =>
-    selectSubscriptionsByStatus(state, "requested")
+  const requestedPulls = useAppSelector((state) =>
+    selectPullsByStatus(state, "requested")
   );
-  const readySubs = useAppSelector((state) =>
-    selectSubscriptionsByStatus(state, "ready")
+  const readyPulls = useAppSelector((state) =>
+    selectPullsByStatus(state, "ready")
   );
 
   const [_, rerender] = useReducer((p) => p + 1, 0);
@@ -86,7 +82,7 @@ export const Rss = () => {
               evt.preventDefault();
               const urlEl = evt.currentTarget.elements.namedItem("url");
               const url = (urlEl as HTMLInputElement).value;
-              dispatch(addSubscription(url));
+              dispatch(requestPull(url));
               const ff = fetchFeed(url);
               console.log("ff", ff);
               dispatch(ff);
@@ -99,7 +95,7 @@ export const Rss = () => {
 
         <h2>Requested</h2>
         <ul>
-          {requestedSubs.map((ru) => (
+          {requestedPulls.map((ru) => (
             <li key={ru.url}>
               [{ru.status}] {ru.url}
               <button
@@ -121,7 +117,7 @@ export const Rss = () => {
           }}
         >
           <ul>
-            {readySubs.map((ru) => (
+            {readyPulls.map((ru) => (
               <li key={ru.url}>
                 <FeedViewer feed={ru.feed!} />
               </li>

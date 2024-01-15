@@ -6,7 +6,7 @@ import { fetchFeed } from "./thunks";
 import { Feed } from "/src/features/rss/guards";
 import { FEED } from "/src/features/rss/fixtures";
 
-export type RssSubscription = {
+export type RssPull = {
   url: string;
 } & (
   | {
@@ -20,50 +20,48 @@ export type RssSubscription = {
 );
 
 export interface RssState {
-  subscriptions: RssSubscription[];
+  pulls: RssPull[];
 }
 
 export const initialState: RssState = {
-  subscriptions: EMPTY_ARRAY,
+  pulls: EMPTY_ARRAY,
 };
 
 export const slice = createSlice({
   name: "rss",
   initialState,
   reducers: {
-    addSubscription: (state, action: PayloadAction<string>) => {
+    requestPull: (state, action: PayloadAction<string>) => {
       const url = action.payload;
 
-      const existing = state.subscriptions.find((ru) => ru.url == url);
+      const existing = state.pulls.find((ru) => ru.url == url);
       if (existing) {
         existing.status = "requested";
         return;
       }
 
-      state.subscriptions.push({
+      state.pulls.push({
         url,
         status: "requested",
       });
     },
     makeReady: (state, action: PayloadAction<string>) => {
       const url = action.payload;
-      const rsub = state.subscriptions.find((ruc) => ruc.url === url);
-      if (!rsub) {
+      const pull = state.pulls.find((p) => p.url === url);
+      if (!pull) {
         console.error("makeReady: No subscription for url");
         return;
       }
 
-      rsub.status = "ready";
-      rsub.feed = FEED;
+      pull.status = "ready";
+      pull.feed = FEED;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchFeed.pending, () => {})
       .addCase(fetchFeed.fulfilled, (state, action) => {
-        const rsub = state.subscriptions.find(
-          (ruc) => ruc.url === action.meta.arg
-        );
+        const rsub = state.pulls.find((ruc) => ruc.url === action.meta.arg);
 
         const attrs = {
           status: "ready",
@@ -79,15 +77,12 @@ export const slice = createSlice({
       .addCase(fetchFeed.rejected, () => {});
   },
   selectors: {
-    selectSubscriptions: (state): RssSubscription[] => state.subscriptions,
-    selectSubscriptionsByStatus: (
-      state,
-      status: RssSubscription["status"]
-    ): RssSubscription[] => {
+    selectPulls: (state): RssPull[] => state.pulls,
+    selectPullsByStatus: (state, status: RssPull["status"]): RssPull[] => {
       return wrapEmpty(
         slice
           .getSelectors()
-          .selectSubscriptions(state)
+          .selectPulls(state)
           .filter((ru) => ru.status === status)
       );
     },
@@ -95,6 +90,5 @@ export const slice = createSlice({
 });
 
 export const { actions, reducer } = slice;
-export const { makeReady, addSubscription } = actions;
-export const { selectSubscriptions, selectSubscriptionsByStatus } =
-  slice.selectors;
+export const { makeReady, requestPull } = actions;
+export const { selectPulls, selectPullsByStatus } = slice.selectors;
