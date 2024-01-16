@@ -1,29 +1,44 @@
 {
-  "name": "podbast-app",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@chakra-ui/react": "^2.8.2",
-    "@emotion/react": "^11.11.3",
-    "@emotion/styled": "^11.11.0",
-    "@reduxjs/toolkit": "^2.0.1",
-    "@vidstack/react": "^1.9.8",
-    "framer-motion": "^10.18.0",
-    "immer": "^10.0.3",
-    "narrow-minded": "^1.2.1",
-    "preact": "^10.19.3",
-    "react-redux": "^9.0.4",
-    "redux-persist": "^6.0.0"
-  },
-  "devDependencies": {
-    "@preact/preset-vite": "^2.7.0",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.8"
-  }
+	"name": "podbast-app",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"lint": "lint-staged",
+		"lint:branch": "lint-staged --diff origin/main"
+	},
+	"dependencies": {
+		"@chakra-ui/react": "^2.8.2",
+		"@emotion/react": "^11.11.3",
+		"@emotion/styled": "^11.11.0",
+		"@reduxjs/toolkit": "^2.0.1",
+		"@vidstack/react": "^1.9.8",
+		"eslint": "^8.56.0",
+		"framer-motion": "^10.18.0",
+		"immer": "^10.0.3",
+		"narrow-minded": "^1.2.1",
+		"preact": "^10.19.3",
+		"react-redux": "^9.0.4",
+		"redux-persist": "^6.0.0"
+	},
+	"devDependencies": {
+		"@preact/preset-vite": "^2.7.0",
+		"@typescript-eslint/eslint-plugin": "^6.19.0",
+		"@typescript-eslint/parser": "^6.19.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^5.1.3",
+		"eslint-plugin-react": "^7.33.2",
+		"eslint-plugin-simple-import-sort": "^10.0.0",
+		"lint-staged": "^15.2.0",
+		"prettier": "^3.2.2",
+		"typescript": "^5.2.2",
+		"vite": "^5.0.8"
+	},
+	"lint-staged": {
+		"*.ts*": "eslint --fix",
+		"*.js*": "eslint --fix"
+	}
 }

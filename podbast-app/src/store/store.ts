@@ -1,42 +1,42 @@
-import { enableMapSet } from "immer";
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore } from '@reduxjs/toolkit'
+import { enableMapSet } from 'immer'
 import {
-  persistStore,
-  persistReducer,
-  FLUSH,
-  REHYDRATE,
-  PAUSE,
-  PERSIST,
-  PURGE,
-  REGISTER,
-  PersistConfig,
-} from "redux-persist";
-import storage from "redux-persist/lib/storage";
+	FLUSH,
+	PAUSE,
+	PERSIST,
+	PersistConfig,
+	persistReducer,
+	persistStore,
+	PURGE,
+	REGISTER,
+	REHYDRATE,
+} from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
 
-import { rootReducer } from "./reducers";
+import { rootReducer } from './reducers'
 
 // Immer plugin
-enableMapSet();
+enableMapSet()
 
 // Persistence
 const persistConfig: PersistConfig<ReturnType<typeof rootReducer>> = {
-  key: "root",
-  storage,
-};
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+	key: 'root',
+	storage,
+}
+const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 // Actual store
 export const store = configureStore({
-  reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-      },
-    }),
-});
+	reducer: persistedReducer,
+	middleware: getDefaultMiddleware =>
+		getDefaultMiddleware({
+			serializableCheck: {
+				ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+			},
+		}),
+})
 
-export const persistor = persistStore(store);
+export const persistor = persistStore(store)
 
 /**
  * ~~Maybe this will save me having to clear the state?
@@ -54,5 +54,5 @@ export const persistor = persistStore(store);
 // }
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

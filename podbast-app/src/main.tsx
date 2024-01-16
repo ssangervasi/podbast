@@ -1,9 +1,9 @@
 if (import.meta.env.DEV) {
-  import("preact/debug");
+	import('preact/debug')
 }
 
-import { render } from "preact";
+import { render } from 'preact'
 
-import { App } from "./app";
+import { App } from './app'
 
-render(<App />, document.getElementById("app")!);
+render(<App />, document.getElementById('app')!)

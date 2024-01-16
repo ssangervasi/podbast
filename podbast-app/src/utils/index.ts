@@ -1,4 +1,4 @@
-import { useRef } from "preact/hooks";
+import { useRef } from 'preact/hooks'
 
 /**
  * Slightly naughty ref. Immediately updates the ref's `current` with the latest argument passed to
@@ -6,7 +6,7 @@ import { useRef } from "preact/hooks";
  * don't care about going through a render cycle.
  */
 export const useUpdatingRef = <V>(updatedValue: V) => {
-  const ref = useRef(updatedValue);
-  ref.current = updatedValue;
-  return ref;
-};
+	const ref = useRef(updatedValue)
+	ref.current = updatedValue
+	return ref
+}
