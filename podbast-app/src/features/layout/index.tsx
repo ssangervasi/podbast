@@ -1,25 +1,52 @@
-import { Box, Center } from '@chakra-ui/react'
+import { Box, Flex, VStack } from '@chakra-ui/react'
 
 import { Player } from '/src/features/player'
 import { Rss } from '/src/features/rss'
 
-export const Top = () => <Box bg="gray.100" />
-
-export const Side = () => <Box bg="gray.200" />
-
-export const Main = () => (
-	<Center paddingY={10}>
-		<Rss />
-	</Center>
+export const Top = () => (
+	<Box
+		bg="gray.700"
+		height={100}
+		borderBottomWidth={2}
+		borderBottomColor="black"
+	/>
 )
 
-export const Bottom = () => <Player />
+export const Side = () => (
+	<Box
+		flexShrink="0"
+		bg="gray.700"
+		width={[10, 200]}
+		padding={[1, 2]}
+		borderRightWidth={2}
+		borderRightColor="black"
+	>
+		<p>Sweet cool yay</p>
+	</Box>
+)
+
+export const Main = () => (
+	<VStack padding={4}>
+		<Rss />
+	</VStack>
+)
+
+export const Bottom = () => (
+	<Box>
+		<Player />
+	</Box>
+)
 
 export const Layout = () => (
-	<Box>
+	<Flex direction="column" minH="100vh">
 		<Top />
-		<Side />
-		<Main />
+		<Flex
+			flexGrow="1"
+			// border="5px dashed hotpink"
+		>
+			<Side />
+			<Main />
+		</Flex>
 		<Bottom />
-	</Box>
+	</Flex>
 )

@@ -1,3 +1,4 @@
+import { Box, Button, List, ListItem } from '@chakra-ui/react'
 import { useReducer } from 'preact/hooks'
 
 import { play } from '/src/features/player/slice'
@@ -12,14 +13,14 @@ const FeedViewer = ({ feed }: { feed: Feed }) => {
 	const dispatch = useAppDispatch()
 
 	return (
-		<div>
+		<Box>
 			<p>
 				<strong>{feed.title}</strong>
 			</p>
 			<ul style={{ lineHeight: '2.1rem' }}>
 				{feed.items.map(fi => (
 					<li>
-						<button
+						<Button
 							onClick={() => {
 								dispatch(
 									play({
@@ -30,12 +31,12 @@ const FeedViewer = ({ feed }: { feed: Feed }) => {
 							}}
 						>
 							▶
-						</button>
+						</Button>
 						<span style={{ fontStyle: 'italic' }}>{fi.title}</span>
 					</li>
 				))}
 			</ul>
-		</div>
+		</Box>
 	)
 }
 
@@ -53,19 +54,19 @@ export const Rss = () => {
 
 	return (
 		<>
-			<div>
+			<Box>
 				<h1>RSS Stuff</h1>
 
-				<button onClick={() => rerender(0)}>Rerender</button>
+				<Button onClick={() => rerender(0)}>Rerender</Button>
 
-				<div>
+				<Box>
 					<p> Previous URLS:</p>
 					<ul>
 						{LOCAL_URLS.map(u => (
 							<li key={u}>
 								<pre style={{ display: 'inline' }}>{u}</pre>
 
-								<button
+								<Button
 									onClick={() => {
 										const inputEl: HTMLInputElement =
 											document.querySelector('input[name=url]')!
@@ -73,7 +74,7 @@ export const Rss = () => {
 									}}
 								>
 									Use
-								</button>
+								</Button>
 							</li>
 						))}
 					</ul>
@@ -90,28 +91,28 @@ export const Rss = () => {
 						}}
 					>
 						<input type="text" name="url" placeholder="rss.url.com"></input>
-						<button type="submit">Request</button>
+						<Button type="submit">Request</Button>
 					</form>
-				</div>
+				</Box>
 
 				<h2>Requested</h2>
-				<ul>
+				<List>
 					{requestedPulls.map(ru => (
-						<li key={ru.url}>
+						<ListItem key={ru.url}>
 							[{ru.status}] {ru.url}
-							<button
+							<Button
 								onClick={() => {
 									dispatch(makeReady(ru.url))
 								}}
 							>
 								Make ready
-							</button>
-						</li>
+							</Button>
+						</ListItem>
 					))}
-				</ul>
+				</List>
 
 				<h2>Ready</h2>
-				<div
+				<Box
 					style={{
 						maxHeight: '40vh',
 						overflowY: 'auto',
@@ -124,8 +125,8 @@ export const Rss = () => {
 							</li>
 						))}
 					</ul>
-				</div>
-			</div>
+				</Box>
+			</Box>
 		</>
 	)
 }
