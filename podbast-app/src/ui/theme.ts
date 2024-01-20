@@ -1,4 +1,22 @@
-import { ChakraTheme, extendTheme } from '@chakra-ui/react'
+import {
+	ChakraTheme,
+	extendTheme,
+	StyleFunctionProps,
+	theme as defaultTheme,
+} from '@chakra-ui/react'
+
+const calc = (...cssVals: string[]) => `calc(${cssVals.join(' ')})`
+
+const mapCalc = <Mob extends Record<string, unknown>>(
+	mob: Mob,
+	...cssVals: string[]
+) =>
+	Object.fromEntries(
+		Object.entries(mob).map(([k, v]) => [
+			k,
+			typeof v === 'string' ? calc(v, ...cssVals) : v,
+		]),
+	) as Mob
 
 export const theme = extendTheme({
 	config: {
@@ -128,8 +146,40 @@ export const theme = extendTheme({
 		},
 	},
 
+	/**
+	 * https://github.com/chakra-ui/chakra-ui/blob/main/packages/theme/src/foundations/sizes.ts
+	 */
+	sizes: mapCalc(defaultTheme.sizes, '* 0.85'),
+
+	space: mapCalc(defaultTheme.space, '* 0.9'),
+
 	fonts: {
 		body: 'Inter, Avenir, system-ui, Helvetica, Arial, sans-serif',
 		heading: 'system-ui, Inter, Avenir, Helvetica, Arial, sans-serif',
+	},
+
+	components: {
+		/**
+		 * https://github.com/chakra-ui/chakra-ui/blob/main/packages/theme/src/components/button.ts#LL129
+		 */
+		Button: {
+			baseStyle: {
+				// lineHeight: 0.5,
+				// paddingX: '100px',
+				// lineHeight: 'inherit',
+				// height: 'unset',
+				// padding: 0,
+				// paddingStart: '100px',
+			},
+			defaultProps: {
+				variant: 'outline',
+				colorScheme: 'purple',
+			},
+			variants: {
+				outline: (_props: StyleFunctionProps) => ({
+					borderBottomWidth: '2px',
+				}),
+			},
+		},
 	},
 } satisfies Partial<ChakraTheme>) as ChakraTheme

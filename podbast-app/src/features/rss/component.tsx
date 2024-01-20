@@ -1,7 +1,16 @@
-import { Box, Button, List, ListItem } from '@chakra-ui/react'
-import { useReducer } from 'preact/hooks'
+import {
+	Box,
+	Button,
+	Heading,
+	Input,
+	List,
+	ListItem,
+	Text,
+	UnorderedList,
+	VStack,
+} from '@chakra-ui/react'
 
-import { play } from '/src/features/player/slice'
+import { play } from '/src/features/player'
 import { Feed } from '/src/features/rss/guards'
 import { useAppDispatch, useAppSelector } from '/src/store'
 
@@ -14,9 +23,8 @@ const FeedViewer = ({ feed }: { feed: Feed }) => {
 
 	return (
 		<Box>
-			<p>
-				<strong>{feed.title}</strong>
-			</p>
+			<Text bold>{feed.title}</Text>
+
 			<ul style={{ lineHeight: '2.1rem' }}>
 				{feed.items.map(fi => (
 					<li>
@@ -50,20 +58,16 @@ export const Rss = () => {
 		selectPullsByStatus(state, 'ready'),
 	)
 
-	const [_, rerender] = useReducer(p => p + 1, 0)
-
 	return (
 		<>
 			<Box>
-				<h1>RSS Stuff</h1>
-
-				<Button onClick={() => rerender(0)}>Rerender</Button>
+				<Heading>RSS Stuff</Heading>
 
 				<Box>
-					<p> Previous URLS:</p>
-					<ul>
+					<Text as="b"> Previous URLS:</Text>
+					<UnorderedList>
 						{LOCAL_URLS.map(u => (
-							<li key={u}>
+							<ListItem key={u}>
 								<pre style={{ display: 'inline' }}>{u}</pre>
 
 								<Button
@@ -75,9 +79,9 @@ export const Rss = () => {
 								>
 									Use
 								</Button>
-							</li>
+							</ListItem>
 						))}
-					</ul>
+					</UnorderedList>
 
 					<form
 						onSubmit={evt => {
@@ -90,12 +94,14 @@ export const Rss = () => {
 							dispatch(ff)
 						}}
 					>
-						<input type="text" name="url" placeholder="rss.url.com"></input>
-						<Button type="submit">Request</Button>
+						<VStack align="start">
+							<Input type="text" name="url" placeholder="rss.url.com"></Input>
+							<Button type="submit">Request</Button>
+						</VStack>
 					</form>
 				</Box>
 
-				<h2>Requested</h2>
+				<Heading>Requested</Heading>
 				<List>
 					{requestedPulls.map(ru => (
 						<ListItem key={ru.url}>
@@ -111,7 +117,7 @@ export const Rss = () => {
 					))}
 				</List>
 
-				<h2>Ready</h2>
+				<Heading>Ready</Heading>
 				<Box
 					style={{
 						maxHeight: '40vh',
