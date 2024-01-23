@@ -161,6 +161,11 @@ export const theme = extendTheme({
 	},
 
 	components: {
+		Link: {
+			baseStyle: {
+				color: 'blue.100',
+			},
+		},
 		/**
 		 * https://github.com/chakra-ui/chakra-ui/blob/main/packages/theme/src/components/button.ts#LL129
 		 */

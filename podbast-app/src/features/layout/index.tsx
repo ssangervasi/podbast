@@ -1,15 +1,30 @@
-import { Box, Flex, VStack } from '@chakra-ui/react'
+import { Box, Flex, HStack, Link, Text, VStack } from '@chakra-ui/react'
 
 import { Player } from '/src/features/player'
 import { Rss } from '/src/features/rss'
 
 export const Top = () => (
-	<Box
+	<HStack
+		justify="space-between"
 		bg="gray.700"
-		height={100}
 		borderBottomWidth={2}
 		borderBottomColor="black"
-	/>
+		paddingX={2}
+		paddingY={0.5}
+	>
+		<HStack as="header">
+			<Text fontSize="3xl" fontWeight="bold" color="purple.100" children="🜪" />
+			<Text fontSize="xl" fontWeight="bold">
+				podbast
+			</Text>
+		</HStack>
+
+		<HStack>
+			<Link href="https://github.com/ssangervasi/podbast" isExternal>
+				source
+			</Link>
+		</HStack>
+	</HStack>
 )
 
 export const Side = () => (
@@ -21,7 +36,7 @@ export const Side = () => (
 		borderRightWidth={2}
 		borderRightColor="black"
 	>
-		<p>Sweet cool yay</p>
+		<Text>Sweet cool yay</Text>
 	</Box>
 )
 
