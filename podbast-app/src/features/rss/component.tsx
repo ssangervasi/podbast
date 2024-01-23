@@ -2,17 +2,17 @@ import {
 	Box,
 	Button,
 	Heading,
+	HStack,
 	Input,
 	List,
 	ListItem,
 	Text,
-	UnorderedList,
-	VStack,
 } from '@chakra-ui/react'
 
 import { play } from '/src/features/player'
 import { Feed } from '/src/features/rss/guards'
 import { useAppDispatch, useAppSelector } from '/src/store'
+import { VStack } from '/src/ui'
 
 import { LOCAL_URLS } from './rssClient'
 import { makeReady, requestPull, selectPullsByStatus } from './slice'
@@ -22,29 +22,33 @@ const FeedViewer = ({ feed }: { feed: Feed }) => {
 	const dispatch = useAppDispatch()
 
 	return (
-		<Box>
+		<VStack>
 			<Text bold>{feed.title}</Text>
 
-			<ul style={{ lineHeight: '2.1rem' }}>
+			<List spacing={2}>
 				{feed.items.map(fi => (
-					<li>
-						<Button
-							onClick={() => {
-								dispatch(
-									play({
-										title: fi.title,
-										url: fi.enclosure.url,
-									}),
-								)
-							}}
-						>
-							▶
-						</Button>
-						<span style={{ fontStyle: 'italic' }}>{fi.title}</span>
-					</li>
+					<ListItem>
+						<HStack>
+							<Button
+								// height="sm"
+								size="sm"
+								onClick={() => {
+									dispatch(
+										play({
+											title: fi.title,
+											url: fi.enclosure.url,
+										}),
+									)
+								}}
+							>
+								▶
+							</Button>
+							<Text as="i">{fi.title}</Text>
+						</HStack>
+					</ListItem>
 				))}
-			</ul>
-		</Box>
+			</List>
+		</VStack>
 	)
 }
 
@@ -63,25 +67,38 @@ export const Rss = () => {
 			<Box>
 				<Heading>RSS Stuff</Heading>
 
-				<Box>
+				<VStack
+				// alignItems="start"
+				// alignItems="start"
+				// backgroundColor="pink"
+				>
 					<Text as="b"> Previous URLS:</Text>
-					<UnorderedList>
+					<List spacing={2}>
 						{LOCAL_URLS.map(u => (
 							<ListItem key={u}>
-								<pre style={{ display: 'inline' }}>{u}</pre>
+								<HStack>
+									<Button
+										size="sm"
+										onClick={() => {
+											const inputEl: HTMLInputElement =
+												document.querySelector('input[name=url]')!
+											inputEl.value = u
+										}}
+									>
+										Autofill
+									</Button>
 
-								<Button
-									onClick={() => {
-										const inputEl: HTMLInputElement =
-											document.querySelector('input[name=url]')!
-										inputEl.value = u
-									}}
-								>
-									Use
-								</Button>
+									<Text
+										as="span"
+										fontFamily="monospace"
+										textOverflow="ellipsis"
+									>
+										{u}
+									</Text>
+								</HStack>
 							</ListItem>
 						))}
-					</UnorderedList>
+					</List>
 
 					<form
 						onSubmit={evt => {
@@ -99,7 +116,7 @@ export const Rss = () => {
 							<Button type="submit">Request</Button>
 						</VStack>
 					</form>
-				</Box>
+				</VStack>
 
 				<Heading>Requested</Heading>
 				<List>

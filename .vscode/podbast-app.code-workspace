@@ -1,11 +1,11 @@
 {
-  "folders": [
-    {
-      "path": "../podbast-app"
-    }
-  ],
-  "settings": {
-    "workbench.colorTheme": "Dracula Soft",
-    "cSpell.words": ["Avenir", "vidstack"]
-  }
+	"folders": [
+		{
+			"path": "../podbast-app"
+		}
+	],
+	"settings": {
+		"workbench.colorTheme": "Dracula Soft",
+		"cSpell.words": ["Avenir", "reprop", "vidstack"]
+	}
 }

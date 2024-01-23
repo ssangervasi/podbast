@@ -14,30 +14,32 @@
  * @type {{ apps: StartOptions[] }}
  */
 module.exports = {
-  apps: [
-    {
-      name: "app-dev",
-      cwd: "./podbast-app",
-      interpreter: "bash",
-      interpreter: "bash",
-      script: "bin/runner.sh",
-      args: "dev",
-    },
-    {
-      name: "server-dev",
-      cwd: "./podbast-server",
-      interpreter: "bash",
-      script: "bin/runner.sh",
-      args: "dev",
-    },
-    {
-      name: "server",
-      cwd: "./podbast-server",
-      script: "dist/index.js",
-      watch: "dist/",
-      env: {
-        NODE_ENV: "development",
-      },
-    },
-  ],
-};
+	apps: [
+		{
+			name: 'app-dev',
+			cwd: './podbast-app',
+			interpreter: 'bash',
+			interpreter: 'bash',
+			script: 'bin/runner.sh',
+			args: 'dev',
+			shutdown_with_message: true,
+		},
+		{
+			name: 'server-dev',
+			cwd: './podbast-server',
+			interpreter: 'bash',
+			script: 'bin/runner.sh',
+			args: 'dev',
+			shutdown_with_message: true,
+		},
+		{
+			name: 'server',
+			cwd: './podbast-server',
+			script: 'dist/index.js',
+			watch: 'dist/',
+			env: {
+				NODE_ENV: 'development',
+			},
+		},
+	],
+}

@@ -153,9 +153,11 @@ export const theme = extendTheme({
 
 	space: mapCalc(defaultTheme.space, '* 0.9'),
 
+	fontSizes: mapCalc(defaultTheme.fontSizes, '* 0.85'),
+
 	fonts: {
-		body: 'Inter, Avenir, system-ui, Helvetica, Arial, sans-serif',
-		heading: 'system-ui, Inter, Avenir, Helvetica, Arial, sans-serif',
+		body: 'system-ui, sans-serif',
+		heading: 'monospace, system-ui, sans-serif',
 	},
 
 	components: {
@@ -164,12 +166,7 @@ export const theme = extendTheme({
 		 */
 		Button: {
 			baseStyle: {
-				// lineHeight: 0.5,
-				// paddingX: '100px',
-				// lineHeight: 'inherit',
-				// height: 'unset',
-				// padding: 0,
-				// paddingStart: '100px',
+				fontFamily: 'heading',
 			},
 			defaultProps: {
 				variant: 'outline',
