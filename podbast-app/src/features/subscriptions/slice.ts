@@ -18,6 +18,10 @@ export const slice = createSlice({
 			state.push(action.payload)
 		},
 	},
+	selectors: {
+		selectSubscriptions: state => state,
+	},
 })
 
-export const { actions, reducer } = slice
+export const { actions, reducer, selectors } = slice
+export const { selectSubscriptions } = selectors

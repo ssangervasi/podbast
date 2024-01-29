@@ -1,7 +1,9 @@
 import { Box, Flex, HStack, Link, Text, VStack } from '@chakra-ui/react'
 
 import { Player } from '/src/features/player'
-import { Rss } from '/src/features/rss'
+
+import { Main } from './main'
+import { Side } from './side'
 
 export const Top = () => (
 	<HStack
@@ -27,22 +29,21 @@ export const Top = () => (
 	</HStack>
 )
 
-export const Side = () => (
+export const SideWrapper = () => (
 	<Box
-		flexShrink="0"
 		bg="gray.700"
 		width={[10, 200]}
 		padding={[1, 2]}
 		borderRightWidth={2}
 		borderRightColor="black"
 	>
-		<Text>Sweet cool yay</Text>
+		<Side />
 	</Box>
 )
 
-export const Main = () => (
+export const MainWrapper = () => (
 	<VStack padding={4}>
-		<Rss />
+		<Main />
 	</VStack>
 )
 
@@ -55,12 +56,9 @@ export const Bottom = () => (
 export const Layout = () => (
 	<Flex direction="column" minH="100vh">
 		<Top />
-		<Flex
-			flexGrow="1"
-			// border="5px dashed hotpink"
-		>
-			<Side />
-			<Main />
+		<Flex flexGrow="1">
+			<SideWrapper />
+			<MainWrapper />
 		</Flex>
 		<Bottom />
 	</Flex>

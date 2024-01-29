@@ -9,48 +9,13 @@ import {
 	Text,
 } from '@chakra-ui/react'
 
-import { play } from '/src/features/player'
-import { Feed } from '/src/features/rss/guards'
+import { FeedViewer } from '/src/features/rss/feedViewer'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { VStack } from '/src/ui'
 
 import { LOCAL_URLS } from './rssClient'
 import { makeReady, requestPull, selectPullsByStatus } from './slice'
 import { fetchFeed } from './thunks'
-
-const FeedViewer = ({ feed }: { feed: Feed }) => {
-	const dispatch = useAppDispatch()
-
-	return (
-		<VStack>
-			<Text bold>{feed.title}</Text>
-
-			<List spacing={2}>
-				{feed.items.map(fi => (
-					<ListItem>
-						<HStack>
-							<Button
-								// height="sm"
-								size="sm"
-								onClick={() => {
-									dispatch(
-										play({
-											title: fi.title,
-											url: fi.enclosure.url,
-										}),
-									)
-								}}
-							>
-								▶
-							</Button>
-							<Text as="i">{fi.title}</Text>
-						</HStack>
-					</ListItem>
-				))}
-			</List>
-		</VStack>
-	)
-}
 
 export const Rss = () => {
 	const dispatch = useAppDispatch()
