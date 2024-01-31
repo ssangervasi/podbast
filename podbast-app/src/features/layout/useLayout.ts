@@ -3,6 +3,7 @@ import { useCallback, useMemo } from 'preact/hooks'
 import { useAppDispatch, useAppSelector } from '/src/store'
 
 import { actions, selectLayout } from './slice'
+export type { LayoutName } from './slice'
 
 export const useLayout = () => {
 	const layout = useAppSelector(selectLayout)

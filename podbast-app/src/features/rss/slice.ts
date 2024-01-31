@@ -57,11 +57,23 @@ export const slice = createSlice({
 			pull.status = 'ready'
 			pull.feed = FEED
 		},
+		clearPending: state => {
+			state.pulls = state.pulls.filter(p => {
+				if (p.status !== 'ready') {
+					return false
+				}
+				return true
+			})
+		},
 	},
 	extraReducers: builder => {
 		builder
-			.addCase(fetchFeed.pending, () => {})
+			.addCase(fetchFeed.pending, (state, action) => {
+				console.debug('DEBUG(ssangervasi)', 'fetchFeed.pending', { action })
+			})
 			.addCase(fetchFeed.fulfilled, (state, action) => {
+				console.debug('DEBUG(ssangervasi)', 'fetchFeed.fulfilled', { action })
+
 				const rsub = state.pulls.find(ruc => ruc.url === action.meta.arg)
 
 				const attrs = {
@@ -75,7 +87,9 @@ export const slice = createSlice({
 					console.error('No RU for feed fulf')
 				}
 			})
-			.addCase(fetchFeed.rejected, () => {})
+			.addCase(fetchFeed.rejected, (state, action) => {
+				console.debug('DEBUG(ssangervasi)', 'fetchFeed.v', { action })
+			})
 	},
 	selectors: {
 		selectPulls: (state): RssPull[] => state.pulls,
@@ -91,5 +105,5 @@ export const slice = createSlice({
 })
 
 export const { actions, reducer } = slice
-export const { makeReady, requestPull } = actions
+export const { makeReady, requestPull, clearPending } = actions
 export const { selectPulls, selectPullsByStatus } = slice.selectors

@@ -4,19 +4,18 @@ import {
 	StyleFunctionProps,
 	theme as defaultTheme,
 } from '@chakra-ui/react'
+import { mapValues } from '/src/utils'
 
 const calc = (...cssVals: string[]) => `calc(${cssVals.join(' ')})`
 
 const mapCalc = <Mob extends Record<string, unknown>>(
 	mob: Mob,
-	...cssVals: string[]
+	cssVal: string,
+	cond?: (v: string) => boolean,
 ) =>
-	Object.fromEntries(
-		Object.entries(mob).map(([k, v]) => [
-			k,
-			typeof v === 'string' ? calc(v, ...cssVals) : v,
-		]),
-	) as Mob
+	mapValues(mob, v =>
+		typeof v !== 'string' ? v : cond && !cond(v) ? v : calc(v, cssVal),
+	)
 
 export const theme = extendTheme({
 	config: {
@@ -147,9 +146,10 @@ export const theme = extendTheme({
 	},
 
 	/**
+	 * So dirty
 	 * https://github.com/chakra-ui/chakra-ui/blob/main/packages/theme/src/foundations/sizes.ts
 	 */
-	sizes: mapCalc(defaultTheme.sizes, '* 0.85'),
+	sizes: mapCalc(defaultTheme.sizes, '* 0.85', v => /rem/.test(v)),
 
 	space: mapCalc(defaultTheme.space, '* 0.9'),
 

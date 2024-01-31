@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 
-type LayoutName = 'rss' | 'subscriptions'
+export type LayoutName = 'rss' | 'subscriptions'
 
 export interface CommonState {
 	layout: LayoutName
@@ -16,6 +16,8 @@ export const slice = createSlice({
 	initialState,
 	reducers: {
 		show: (state, action: PayloadAction<LayoutName>) => {
+			console.debug('DEBUG(ssangervasi)', Date.now())
+
 			state.layout = action.payload
 		},
 	},

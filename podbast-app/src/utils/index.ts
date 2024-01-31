@@ -10,3 +10,17 @@ export const useUpdatingRef = <V>(updatedValue: V) => {
 	ref.current = updatedValue
 	return ref
 }
+
+export const mapValues = <
+	InObj extends object,
+	OutV,
+	K extends keyof InObj,
+	V extends InObj[K],
+	OutObj extends { [k in K]: OutV },
+>(
+	inObj: InObj,
+	mapFn: (v: V, k: K) => OutV,
+): OutObj =>
+	Object.fromEntries(
+		Object.entries(inObj).map(([k, v]) => [k, mapFn(v, k as K)]),
+	) as OutObj

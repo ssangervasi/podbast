@@ -8,13 +8,19 @@ import {
 	ListItem,
 	Text,
 } from '@chakra-ui/react'
+import { useEffect } from 'preact/hooks'
 
 import { FeedViewer } from '/src/features/rss/feedViewer'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { VStack } from '/src/ui'
 
 import { LOCAL_URLS } from './rssClient'
-import { makeReady, requestPull, selectPullsByStatus } from './slice'
+import {
+	clearPending,
+	makeReady,
+	requestPull,
+	selectPullsByStatus,
+} from './slice'
 import { fetchFeed } from './thunks'
 
 export const Rss = () => {
@@ -27,16 +33,16 @@ export const Rss = () => {
 		selectPullsByStatus(state, 'ready'),
 	)
 
+	useEffect(() => {
+		dispatch(clearPending())
+	}, [])
+
 	return (
 		<>
 			<Box>
 				<Heading>RSS Stuff</Heading>
 
-				<VStack
-				// alignItems="start"
-				// alignItems="start"
-				// backgroundColor="pink"
-				>
+				<VStack>
 					<Text as="b"> Previous URLS:</Text>
 					<List spacing={2}>
 						{LOCAL_URLS.map(u => (
