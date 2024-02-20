@@ -20,8 +20,11 @@ export const slice = createSlice({
 	},
 	selectors: {
 		selectSubscriptions: state => state,
+		selectFeedSubscription: (state, url: string) =>
+			state.find(sub => sub.url === url),
 	},
 })
 
 export const { actions, reducer, selectors } = slice
-export const { selectSubscriptions } = selectors
+export const { subscribe } = actions
+export const { selectSubscriptions, selectFeedSubscription } = selectors

@@ -1,40 +1,76 @@
-import { Button, HStack, List, ListItem, Text } from '@chakra-ui/react'
+import { Button, chakra, HStack, List, ListItem, Text } from '@chakra-ui/react'
+import { useCallback } from 'preact/hooks'
 
 import { play } from '/src/features/player'
-import { Feed } from '/src/features/rss/guards'
+import { Feed, FeedItem } from '/src/features/rss/guards'
+import { selectFeedSubscription, subscribe } from '/src/features/subscriptions'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { VStack } from '/src/ui'
 
 export const FeedViewer = ({ feed }: { feed: Feed }) => {
 	const dispatch = useAppDispatch()
+	const subscription = useAppSelector(state =>
+		selectFeedSubscription(state, feed.feedUrl),
+	)
+	const isSubscribed = Boolean(subscription)
+
+	const handleSubscribe = useCallback(() => {
+		dispatch(
+			subscribe({
+				title: feed.title,
+				url: feed.feedUrl,
+			}),
+		)
+	}, [feed])
 
 	return (
-		<VStack>
-			<Text bold>{feed.title}</Text>
+		<VStack maxWidth={['full', 'container.lg']}>
+			<chakra.b fontSize="large">{feed.title}</chakra.b>
 
+			<HStack>
+				<Button size="sm" onClick={handleSubscribe} isDisabled={isSubscribed}>
+					{isSubscribed ? 'Subscribed' : 'Subscribe'}
+				</Button>
+			</HStack>
+
+			<chakra.span>{feed.description}</chakra.span>
+
+			<chakra.b>Episodes</chakra.b>
 			<List spacing={2}>
-				{feed.items.map(fi => (
-					<ListItem>
-						<HStack>
-							<Button
-								// height="sm"
-								size="sm"
-								onClick={() => {
-									dispatch(
-										play({
-											title: fi.title,
-											url: fi.enclosure.url,
-										}),
-									)
-								}}
-							>
-								▶
-							</Button>
-							<Text as="i">{fi.title}</Text>
-						</HStack>
+				{feed.items.map(item => (
+					<ListItem key={item.guid}>
+						<FeedItemViewer item={item} />
 					</ListItem>
 				))}
 			</List>
 		</VStack>
+	)
+}
+
+export const FeedItemViewer = ({ item }: { item: FeedItem }) => {
+	const dispatch = useAppDispatch()
+
+	return (
+		<HStack borderTopColor="gray.700" borderTopWidth={1} padding={1}>
+			<Button
+				size="sm"
+				onClick={() => {
+					dispatch(
+						play({
+							title: item.title,
+							url: item.enclosure.url,
+						}),
+					)
+				}}
+			>
+				▶
+			</Button>
+			<VStack spacing={1}>
+				<chakra.i>{item.title}</chakra.i>
+				<chakra.span fontSize="md" noOfLines={1}>
+					{item.contentSnippet}
+				</chakra.span>
+			</VStack>
+		</HStack>
 	)
 }

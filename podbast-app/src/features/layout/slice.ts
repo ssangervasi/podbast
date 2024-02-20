@@ -16,8 +16,6 @@ export const slice = createSlice({
 	initialState,
 	reducers: {
 		show: (state, action: PayloadAction<LayoutName>) => {
-			console.debug('DEBUG(ssangervasi)', Date.now())
-
 			state.layout = action.payload
 		},
 	},

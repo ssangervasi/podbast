@@ -1,7 +1,5 @@
-import { Box, Button, Text, useBreakpointValue } from '@chakra-ui/react'
+import { Button, Text, useBreakpointValue } from '@chakra-ui/react'
 import { ReactNode } from 'preact/compat'
-
-import { VStack } from '/src/ui'
 
 import { LayoutName, useLayout } from './useLayout'
 
@@ -9,8 +7,8 @@ export const Side = () => {
 	return (
 		<>
 			<Text>Sidebar</Text>
-			<SideButton to="rss">Add feed</SideButton>
 			<SideButton to="subscriptions">Subscriptions</SideButton>
+			<SideButton to="rss">Find feed</SideButton>
 		</>
 	)
 }
@@ -32,7 +30,9 @@ const SideButton = ({
 			textOverflow="ellipsis"
 			justifyContent="flex-start"
 			paddingX="1"
-			onClick={() => show(to)}
+			onClick={() => {
+				show(to)
+			}}
 			leftIcon={<span>{layout === to ? '»' : ' '}</span>}
 		>
 			{needsTiny ? to[0] : children}

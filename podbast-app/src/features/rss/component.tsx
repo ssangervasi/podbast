@@ -1,6 +1,7 @@
 import {
 	Box,
 	Button,
+	chakra,
 	Heading,
 	HStack,
 	Input,
@@ -106,20 +107,9 @@ export const Rss = () => {
 				</List>
 
 				<Heading>Ready</Heading>
-				<Box
-					style={{
-						maxHeight: '40vh',
-						overflowY: 'auto',
-					}}
-				>
-					<ul>
-						{readyPulls.map(ru => (
-							<li key={ru.url}>
-								<FeedViewer feed={ru.feed!} />
-							</li>
-						))}
-					</ul>
-				</Box>
+				{readyPulls.map(ru => (
+					<FeedViewer key={ru.url} feed={ru.feed!} />
+				))}
 			</Box>
 		</>
 	)

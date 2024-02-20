@@ -24,3 +24,27 @@ export const mapValues = <
 	Object.fromEntries(
 		Object.entries(inObj).map(([k, v]) => [k, mapFn(v, k as K)]),
 	) as OutObj
+
+/**
+ * Logging
+ */
+
+const logState = {
+	lastMs: 0,
+}
+
+const nextDelta = () => {
+	const prev = logState.lastMs
+	const now = Date.now()
+	logState.lastMs = now
+
+	if (prev === 0) {
+		return 0
+	}
+
+	return now - prev
+}
+
+export const logDelta = (...args: unknown[]) => {
+	console.log(`[${nextDelta()}ms]`, ...args)
+}
