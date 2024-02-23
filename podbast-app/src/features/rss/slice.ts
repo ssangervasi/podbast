@@ -4,6 +4,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { FEED } from '/src/features/rss/fixtures'
 import { Feed } from '/src/features/rss/guards'
 import { EMPTY_ARRAY, wrapEmpty } from '/src/store/utils'
+import { log } from '/src/utils'
 
 import { fetchFeed } from './thunks'
 
@@ -50,7 +51,7 @@ export const slice = createSlice({
 			const url = action.payload
 			const pull = state.pulls.find(p => p.url === url)
 			if (!pull) {
-				console.error('makeReady: No subscription for url')
+				log.info('makeReady: No subscription for url')
 				return
 			}
 
@@ -69,10 +70,10 @@ export const slice = createSlice({
 	extraReducers: builder => {
 		builder
 			.addCase(fetchFeed.pending, (state, action) => {
-				console.debug('DEBUG(ssangervasi)', 'fetchFeed.pending', { action })
+				log.info('fetchFeed.pending', { action })
 			})
 			.addCase(fetchFeed.fulfilled, (state, action) => {
-				console.debug('DEBUG(ssangervasi)', 'fetchFeed.fulfilled', { action })
+				log.info('fetchFeed.fulfilled', { action })
 
 				const rsub = state.pulls.find(ruc => ruc.url === action.meta.arg)
 
@@ -84,11 +85,11 @@ export const slice = createSlice({
 				if (rsub) {
 					Object.assign(rsub, attrs)
 				} else {
-					console.error('No RU for feed fulf')
+					log.info('No RU for feed fulf')
 				}
 			})
 			.addCase(fetchFeed.rejected, (state, action) => {
-				console.debug('DEBUG(ssangervasi)', 'fetchFeed.v', { action })
+				log.info('fetchFeed.v', { action })
 			})
 	},
 	selectors: {
@@ -101,9 +102,18 @@ export const slice = createSlice({
 					.filter(ru => ru.status === status),
 			)
 		},
+		selectStatusToPulls: (
+			state: RssState,
+		): { ready: RssPull[]; requested: RssPull[] } => {
+			return {
+				ready: slice.getSelectors().selectPullsByStatus(state, 'ready'),
+				requested: slice.getSelectors().selectPullsByStatus(state, 'requested'),
+			}
+		},
 	},
 })
 
 export const { actions, reducer } = slice
 export const { makeReady, requestPull, clearPending } = actions
-export const { selectPulls, selectPullsByStatus } = slice.selectors
+export const { selectPulls, selectPullsByStatus, selectStatusToPulls } =
+	slice.selectors

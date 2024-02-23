@@ -45,6 +45,26 @@ const nextDelta = () => {
 	return now - prev
 }
 
-export const logDelta = (...args: unknown[]) => {
-	console.log(`[${nextDelta()}ms]`, ...args)
+const _log = (
+	level: 'error' | 'info' | 'debug' = 'info',
+	prefix = '',
+	...args: unknown[]
+) => {
+	if (!import.meta.env.DEV) {
+		return
+	}
+	const preArr = prefix ? `[${prefix}]` : []
+	console[level](...preArr, ...args)
 }
+
+export const log = Object.assign(_log, {
+	info: (...args: unknown[]) => {
+		_log('info', '', ...args)
+	},
+	error: (...args: unknown[]) => {
+		_log('error', '', ...args)
+	},
+	delta: (...args: unknown[]) => {
+		_log('info', `${nextDelta()}ms`, ...args)
+	},
+})

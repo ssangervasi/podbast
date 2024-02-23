@@ -27,12 +27,8 @@ import { fetchFeed } from './thunks'
 export const Rss = () => {
 	const dispatch = useAppDispatch()
 
-	const requestedPulls = useAppSelector(state =>
-		selectPullsByStatus(state, 'requested'),
-	)
-	const readyPulls = useAppSelector(state =>
-		selectPullsByStatus(state, 'ready'),
-	)
+	const { request: requestedPulls, ready: readyPulls } =
+		useAppSelector(selectStatusToPulls)
 
 	useEffect(() => {
 		dispatch(clearPending())
@@ -78,9 +74,6 @@ export const Rss = () => {
 							const urlEl = evt.currentTarget.elements.namedItem('url')
 							const url = (urlEl as HTMLInputElement).value
 							dispatch(requestPull(url))
-							const ff = fetchFeed(url)
-							console.log('ff', ff)
-							dispatch(ff)
 						}}
 					>
 						<VStack align="start">

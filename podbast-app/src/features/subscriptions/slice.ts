@@ -1,6 +1,8 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 
+import { wrapEmpty } from '/src/store'
+
 export type Subscription = {
 	url: string
 	title: string
@@ -18,6 +20,7 @@ export const slice = createSlice({
 			state.push(action.payload)
 		},
 	},
+	// extraReducers:
 	selectors: {
 		selectSubscriptions: state => state,
 		selectFeedSubscription: (state, url: string) =>

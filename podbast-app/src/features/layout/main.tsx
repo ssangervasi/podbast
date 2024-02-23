@@ -1,5 +1,5 @@
 import { Rss } from '/src/features/rss'
-import { Subscriptions } from '/src/features/subscriptions'
+import { Page as SubscriptionsPage } from '/src/features/subscriptions'
 
 import { useLayout } from './useLayout'
 
@@ -10,7 +10,7 @@ export const Main = () => {
 		//
 		<>
 			{layout === 'rss' ? <Rss /> : null}
-			{layout === 'subscriptions' ? <Subscriptions /> : null}
+			{layout === 'subscriptions' ? <SubscriptionsPage /> : null}
 		</>
 	)
 }
