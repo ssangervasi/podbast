@@ -14,6 +14,7 @@ import { useEffect } from 'preact/hooks'
 import { FeedViewer } from '/src/features/rss/feedViewer'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { VStack } from '/src/ui'
+import { log } from '/src/utils'
 
 import { LOCAL_URLS } from './rssClient'
 import {
@@ -22,13 +23,23 @@ import {
 	requestPull,
 	selectPullsByStatus,
 } from './slice'
-import { fetchFeed } from './thunks'
+import { fetchFeed } from '/src/features/rss/thunks'
 
 export const Rss = () => {
 	const dispatch = useAppDispatch()
 
-	const { request: requestedPulls, ready: readyPulls } =
-		useAppSelector(selectStatusToPulls)
+	// const requestedPulls = []
+	const requestedPulls = useAppSelector(state =>
+		selectPullsByStatus(state, 'requested'),
+	)
+	log.info(selectPullsByStatus)
+	const readyPulls = useAppSelector(state => {
+		console.log('use app')
+		return selectPullsByStatus(state, 'ready')
+	})
+
+	// const { request: requestedPulls, ready: readyPulls } =
+	// 	useAppSelector(selectStatusToPulls)
 
 	useEffect(() => {
 		dispatch(clearPending())
@@ -74,6 +85,7 @@ export const Rss = () => {
 							const urlEl = evt.currentTarget.elements.namedItem('url')
 							const url = (urlEl as HTMLInputElement).value
 							dispatch(requestPull(url))
+							dispatch(fetchFeed(url))
 						}}
 					>
 						<VStack align="start">

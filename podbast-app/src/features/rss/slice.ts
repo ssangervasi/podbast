@@ -1,5 +1,5 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { createSlice } from '@reduxjs/toolkit'
+import { createSelector, createSlice } from '@reduxjs/toolkit'
 
 import { FEED } from '/src/features/rss/fixtures'
 import { Feed } from '/src/features/rss/guards'
@@ -94,14 +94,36 @@ export const slice = createSlice({
 	},
 	selectors: {
 		selectPulls: (state): RssPull[] => state.pulls,
-		selectPullsByStatus: (state, status: RssPull['status']): RssPull[] => {
-			return wrapEmpty(
-				slice
-					.getSelectors()
-					.selectPulls(state)
-					.filter(ru => ru.status === status),
-			)
-		},
+		selectPullsByStatus: createSelector(
+			[state => state, (state, status: RssPull['status']) => status],
+			(state, status: RssPull['status']): RssPull[] => {
+				console.log('selecty')
+				return wrapEmpty(
+					slice
+						.getSelectors()
+						.selectPulls(state)
+						.filter(ru => ru.status === status),
+				)
+			},
+		),
+		// selectPullsByStatus: (state, status: RssPull['status']): RssPull[] => {
+		// 	if (prev.state) {
+		// 		console.log({
+		// 			'eq state?': prev.state === state,
+		// 			'eq status?': prev.status === status,
+		// 		})
+		// 	} else {
+		// 		console.log('first time')
+		// 	}
+		// 	prev.state = state
+		// 	prev.status = status
+		// 	return wrapEmpty(
+		// 		slice
+		// 			.getSelectors()
+		// 			.selectPulls(state)
+		// 			.filter(ru => ru.status === status),
+		// 	)
+		// },
 		selectStatusToPulls: (
 			state: RssState,
 		): { ready: RssPull[]; requested: RssPull[] } => {
@@ -112,6 +134,8 @@ export const slice = createSlice({
 		},
 	},
 })
+
+const prev: any = {}
 
 export const { actions, reducer } = slice
 export const { makeReady, requestPull, clearPending } = actions

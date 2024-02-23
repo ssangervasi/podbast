@@ -21,7 +21,7 @@ export const getFeed = async (url: string) => {
 
 		throw new Error('Invalid feed JSON')
 	} catch (e) {
-		log('Feed error', e)
+		log.info('Feed error', e)
 		throw e
 	}
 }
