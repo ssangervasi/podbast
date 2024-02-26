@@ -1,51 +1,32 @@
-import { Box, Text } from '@chakra-ui/react'
+import { Box, Text, useTimeout } from '@chakra-ui/react'
+import { useMeasure } from '@uidotdev/usehooks'
 import { RefObject } from 'preact'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 
 import { log } from '/src/utils'
+import { CATJAM } from '/src/utils/images'
 
 import { CorePlayer } from './corePlayer'
 
-const useSpacing = <El extends HTMLElement, Init extends Partial<DOMRect>>({
-	ref,
-	initial,
-}: {
-	ref: RefObject<El>
-	initial: Init
-}) => {
-	const [state, setState] = useState<DOMRect>()
-
-	useEffect(() => {
-		const el = ref.current
-		log.info('usespacing', el)
-
-		if (!el) {
-			return
-		}
-
-		setState(el.getBoundingClientRect())
-	}, [ref.current])
-
-	return state ?? initial
-}
-
 export const Player = () => {
-	const fixedRef = useRef<HTMLDivElement>(null)
+	const [fixedRef, rect] = useMeasure()
 
-	const spacing = useSpacing({ ref: fixedRef, initial: { height: 100 } })
+	useTimeout
 
 	return (
 		<>
 			{/* Spacer to ensure fixed content position doesn't hide main content*/}
 			<Box
 				sx={{
-					// position: 'relative',
-					// overflow: 'hidden',
-					height: spacing.height,
+					position: 'relative',
+					overflow: 'hidden',
+					height: rect.height ? rect.height * 0.95 : 0,
+					width: 'full',
+					// JAMJAMJAMJAM
+					backgroundImage: rect.height ? CATJAM : 'none',
+					backgroundRepeat: 'round',
 				}}
-			>
-				wha
-			</Box>
+			></Box>
 
 			<Box
 				ref={fixedRef}
@@ -55,11 +36,20 @@ export const Player = () => {
 					bottom: 0,
 					left: 0,
 					backgroundColor: '#202535',
+					minHeight: 50,
 					//
 					display: 'flex',
 					flexDirection: 'row',
 					placeContent: 'center',
 					placeItems: 'center',
+
+					// JAMJAMJAM
+					transitionProperty: 'opacity',
+					':hover': {
+						transitionDuration: '30s',
+						transitionTimingFunction: 'ease-in',
+						opacity: 0.85,
+					},
 				}}
 			>
 				<Box
