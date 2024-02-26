@@ -69,7 +69,7 @@ export const slice = createSlice({
 	},
 	extraReducers: builder => {
 		builder
-			.addCase(fetchFeed.pending, (state, action) => {
+			.addCase(fetchFeed.pending, (_, action) => {
 				log.info('fetchFeed.pending', { action })
 			})
 			.addCase(fetchFeed.fulfilled, (state, action) => {
@@ -88,56 +88,24 @@ export const slice = createSlice({
 					log.info('No RU for feed fulf')
 				}
 			})
-			.addCase(fetchFeed.rejected, (state, action) => {
+			.addCase(fetchFeed.rejected, (_, action) => {
 				log.info('fetchFeed.v', { action })
 			})
 	},
 	selectors: {
 		selectPulls: (state): RssPull[] => state.pulls,
-		selectPullsByStatus: createSelector(
-			[state => state, (state, status: RssPull['status']) => status],
-			(state, status: RssPull['status']): RssPull[] => {
-				console.log('selecty')
-				return wrapEmpty(
-					slice
-						.getSelectors()
-						.selectPulls(state)
-						.filter(ru => ru.status === status),
-				)
-			},
-		),
-		// selectPullsByStatus: (state, status: RssPull['status']): RssPull[] => {
-		// 	if (prev.state) {
-		// 		console.log({
-		// 			'eq state?': prev.state === state,
-		// 			'eq status?': prev.status === status,
-		// 		})
-		// 	} else {
-		// 		console.log('first time')
-		// 	}
-		// 	prev.state = state
-		// 	prev.status = status
-		// 	return wrapEmpty(
-		// 		slice
-		// 			.getSelectors()
-		// 			.selectPulls(state)
-		// 			.filter(ru => ru.status === status),
-		// 	)
-		// },
-		selectStatusToPulls: (
-			state: RssState,
-		): { ready: RssPull[]; requested: RssPull[] } => {
-			return {
-				ready: slice.getSelectors().selectPullsByStatus(state, 'ready'),
-				requested: slice.getSelectors().selectPullsByStatus(state, 'requested'),
-			}
-		},
 	},
 })
 
-const prev: any = {}
+export const { selectPulls } = slice.selectors
+
+export const selectPullsByStatus = createSelector(
+	[selectPulls, (_, status: RssPull['status']) => status],
+	(pulls, status) => {
+		log.info('selecty', pulls, status)
+		return wrapEmpty(pulls.filter(ru => ru.status === status))
+	},
+)
 
 export const { actions, reducer } = slice
 export const { makeReady, requestPull, clearPending } = actions
-export const { selectPulls, selectPullsByStatus, selectStatusToPulls } =
-	slice.selectors

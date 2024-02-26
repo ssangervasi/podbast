@@ -1,4 +1,5 @@
 import { Button, chakra, HStack, List, ListItem, Text } from '@chakra-ui/react'
+import { Suspense } from 'preact/compat'
 import { useCallback } from 'preact/hooks'
 
 import { play } from '/src/features/player'
@@ -6,6 +7,7 @@ import { Feed, FeedItem } from '/src/features/rss/guards'
 import { selectFeedSubscription, subscribe } from '/src/features/subscriptions'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { VStack } from '/src/ui'
+import { useChunker } from '/src/utils/use-chunker'
 
 export const FeedViewer = ({ feed }: { feed: Feed }) => {
 	const dispatch = useAppDispatch()
@@ -23,6 +25,8 @@ export const FeedViewer = ({ feed }: { feed: Feed }) => {
 		)
 	}, [feed])
 
+	const chunker = useChunker({ items: feed.items })
+
 	return (
 		<VStack maxWidth={['full', 'container.lg']}>
 			<chakra.b fontSize="large">{feed.title}</chakra.b>
@@ -36,13 +40,15 @@ export const FeedViewer = ({ feed }: { feed: Feed }) => {
 			<chakra.span>{feed.description}</chakra.span>
 
 			<chakra.b>Episodes</chakra.b>
-			<List spacing={2}>
-				{feed.items.map(item => (
-					<ListItem key={item.guid}>
-						<FeedItemViewer item={item} />
-					</ListItem>
-				))}
-			</List>
+			<Suspense fallback={<chakra.span>...</chakra.span>}>
+				<List spacing={2}>
+					{chunker.chunk.map(item => (
+						<ListItem key={item.guid}>
+							<FeedItemViewer item={item} />
+						</ListItem>
+					))}
+				</List>
+			</Suspense>
 		</VStack>
 	)
 }

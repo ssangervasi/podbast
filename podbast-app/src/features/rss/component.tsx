@@ -12,6 +12,7 @@ import {
 import { useEffect } from 'preact/hooks'
 
 import { FeedViewer } from '/src/features/rss/feedViewer'
+import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { VStack } from '/src/ui'
 import { log } from '/src/utils'
@@ -23,23 +24,19 @@ import {
 	requestPull,
 	selectPullsByStatus,
 } from './slice'
-import { fetchFeed } from '/src/features/rss/thunks'
 
 export const Rss = () => {
 	const dispatch = useAppDispatch()
 
 	// const requestedPulls = []
+	// const readyPulls = []
+
 	const requestedPulls = useAppSelector(state =>
 		selectPullsByStatus(state, 'requested'),
 	)
-	log.info(selectPullsByStatus)
 	const readyPulls = useAppSelector(state => {
-		console.log('use app')
 		return selectPullsByStatus(state, 'ready')
 	})
-
-	// const { request: requestedPulls, ready: readyPulls } =
-	// 	useAppSelector(selectStatusToPulls)
 
 	useEffect(() => {
 		dispatch(clearPending())
