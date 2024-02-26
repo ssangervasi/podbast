@@ -7,7 +7,8 @@ import { Feed, FeedItem } from '/src/features/rss/guards'
 import { selectFeedSubscription, subscribe } from '/src/features/subscriptions'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { VStack } from '/src/ui'
-import { useChunker } from '/src/utils/use-chunker'
+
+import { useChunker } from '../../utils/useChunker'
 
 export const FeedViewer = ({ feed }: { feed: Feed }) => {
 	const dispatch = useAppDispatch()
