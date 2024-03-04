@@ -3,6 +3,7 @@ import { createSelector, createSlice } from '@reduxjs/toolkit'
 
 import { Feed, FeedImage, FeedItem } from '/src/features/rss/guards'
 import { compact, wrapEmpty } from '/src/store'
+import { RootState } from '/src/store/store'
 
 export type Subscription = {
 	url: string
@@ -24,12 +25,23 @@ export const initialState: SubscriptionsState = []
 export const slice = createSlice({
 	name: 'subscriptions',
 	initialState,
-	reducers: {
-		subscribe: (state, action: PayloadAction<Subscription>) => {
-			state.push(action.payload)
-		},
-	},
-	// extraReducers:
+	reducers: create => ({
+		// subscribe: create.reducer<{ feedUrl: string }>((state, action) => {
+		// 	// state.
+		// 	state.push(action.payload)
+		// }),
+		subscribe: create.asyncThunk(
+			//
+			async ({ feedUrl: string }, thunkApi) => {
+				const x = thunkApi.getState() as RootState
+			},
+			{
+				fulfilled: (state, action) => {
+					state.push(action.payload)
+				},
+			},
+		),
+	}),
 	selectors: {
 		selectSubscriptions: state => state,
 		selectFeedSubscription: (state, url: string) =>

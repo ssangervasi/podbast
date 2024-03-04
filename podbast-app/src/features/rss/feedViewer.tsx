@@ -18,12 +18,7 @@ export const FeedViewer = ({ feed }: { feed: Feed }) => {
 	const isSubscribed = Boolean(subscription)
 
 	const handleSubscribe = useCallback(() => {
-		dispatch(
-			subscribe({
-				title: feed.title,
-				url: feed.feedUrl,
-			}),
-		)
+		dispatch(subscribe(feed))
 	}, [feed])
 
 	const chunker = useChunker({ items: feed.items })
