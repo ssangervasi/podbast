@@ -38,4 +38,5 @@ export const FeedResponseGuard = Guard.narrow({
 
 export type FeedResponse = Payload<typeof FeedResponseGuard>
 export type Feed = FeedResponse['content']
+export type FeedImage = Feed['image']
 export type FeedItem = Feed['items'][number]

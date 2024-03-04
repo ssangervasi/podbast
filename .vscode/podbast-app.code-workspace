@@ -6,6 +6,13 @@
 	],
 	"settings": {
 		"workbench.colorTheme": "Dracula Soft",
-		"cSpell.words": ["Avenir", "CATJAM", "Chunker", "reprop", "vidstack"]
+		"cSpell.words": [
+			"Avenir",
+			"CATJAM",
+			"Chunker",
+			"Emptyish",
+			"reprop",
+			"vidstack"
+		]
 	}
 }

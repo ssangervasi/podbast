@@ -1,11 +1,20 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { createSlice } from '@reduxjs/toolkit'
+import { createSelector, createSlice } from '@reduxjs/toolkit'
 
-import { wrapEmpty } from '/src/store'
+import { Feed, FeedImage, FeedItem } from '/src/features/rss/guards'
+import { compact, wrapEmpty } from '/src/store'
 
 export type Subscription = {
 	url: string
 	title: string
+	// Do I want to replicate the whole thing?
+	feed: Feed
+}
+
+export type FeedInfo = {
+	feedUrl: string
+	title: string
+	image: FeedImage
 }
 
 export type SubscriptionsState = Subscription[]
@@ -31,3 +40,27 @@ export const slice = createSlice({
 export const { actions, reducer, selectors } = slice
 export const { subscribe } = actions
 export const { selectSubscriptions, selectFeedSubscription } = selectors
+
+export type SubEp = {
+	item: FeedItem
+	feed: FeedInfo
+}
+
+export const selectRecentEpisodes = createSelector(
+	[selectSubscriptions],
+	(subs): SubEp[] =>
+		compact(
+			subs.map(sub => {
+				const { feed } = sub
+				const item = feed.items[0]
+				return {
+					item,
+					feed: {
+						title: feed.title,
+						image: feed.image,
+						feedUrl: feed.feedUrl,
+					},
+				}
+			}),
+		),
+)
