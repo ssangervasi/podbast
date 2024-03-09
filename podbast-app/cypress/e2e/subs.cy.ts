@@ -17,24 +17,43 @@ describe('find feed', () => {
 
 		cy.findByRole('button', { name: 'Subscriptions' }).click()
 
-		cy.appStateSnapshot()
-		cy.pause()
+		// cy.appStateSnapshot()
+		// cy.pause()
 	})
 })
 
 describe('layout', () => {
 	it('can populate store', () => {
 		cy.visit('/')
-		cy.findByRole('button', { name: 'Find feed' }).click()
+		// cy.findByRole('button', { name: 'Find feed' }).click()
 
 		cy.appStateReset({
-			common: undefined,
-			layout: undefined,
-			player: undefined,
-			rss: undefined,
-			subscriptions: undefined,
-			_persist: undefined,
-		} as any)
+			layout: {
+				layout: 'subscriptions',
+			},
+			subscriptions: [
+				{
+					link: 'example.sangervasi.net/pod/1',
+					title: 'Pod 1',
+					feed: {
+						items: [],
+						feedUrl: '',
+						image: {
+							link: '',
+							url: '',
+							title: '',
+						},
+						paginationLinks: undefined,
+						title: '',
+						description: '',
+						pubDate: '',
+						link: '',
+						language: '',
+						lastBuildDate: '',
+					},
+				},
+			],
+		})
 
 		cy.pause()
 	})

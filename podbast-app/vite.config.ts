@@ -16,6 +16,9 @@ export default defineConfig({
 		},
 	},
 	plugins: [preact()],
+	build: {
+		sourcemap: 'inline',
+	},
 	resolve: {
 		alias: [
 			// Actually already supports absolute imports

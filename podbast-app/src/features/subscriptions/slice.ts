@@ -15,6 +15,7 @@ export type Subscription = {
 export type FeedInfo = {
 	feedUrl: string
 	title: string
+	link: string
 	image: FeedImage
 }
 
@@ -63,6 +64,9 @@ export const selectRecentEpisodes = createSelector(
 			subs.map(sub => {
 				const { feed } = sub
 				const item = feed.items[0]
+				if (!item) {
+					return undefined
+				}
 				return {
 					item,
 					feed: {

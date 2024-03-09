@@ -1,4 +1,4 @@
-import { Guard, Payload } from 'narrow-minded'
+import { Guard, Payload, some } from 'narrow-minded'
 
 export const FeedResponseGuard = Guard.narrow({
 	content: {
@@ -24,9 +24,9 @@ export const FeedResponseGuard = Guard.narrow({
 			url: 'string',
 			title: 'string',
 		},
-		paginationLinks: {
+		paginationLinks: some('undefined', {
 			self: 'string',
-		},
+		}),
 		title: 'string',
 		description: 'string',
 		pubDate: 'string',

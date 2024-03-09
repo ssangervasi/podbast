@@ -3,6 +3,7 @@ import { type Draft, produce } from 'immer'
 
 export const EMPTY_ARRAY: never[] = produce([], () => [])
 
+export type Nullish<I = unknown> = I | null | undefined
 export type Emptyish<I = unknown> = I[] | null | undefined
 
 const _wrapEmpty = <I>(a: Emptyish<I>): I[] =>
@@ -16,8 +17,11 @@ export const wrapEmpty = Object.assign(_wrapEmpty, {
 // export const emptyRecord = <R extends >(a: I[] | null | undefined): I[] =>
 //   a !== undefined && a !== null && a.length > 0 ? a : EMPTY_ARRAY;
 
-export const compact = <I>(a: Emptyish<I>): I[] =>
+export const compact = <I>(a: Emptyish<Nullish<I>>): I[] =>
 	wrapEmpty(wrapEmpty(a).filter((i): i is I => i !== null && i !== undefined))
+
+const maybes = [undefined, { a: 1 }, undefined, { b: 2 }]
+const yesses = compact(maybes)
 
 export const createResetReducer =
 	<SliceState>(initialStateArg: SliceState) =>

@@ -23,4 +23,4 @@ const createTestAction = <
 	return actionCreator
 }
 
-export const TEST_reset = createTestAction<RootState>('TEST/reset')
+export const TEST_reset = createTestAction<Partial<RootState>>('TEST/reset')
