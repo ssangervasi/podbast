@@ -16,5 +16,26 @@ describe('find feed', () => {
 		cy.findByRole('button', { name: 'Subscribe' }).click()
 
 		cy.findByRole('button', { name: 'Subscriptions' }).click()
+
+		cy.appStateSnapshot()
+		cy.pause()
+	})
+})
+
+describe('layout', () => {
+	it('can populate store', () => {
+		cy.visit('/')
+		cy.findByRole('button', { name: 'Find feed' }).click()
+
+		cy.appStateReset({
+			common: undefined,
+			layout: undefined,
+			player: undefined,
+			rss: undefined,
+			subscriptions: undefined,
+			_persist: undefined,
+		} as any)
+
+		cy.pause()
 	})
 })

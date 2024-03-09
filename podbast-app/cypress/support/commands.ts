@@ -34,7 +34,29 @@ import '@testing-library/cypress/add-commands'
 //       login(email: string, password: string): Chainable<void>
 //       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
 //       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
 //     }
 //   }
 // }
+import { type RootState, TEST_reset } from '/src/devtools/cypressImportable'
+
+Cypress.Commands.add('appStateReset', (appState: RootState) => {
+	cy.window().then(win => {
+		win.TEST.store.dispatch(TEST_reset(appState))
+	})
+})
+
+Cypress.Commands.add('appStateSnapshot', () => {
+	cy.window().then(win => {
+		const appState = win.TEST.store.getState()
+		cy.log('appStateSnapshot', JSON.stringify(appState, null, 2))
+	})
+})
+
+declare global {
+	namespace Cypress {
+		interface Chainable {
+			appStateReset(appState: RootState): Chainable<void>
+			appStateSnapshot(): Chainable<void>
+		}
+	}
+}

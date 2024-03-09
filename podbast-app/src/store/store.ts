@@ -13,6 +13,8 @@ import {
 } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 
+import { wrapTestableReducer } from '/src/devtools/wrapReducer'
+
 import { rootReducer } from './reducers'
 
 // Immer plugin
@@ -24,10 +26,12 @@ const persistConfig: PersistConfig<ReturnType<typeof rootReducer>> = {
 	storage,
 }
 const persistedReducer = persistReducer(persistConfig, rootReducer)
+const testableReducer = wrapTestableReducer(persistedReducer)
+const reducer = testableReducer
 
 // Actual store
 export const store = configureStore({
-	reducer: persistedReducer,
+	reducer,
 	middleware: getDefaultMiddleware =>
 		getDefaultMiddleware({
 			serializableCheck: {
@@ -53,6 +57,6 @@ export const persistor = persistStore(store)
 //   });
 // }
 
-// Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>
-export type AppDispatch = typeof store.dispatch
+export type AppStore = typeof store
+export type RootState = ReturnType<AppStore['getState']>
+export type AppDispatch = AppStore['dispatch']

@@ -1,8 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 
-import { createResetReducer } from '/src/store/utils'
-
 export type LayoutName = 'rss' | 'subscriptions'
 
 export interface LayoutState {
@@ -20,7 +18,6 @@ export const slice = createSlice({
 		show: (state, action: PayloadAction<LayoutName>) => {
 			state.layout = action.payload
 		},
-		_reset: createResetReducer(initialState),
 	},
 	selectors: { selectLayout: state => state.layout },
 })
