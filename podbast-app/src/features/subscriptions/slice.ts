@@ -1,12 +1,12 @@
-import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 
 import { Feed, FeedImage, FeedItem } from '/src/features/rss/guards'
 import { compact, wrapEmpty } from '/src/store'
-import { RootState } from '/src/store/store'
+import { log } from '/src/utils'
 
 export type Subscription = {
-	url: string
+	// Replicating the feed link to get a canonical website for the podcast
+	link: string
 	title: string
 	// Do I want to replicate the whole thing?
 	feed: Feed
@@ -26,26 +26,24 @@ export const slice = createSlice({
 	name: 'subscriptions',
 	initialState,
 	reducers: create => ({
-		// subscribe: create.reducer<{ feedUrl: string }>((state, action) => {
-		// 	// state.
-		// 	state.push(action.payload)
-		// }),
-		subscribe: create.asyncThunk(
-			//
-			async ({ feedUrl: string }, thunkApi) => {
-				const x = thunkApi.getState() as RootState
-			},
-			{
-				fulfilled: (state, action) => {
-					state.push(action.payload)
-				},
-			},
-		),
+		subscribe: create.reducer<Feed>((state, action) => {
+			const feed = action.payload
+			const existing = state.find(sub => sub.link === sub.feed.link)
+			if (existing) {
+				log.error('Repeat feed', feed.link)
+				return
+			}
+			state.push({
+				link: feed.link,
+				title: feed.title,
+				feed,
+			})
+		}),
 	}),
 	selectors: {
 		selectSubscriptions: state => state,
-		selectFeedSubscription: (state, url: string) =>
-			state.find(sub => sub.url === url),
+		selectFeedSubscription: (state, link: string) =>
+			state.find(sub => sub.link === link),
 	},
 })
 
@@ -70,9 +68,19 @@ export const selectRecentEpisodes = createSelector(
 					feed: {
 						title: feed.title,
 						image: feed.image,
+						link: feed.link,
 						feedUrl: feed.feedUrl,
 					},
 				}
 			}),
 		),
+)
+
+export const selectSubSummaries = createSelector([selectSubscriptions], subs =>
+	compact(
+		subs.map(sub => ({
+			title: sub.title,
+			link: sub.link,
+		})),
+	),
 )

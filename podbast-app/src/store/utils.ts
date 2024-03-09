@@ -1,4 +1,5 @@
-import { produce } from 'immer'
+import { PayloadAction } from '@reduxjs/toolkit'
+import { type Draft, produce } from 'immer'
 
 export const EMPTY_ARRAY: never[] = produce([], () => [])
 
@@ -17,3 +18,13 @@ export const wrapEmpty = Object.assign(_wrapEmpty, {
 
 export const compact = <I>(a: Emptyish<I>): I[] =>
 	wrapEmpty(wrapEmpty(a).filter((i): i is I => i !== null && i !== undefined))
+
+export const createResetReducer =
+	<SliceState>(initialStateArg: SliceState) =>
+	(
+		_state: Draft<SliceState>,
+		action: PayloadAction<undefined | Partial<SliceState>>,
+	) => ({
+		...action.payload,
+		...initialStateArg,
+	})

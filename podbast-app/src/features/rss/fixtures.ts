@@ -7,7 +7,7 @@ export const FEED: Feed = {
 			link: 'https://www.patreon.com/posts/equitable-lagoon-83745026',
 			pubDate: 'pubDate',
 			enclosure: {
-				url: 'https://c10.patreonusercontent.com/4/patreon-media/p/post/83745026/e5500b7b10ca4aa0b9c3209e95f5baf4/eyJhIjoxLCJpc19hdWRpbyI6MSwicCI6MX0%3D/1.wav?token-time=1704758400&token-hash=SfkNmSkJENyVwgrIJFigeFfuOb1uf-xp5npPM--IvuM%3D',
+				url: 'https://example.sangervasi.net/pod/83745026/e5500b7b10ca4aa0b9c3209e95f5baf4/eyJhIjoxLCJpc19hdWRpbyI6MSwicCI6MX0%3D/1.wav?token-time=1704758400&token-hash=SfkNmSkJENyVwgrIJFigeFfuOb1uf-xp5npPM--IvuM%3D',
 				length: '123456',
 				type: 'audio/x-wav',
 			},

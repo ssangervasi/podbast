@@ -2,17 +2,24 @@ import { Box, Text } from '@chakra-ui/react'
 
 import { useAppDispatch, useAppSelector } from '/src/store'
 
-import { selectSubscriptions } from './slice'
+import { selectRecentEpisodes, selectSubSummaries } from './slice'
 
 export const Page = () => {
-	const subscriptions = useAppSelector(selectSubscriptions)
+	const summaries = useAppSelector(selectSubSummaries)
+	const episodes = useAppSelector(selectRecentEpisodes)
 
 	return (
 		<>
-			<Text>Subs: {subscriptions.length}</Text>
+			<Text>Subs: {summaries.length}</Text>
 
-			{subscriptions.map(sub => (
-				<Box>{sub.title}</Box>
+			{summaries.map(summ => (
+				<Box key={summ.link}>{summ.title}</Box>
+			))}
+
+			<Text>Recent episodes: {episodes.length}</Text>
+
+			{episodes.map(ep => (
+				<Box key={ep.item.guid}>{ep.item.title}</Box>
 			))}
 		</>
 	)

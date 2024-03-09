@@ -7,6 +7,7 @@
 		"dev": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
+		"cypress:open": "cypress open",
 		"lint": "lint-staged",
 		"lint:branch": "lint-staged --diff origin/main"
 	},
@@ -27,6 +28,7 @@
 	},
 	"devDependencies": {
 		"@preact/preset-vite": "^2.7.0",
+		"@testing-library/cypress": "^10.0.1",
 		"@typescript-eslint/eslint-plugin": "^6.19.0",
 		"@typescript-eslint/parser": "^6.19.0",
 		"cypress": "^13.6.6",
