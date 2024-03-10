@@ -36,15 +36,15 @@ const titleToFilename = title => {
 	return `${cleaned}.json`
 }
 
-const writeStub = async content => {
+const writeStub = async json => {
 	const { STUBS_DIR } = loadEnv()
-	const feedPath = path.join(STUBS_DIR, titleToFilename(content.title))
-	await fs.promises.writeFile(feedPath, JSON.stringify(content, null, 2))
+	const feedPath = path.join(STUBS_DIR, titleToFilename(json.content.title))
+	await fs.promises.writeFile(feedPath, JSON.stringify(json, null, 2))
 }
 
 const createStub = async feedUrl => {
-	const { content } = await fetchFeedThroughServer(feedUrl)
-	await writeStub(content)
+	const json = await fetchFeedThroughServer(feedUrl)
+	await writeStub(json)
 }
 
 const loadEnv = () => {
