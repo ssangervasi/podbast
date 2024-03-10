@@ -2,21 +2,22 @@
 import path from 'node:path'
 import fs from 'node:fs'
 
-const STUB_URLS = ['https://feed.podbean.com/trashfuturepodcast/feed.xml']
+const STUB_URLS = [
+	'https://feed.podbean.com/trashfuturepodcast/feed.xml',
+	'https://feeds.simplecast.com/byb4nhvN',
+]
 
 const fetchFeedThroughServer = async feedUrl => {
-	const apiUrl = new URL('/api/rss', 'http://localhost:42993')
-	apiUrl.searchParams.set('url', url)
+	const apiUrl = new URL('/rss', 'http://localhost:42993')
+	apiUrl.searchParams.set('url', feedUrl)
 
 	try {
 		const res = await fetch(apiUrl)
 		const json = await res.json()
 
 		return json
-
-		throw new Error('Invalid feed JSON')
 	} catch (e) {
-		log.info('Feed error', e)
+		console.error('Feed error', e)
 		throw e
 	}
 }

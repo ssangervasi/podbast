@@ -7,6 +7,7 @@ module.exports = {
 		Atomics: 'readonly',
 		SharedArrayBuffer: 'readonly',
 	},
+	ignorePatterns: ['podbast-app/cypress/fixtures/feedStubs/'],
 	rules: {
 		'sort-imports': 'off',
 		'simple-import-sort/imports': [
