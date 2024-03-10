@@ -2,37 +2,43 @@ import { Guard, Payload, some } from 'narrow-minded'
 
 export const FeedResponseGuard = Guard.narrow({
 	content: {
+		// Required
+		title: 'string',
+		link: 'string',
+		description: 'string',
+		feedUrl: 'string',
+
 		items: [
 			{
+				// Required
 				title: 'string',
 				link: 'string',
-				pubDate: 'string',
+				guid: 'string',
 				enclosure: {
 					url: 'string',
 					length: 'string',
 					type: 'string',
 				},
-				content: 'string',
-				contentSnippet: 'string',
-				guid: 'string',
-				isoDate: 'string',
+				// Optional
+				pubDate: some('undefined', 'string'),
+				content: some('undefined', 'string'),
+				contentSnippet: some('undefined', 'string'),
+				isoDate: some('undefined', 'string'),
 			},
 		],
-		feedUrl: 'string',
-		image: {
+
+		// Optional
+		image: some('undefined', {
 			link: 'string',
 			url: 'string',
 			title: 'string',
-		},
+		}),
 		paginationLinks: some('undefined', {
 			self: 'string',
 		}),
-		title: 'string',
-		description: 'string',
-		pubDate: 'string',
-		link: 'string',
-		language: 'string',
-		lastBuildDate: 'string',
+		pubDate: some('undefined', 'string'),
+		language: some('undefined', 'string'),
+		lastBuildDate: some('undefined', 'string'),
 	},
 })
 

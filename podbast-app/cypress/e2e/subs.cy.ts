@@ -6,11 +6,12 @@ describe('find feed', () => {
 		cy.findByRole('textbox').type('fake-search')
 
 		cy.intercept(
-			{ pathname: 'rss' },
+			{ pathname: '/api/rss' },
 			{ fixture: 'feedStubs/trashfuture.json' },
 		).as('getRss')
 		cy.findByRole('button', { name: 'Request' }).click()
 		cy.wait('@getRss')
+		// cy.pause()
 
 		// cy.contains('Find feed').click()
 
