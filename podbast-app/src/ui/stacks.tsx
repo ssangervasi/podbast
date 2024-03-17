@@ -1,4 +1,6 @@
 import {
+	Flex,
+	FlexProps,
 	HStack as CHStack,
 	Stack as CStack,
 	StackProps,
@@ -13,3 +15,5 @@ function withDefaults<P>(Component: ComponentType<P>, defaults: Partial<P>) {
 export const Stack = withDefaults<StackProps>(CStack, { alignItems: 'start' })
 export const VStack = withDefaults<StackProps>(CVStack, { alignItems: 'start' })
 export const HStack = withDefaults<StackProps>(CHStack, { alignItems: 'start' })
+
+export const VCenter = withDefaults<FlexProps>(Flex, { alignItems: 'center' })

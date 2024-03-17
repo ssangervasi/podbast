@@ -1,23 +1,15 @@
 import {
-	Box,
 	Card,
-	CardBody,
 	CardHeader,
-	Heading,
+	Divider,
+	GridItem,
 	Image,
-	Table,
-	TableContainer,
-	Tbody,
-	Td,
+	SimpleGrid,
 	Text,
-	Th,
-	Thead,
-	Tr,
-	VisuallyHidden,
 } from '@chakra-ui/react'
 
-import { useAppDispatch, useAppSelector } from '/src/store'
-import { HStack, Stack } from '/src/ui'
+import { useAppSelector } from '/src/store'
+import { HStack, Stack, VCenter } from '/src/ui'
 
 import { selectRecentEpisodes, selectSubSummaries, SubEp } from './slice'
 
@@ -28,35 +20,27 @@ export const SummaryView = ({ summary }: { summary: { title: string } }) => (
 )
 
 export const EpisodeRow = ({ episode }: { episode: SubEp }) => (
-	<Tr>
-		<Td>
-			<HStack>
-				<Image src={episode.feed.image?.url} objectFit="cover" maxW="25px" />
+	<>
+		<VCenter>
+			<Image src={episode.feed.image?.url} objectFit="cover" maxW="30px" />
+		</VCenter>
 
-				<Text
-					w={20}
-					noOfLines={2}
-					// overflow="
-					// overflow="wrap"
-					// textOverflow="clip"
-					// overflowWrap="anywhere"
-				>
-					{episode.feed.title}
-				</Text>
-			</HStack>
-		</Td>
+		<VCenter>
+			<Text maxW="16ch" noOfLines={2} fontSize="sm">
+				{episode.feed.title}
+			</Text>
+		</VCenter>
 
-		<Td>
-			<Text
-				maxW="40ch"
-				// maxH="10px"
-				noOfLines={1}
-				background="black"
-			>
+		<VCenter>
+			<Text maxW="40ch" noOfLines={2} fontSize="sm">
 				{episode.item.title}
 			</Text>
-		</Td>
-	</Tr>
+		</VCenter>
+
+		<GridItem colSpan={3}>
+			<Divider />
+		</GridItem>
+	</>
 )
 
 export const Page = () => {
@@ -74,28 +58,11 @@ export const Page = () => {
 
 				<Text>Recent episodes: {episodes.length}</Text>
 
-				<TableContainer>
-					<Table size="sm">
-						<Thead>
-							<Tr>
-								<Th>Feed</Th>
-								<Th>Episode</Th>
-								<Th isNumeric>
-									<VisuallyHidden>Runtime</VisuallyHidden>
-								</Th>
-								<Th>
-									<VisuallyHidden>Actions</VisuallyHidden>
-								</Th>
-							</Tr>
-						</Thead>
-
-						<Tbody>
-							{episodes.map(episode => (
-								<EpisodeRow key={episode.item.link} episode={episode} />
-							))}
-						</Tbody>
-					</Table>
-				</TableContainer>
+				<SimpleGrid spacing={2}>
+					{episodes.map(episode => (
+						<EpisodeRow key={episode.item.link} episode={episode} />
+					))}
+				</SimpleGrid>
 			</Stack>
 		</>
 	)
