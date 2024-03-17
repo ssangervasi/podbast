@@ -25,10 +25,9 @@ describe('find feed', () => {
 })
 
 describe('layout', () => {
-	it('can populate store', () => {
+	it.only('can populate store', () => {
 		cy.visit('/')
-		// cy.findByRole('button', { name: 'Find feed' }).click()
-
+		// Extract loading and then-ing to
 		cy.fixture('feedStubs/comedy_bang_bang_the_podcast.json').as('feedCBB')
 		cy.fixture('feedStubs/trashfuture.json').as('feedTF')
 		cy.then(function () {
@@ -38,44 +37,14 @@ describe('layout', () => {
 				},
 				subscriptions: [
 					{
-						link: 'example.sangervasi.net/pod/1',
-						title: 'Pod 1',
-						feed: {
-							items: [],
-							feedUrl: '',
-							image: {
-								link: '',
-								url: '',
-								title: '',
-							},
-							paginationLinks: undefined,
-							title: 'Pod 1',
-							description: 'This is Pod 1',
-							pubDate: '',
-							link: '',
-							language: '',
-							lastBuildDate: '',
-						},
+						link: this.feedCBB.content.link,
+						title: this.feedCBB.content.title,
+						feed: this.feedCBB.content,
 					},
 					{
 						link: this.feedTF.content.link,
 						title: this.feedTF.content.title,
-						feed: {
-							items: [],
-							feedUrl: '',
-							image: {
-								link: '',
-								url: '',
-								title: '',
-							},
-							paginationLinks: undefined,
-							title: 'Pod 1',
-							description: 'This is Pod 1',
-							pubDate: '',
-							link: '',
-							language: '',
-							lastBuildDate: '',
-						},
+						feed: this.feedTF.content,
 					},
 				],
 			})
