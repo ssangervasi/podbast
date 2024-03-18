@@ -1,43 +1,95 @@
 import {
+	Box,
+	Button,
 	Card,
 	CardHeader,
+	Center,
 	Divider,
 	GridItem,
+	Heading,
+	IconButton,
 	Image,
 	SimpleGrid,
 	Text,
+	TextProps,
+	useDisclosure,
 } from '@chakra-ui/react'
+import { ChevronDownIcon } from '@vidstack/react/icons'
+import { useCallback, useEffect, useState } from 'preact/hooks'
 
 import { useAppSelector } from '/src/store'
-import { HStack, Stack, VCenter } from '/src/ui'
+import { HCenter, HStack, Stack } from '/src/ui'
 
 import { selectRecentEpisodes, selectSubSummaries, SubEp } from './slice'
 
-export const SummaryView = ({ summary }: { summary: { title: string } }) => (
-	<Card>
-		<CardHeader>{summary.title}</CardHeader>
+const SummaryView = ({ summary }: { summary: { title: string } }) => (
+	<Card size="sm">
+		<CardHeader>
+			<Text size="xs">{summary.title}</Text>
+		</CardHeader>
 	</Card>
 )
 
+const ExpandableLines = (props: TextProps) => {
+	const { noOfLines: noOfLinesCollapsed, children } = props
+	const { isOpen, onToggle } = useDisclosure()
+
+	return (
+		<Box>
+			<Text noOfLines={isOpen ? undefined : noOfLinesCollapsed}>
+				{children}
+			</Text>
+			<HCenter width="full" border="1px solid white">
+				<IconButton
+					aria-label="Expand text"
+					variant="unstyled"
+					icon={
+						<Box
+							transform={isOpen ? 'rotate(180deg)' : ''}
+							transitionProperty="transform"
+							transitionDuration="0.25s"
+						>
+							<ChevronDownIcon />
+						</Box>
+					}
+					onClick={onToggle}
+				/>
+			</HCenter>
+		</Box>
+	)
+}
+
 export const EpisodeRow = ({ episode }: { episode: SubEp }) => (
 	<>
-		<VCenter>
-			<Image src={episode.feed.image?.url} objectFit="cover" maxW="30px" />
-		</VCenter>
+		<GridItem colSpan={2}>
+			<HStack alignItems="center">
+				<Box>
+					<Image src={episode.feed.image?.url} objectFit="cover" maxW="30px" />
+				</Box>
 
-		<VCenter>
-			<Text maxW="16ch" noOfLines={2} fontSize="sm">
-				{episode.feed.title}
-			</Text>
-		</VCenter>
+				<Text noOfLines={3} fontSize="sm">
+					{episode.feed.title}
+				</Text>
+			</HStack>
+		</GridItem>
 
-		<VCenter>
-			<Text maxW="40ch" noOfLines={2} fontSize="sm">
+		<GridItem colSpan={2}>
+			{/* <HCenter> */}
+			<Text maxW="40ch" noOfLines={3} fontSize="sm" fontWeight="">
 				{episode.item.title}
 			</Text>
-		</VCenter>
+			{/* </HCenter> */}
+		</GridItem>
 
-		<GridItem colSpan={3}>
+		<GridItem colSpan={6}>
+			<HCenter>
+				<ExpandableLines maxW="40ch" noOfLines={4} fontSize="sm">
+					{episode.item.contentSnippet}
+				</ExpandableLines>
+			</HCenter>
+		</GridItem>
+
+		<GridItem colSpan={12}>
 			<Divider />
 		</GridItem>
 	</>
@@ -49,16 +101,10 @@ export const Page = () => {
 
 	return (
 		<>
-			<Stack>
-				<HStack>
-					{summaries.map(summary => (
-						<SummaryView key={summary.link} summary={summary} />
-					))}
-				</HStack>
+			<Stack w="full">
+				<Heading size="md">Recent episodes</Heading>
 
-				<Text>Recent episodes: {episodes.length}</Text>
-
-				<SimpleGrid spacing={2}>
+				<SimpleGrid columns={12} spacing={2} w="full">
 					{episodes.map(episode => (
 						<EpisodeRow key={episode.item.link} episode={episode} />
 					))}

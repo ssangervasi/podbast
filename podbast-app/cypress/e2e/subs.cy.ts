@@ -49,6 +49,6 @@ describe('layout', () => {
 				],
 			})
 		})
-		// cy.pause()
+		cy.findAllByLabelText('Expand text').first().click()
 	})
 })

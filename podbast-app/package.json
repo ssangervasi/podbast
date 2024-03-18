@@ -12,6 +12,7 @@
 		"lint:branch": "lint-staged --diff origin/main"
 	},
 	"dependencies": {
+		"@chakra-ui/icons": "^2.1.1",
 		"@chakra-ui/react": "^2.8.2",
 		"@emotion/react": "^11.11.3",
 		"@emotion/styled": "^11.11.0",
@@ -21,6 +22,7 @@
 		"eslint": "^8.56.0",
 		"framer-motion": "^10.18.0",
 		"immer": "^10.0.3",
+		"media-icons": "^0.10.0",
 		"narrow-minded": "^1.2.1",
 		"preact": "^10.19.3",
 		"react-redux": "^9.0.4",

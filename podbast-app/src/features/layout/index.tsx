@@ -42,7 +42,7 @@ export const SideWrapper = () => (
 )
 
 export const MainWrapper = () => (
-	<VStack padding={4}>
+	<VStack padding={2} width="full">
 		<Main />
 	</VStack>
 )

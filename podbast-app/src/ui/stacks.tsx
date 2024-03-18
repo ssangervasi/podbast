@@ -16,4 +16,13 @@ export const Stack = withDefaults<StackProps>(CStack, { alignItems: 'start' })
 export const VStack = withDefaults<StackProps>(CVStack, { alignItems: 'start' })
 export const HStack = withDefaults<StackProps>(CHStack, { alignItems: 'start' })
 
-export const VCenter = withDefaults<FlexProps>(Flex, { alignItems: 'center' })
+export const HCenter = withDefaults<FlexProps>(Flex, {
+	justifyContent: 'center',
+	width: 'full',
+})
+
+export const VCenter = withDefaults<FlexProps>(Flex, {
+	direction: 'column',
+	alignItems: 'center',
+	height: 'full',
+})
