@@ -23,6 +23,15 @@ export const theme = extendTheme({
 		initialColorMode: 'system',
 		useSystemColorMode: true,
 	},
+
+	styles: {
+		global: {
+			'html, body': {
+				fontSize: 'md',
+			},
+		},
+	},
+
 	colors: {
 		gray: {
 			'50': '#F4F1F4',
@@ -146,6 +155,15 @@ export const theme = extendTheme({
 		},
 	},
 
+	semanticTokens: {
+		// A way to give semantic names instead referencing "purple"
+		// colors: {
+		// 	snorp: 'purple.200',
+		// 	sneep: 'purple.600',
+		// 	'storf.100': 'purple.100',
+		// },
+	},
+
 	/**
 	 * So dirty
 	 * https://github.com/chakra-ui/chakra-ui/blob/main/packages/theme/src/foundations/sizes.ts
@@ -181,6 +199,16 @@ export const theme = extendTheme({
 			variants: {
 				outline: (_props: StyleFunctionProps) => ({
 					borderBottomWidth: '2px',
+				}),
+				interactOnly: (_props: StyleFunctionProps) => ({
+					borderBottomWidth: '2px',
+					borderColor: 'transparent',
+					_hover: {
+						borderColor: 'purple.200',
+					},
+					_active: {
+						borderColor: 'purple.400',
+					},
 				}),
 			},
 		},

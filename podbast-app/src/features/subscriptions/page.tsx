@@ -7,57 +7,18 @@ import {
 	Divider,
 	GridItem,
 	Heading,
-	IconButton,
 	Image,
 	SimpleGrid,
 	Text,
-	TextProps,
-	useDisclosure,
 } from '@chakra-ui/react'
-import { ChevronDownIcon } from '@vidstack/react/icons'
 import { useCallback, useEffect, useState } from 'preact/hooks'
 
 import { useAppSelector } from '/src/store'
 import { HCenter, HStack, Stack } from '/src/ui'
 
+import { EpisodeControls } from './EpisodeControls'
+import { ExpandableLines } from './ExpandableLines'
 import { selectRecentEpisodes, selectSubSummaries, SubEp } from './slice'
-
-const SummaryView = ({ summary }: { summary: { title: string } }) => (
-	<Card size="sm">
-		<CardHeader>
-			<Text size="xs">{summary.title}</Text>
-		</CardHeader>
-	</Card>
-)
-
-const ExpandableLines = (props: TextProps) => {
-	const { noOfLines: noOfLinesCollapsed, children } = props
-	const { isOpen, onToggle } = useDisclosure()
-
-	return (
-		<Box>
-			<Text noOfLines={isOpen ? undefined : noOfLinesCollapsed}>
-				{children}
-			</Text>
-			<HCenter width="full" border="1px solid white">
-				<IconButton
-					aria-label="Expand text"
-					variant="unstyled"
-					icon={
-						<Box
-							transform={isOpen ? 'rotate(180deg)' : ''}
-							transitionProperty="transform"
-							transitionDuration="0.25s"
-						>
-							<ChevronDownIcon />
-						</Box>
-					}
-					onClick={onToggle}
-				/>
-			</HCenter>
-		</Box>
-	)
-}
 
 export const EpisodeRow = ({ episode }: { episode: SubEp }) => (
 	<>
@@ -67,26 +28,28 @@ export const EpisodeRow = ({ episode }: { episode: SubEp }) => (
 					<Image src={episode.feed.image?.url} objectFit="cover" maxW="30px" />
 				</Box>
 
-				<Text noOfLines={3} fontSize="sm">
+				<Text noOfLines={3} fontSize="sm" fontWeight="bold">
 					{episode.feed.title}
 				</Text>
 			</HStack>
 		</GridItem>
 
 		<GridItem colSpan={2}>
-			{/* <HCenter> */}
-			<Text maxW="40ch" noOfLines={3} fontSize="sm" fontWeight="">
+			<Text maxW="40ch" noOfLines={3} fontStyle="italic">
 				{episode.item.title}
 			</Text>
-			{/* </HCenter> */}
 		</GridItem>
 
 		<GridItem colSpan={6}>
 			<HCenter>
-				<ExpandableLines maxW="40ch" noOfLines={4} fontSize="sm">
+				<ExpandableLines maxW="40ch" noOfLines={2}>
 					{episode.item.contentSnippet}
 				</ExpandableLines>
 			</HCenter>
+		</GridItem>
+
+		<GridItem colSpan={2}>
+			<EpisodeControls episode={episode} />
 		</GridItem>
 
 		<GridItem colSpan={12}>

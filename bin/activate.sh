@@ -17,6 +17,10 @@ server() {
   cd "$PB_ROOT"/podbast-server
 }
 
+dev() {
+  npm run dev
+}
+
 cy() {
   app
   npm run cypress:open
