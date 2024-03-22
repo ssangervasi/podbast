@@ -4,8 +4,8 @@ import { getFeed } from './rssClient'
 
 export const fetchFeed = createAsyncThunk(
 	'rss/fetchFeed',
-	async (url: string, _thunkAPI) => {
-		const response = await getFeed(url)
+	async ({ feedUrl }: { feedUrl: string }, _thunkAPI) => {
+		const response = await getFeed(feedUrl)
 		return response
 	},
 )

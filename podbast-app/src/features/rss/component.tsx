@@ -18,12 +18,7 @@ import { VStack } from '/src/ui'
 import { log } from '/src/utils'
 
 import { LOCAL_URLS } from './rssClient'
-import {
-	clearPending,
-	makeReady,
-	requestPull,
-	selectPullsByStatus,
-} from './slice'
+import { clearPending, makeReady, selectPullsByStatus } from './slice'
 
 export const Rss = () => {
 	const dispatch = useAppDispatch()
@@ -81,8 +76,7 @@ export const Rss = () => {
 							evt.preventDefault()
 							const urlEl = evt.currentTarget.elements.namedItem('url')
 							const url = (urlEl as HTMLInputElement).value
-							dispatch(requestPull(url))
-							dispatch(fetchFeed(url))
+							dispatch(fetchFeed({ feedUrl: url }))
 						}}
 					>
 						<VStack align="start">

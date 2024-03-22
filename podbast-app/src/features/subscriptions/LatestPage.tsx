@@ -1,9 +1,6 @@
 import {
 	Box,
 	Button,
-	Card,
-	CardHeader,
-	Center,
 	Divider,
 	GridItem,
 	Heading,
@@ -11,14 +8,14 @@ import {
 	SimpleGrid,
 	Text,
 } from '@chakra-ui/react'
-import { useCallback, useEffect, useState } from 'preact/hooks'
 
+import { useSubscriptionManager } from '/src/features/subscriptions/manager'
 import { useAppSelector } from '/src/store'
 import { HCenter, HStack, Stack } from '/src/ui'
 
 import { EpisodeControls } from './EpisodeControls'
 import { ExpandableLines } from './ExpandableLines'
-import { selectRecentEpisodes, selectSubSummaries, SubEp } from './slice'
+import { selectRecentEpisodes, SubEp } from './slice'
 
 export const EpisodeRow = ({ episode }: { episode: SubEp }) => (
 	<>
@@ -58,14 +55,17 @@ export const EpisodeRow = ({ episode }: { episode: SubEp }) => (
 	</>
 )
 
-export const Page = () => {
-	const summaries = useAppSelector(selectSubSummaries)
+export const LatestPage = () => {
+	const { refresh } = useSubscriptionManager()
 	const episodes = useAppSelector(selectRecentEpisodes)
 
 	return (
 		<>
 			<Stack w="full">
 				<Heading size="md">Recent episodes</Heading>
+				<HStack>
+					<Button onClick={refresh}>Refresh</Button>
+				</HStack>
 
 				<SimpleGrid columns={12} spacing={2} w="full">
 					{episodes.map(episode => (

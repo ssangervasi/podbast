@@ -52,11 +52,39 @@ Cypress.Commands.add('appStateSnapshot', () => {
 	})
 })
 
+Cypress.Commands.add('aliases', function (...aliasNames) {
+	const m: any = {}
+	for (const an of aliasNames) {
+		// Initial attempt that doesn't refresh aliases.
+		m[an] = this[an]
+	}
+	return m
+})
+
+Cypress.Commands.add('fixtures', aliasToPath => {
+	Object.entries(aliasToPath).forEach(([a, p]) => {
+		cy.fixture(p).as(a)
+	})
+	return cy.aliases(...Object.keys(aliasToPath))
+})
+
 declare global {
 	namespace Cypress {
 		interface Chainable {
 			appStateReset(appState: Partial<RootState>): Chainable<void>
 			appStateSnapshot(): Chainable<void>
+
+			//
+			aliases<AN extends string[]>(
+				...aliasNames: AN
+			): Chainable<{
+				[alias in AN[number]]: any
+			}>
+			fixtures<ATP extends Record<string, string>>(
+				aliasToPath: ATP,
+			): Chainable<{
+				[alias in keyof ATP]: any
+			}>
 		}
 	}
 }

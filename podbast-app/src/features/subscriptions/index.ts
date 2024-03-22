@@ -1,2 +1,3 @@
-export * from './page'
+export * from './LatestPage'
 export * from './slice'
+export * from './SubscriptionsPage'

@@ -33,20 +33,20 @@ export const slice = createSlice({
 	name: 'rss',
 	initialState,
 	reducers: {
-		requestPull: (state, action: PayloadAction<string>) => {
-			const url = action.payload
+		// requestPull: (state, action: PayloadAction<string>) => {
+		// 	const url = action.payload
 
-			const existing = state.pulls.find(ru => ru.url === url)
-			if (existing) {
-				existing.status = 'requested'
-				return
-			}
+		// 	const existing = state.pulls.find(ru => ru.url === url)
+		// 	if (existing) {
+		// 		existing.status = 'requested'
+		// 		return
+		// 	}
 
-			state.pulls.push({
-				url,
-				status: 'requested',
-			})
-		},
+		// 	state.pulls.push({
+		// 		url,
+		// 		status: 'requested',
+		// 	})
+		// },
 		makeReady: (state, action: PayloadAction<string>) => {
 			const url = action.payload
 			const pull = state.pulls.find(p => p.url === url)
@@ -69,13 +69,26 @@ export const slice = createSlice({
 	},
 	extraReducers: builder => {
 		builder
-			.addCase(fetchFeed.pending, (_, action) => {
-				log.info('fetchFeed.pending', { action })
+			.addCase(fetchFeed.pending, (state, action) => {
+				const { feedUrl } = action.meta.arg
+				log.info('fetchFeed.pending', { feedUrl })
+
+				const existing = state.pulls.find(ru => ru.url === feedUrl)
+				if (existing) {
+					existing.status = 'requested'
+					return
+				}
+
+				state.pulls.push({
+					url: feedUrl,
+					status: 'requested',
+				})
 			})
 			.addCase(fetchFeed.fulfilled, (state, action) => {
-				log.info('fetchFeed.fulfilled', { action })
+				const { feedUrl } = action.meta.arg
+				log.info('fetchFeed.fulfilled', { feedUrl })
 
-				const rsub = state.pulls.find(ruc => ruc.url === action.meta.arg)
+				const rsub = state.pulls.find(ruc => ruc.url === feedUrl)
 
 				const attrs = {
 					status: 'ready',
@@ -89,7 +102,8 @@ export const slice = createSlice({
 				}
 			})
 			.addCase(fetchFeed.rejected, (_, action) => {
-				log.info('fetchFeed.v', { action })
+				const { feedUrl } = action.meta.arg
+				log.info('fetchFeed.v', { feedUrl })
 			})
 	},
 	selectors: {
@@ -108,4 +122,4 @@ export const selectPullsByStatus = createSelector(
 )
 
 export const { actions, reducer } = slice
-export const { makeReady, requestPull, clearPending } = actions
+export const { makeReady, clearPending } = actions

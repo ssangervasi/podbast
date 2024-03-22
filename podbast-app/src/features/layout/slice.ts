@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 
-export type LayoutName = 'rss' | 'subscriptions'
+import { LayoutName } from './layouts'
 
 export interface LayoutState {
 	layout: LayoutName

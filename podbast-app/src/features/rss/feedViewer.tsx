@@ -1,4 +1,4 @@
-import { Button, chakra, HStack, List, ListItem, Text } from '@chakra-ui/react'
+import { Button, chakra, HStack, List, ListItem } from '@chakra-ui/react'
 import { Suspense } from 'preact/compat'
 import { useCallback } from 'preact/hooks'
 
@@ -25,7 +25,7 @@ export const FeedViewer = ({ feed }: { feed: Feed }) => {
 
 	return (
 		<VStack maxWidth={['full', 'container.lg']}>
-			<chakra.b fontSize="large">{feed.title}</chakra.b>
+			<chakra.b fontSize="lg">{feed.title}</chakra.b>
 
 			<HStack>
 				<Button size="sm" onClick={handleSubscribe} isDisabled={isSubscribed}>
