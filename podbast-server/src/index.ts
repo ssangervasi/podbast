@@ -3,12 +3,14 @@ import { App } from '@tinyhttp/app'
 import { narrow } from 'narrow-minded'
 
 import { app as rssApp } from './rss.js'
+import { app as opmlApp } from './opmls.js'
 
 export const PORT = Number(process.env.PORT) || 42993
 
 const app = new App()
 
 app.use(rssApp)
+app.use(opmlApp)
 
 app.get('/debug', async (req, res) => {
 	console.log('/debug requested ')

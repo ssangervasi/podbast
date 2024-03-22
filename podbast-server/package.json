@@ -1,27 +1,30 @@
 {
-  "name": "podbast-server",
-  "version": "0.0.0",
-  "description": "PB API",
-  "module": "dist/index.js",
-  "type": "module",
-  "scripts": {
-    "test": "jest",
-    "rollup": "npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
-    "dev": "npm run rollup -- -w"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "rss-parser": "^3.13.0",
-    "xml2js": "^0.6.2",
-    "@tinyhttp/app": "^2.2.1",
-    "narrow-minded": "^1.2.1"
-  },
-  "devDependencies": {
-    "@rollup/plugin-typescript": "^11.1.5",
-    "@types/node": "^20.10.5",
-    "rollup": "^4.9.1",
-    "tslib": "^2.6.2",
-    "typescript": "^5.3.3"
-  }
+	"name": "podbast-server",
+	"version": "0.0.0",
+	"description": "PB API",
+	"module": "dist/index.js",
+	"type": "module",
+	"scripts": {
+		"test": "jest",
+		"rollup": "npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+		"dev": "npm run rollup -- -w"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@tinyhttp/app": "^2.2.1",
+		"multer": "^1.4.5-lts.1",
+		"narrow-minded": "^1.2.1",
+		"rss-parser": "^3.13.0",
+		"xml2js": "^0.6.2"
+	},
+	"devDependencies": {
+		"@rollup/plugin-typescript": "^11.1.5",
+		"@types/multer": "^1.4.11",
+		"@types/node": "^20.10.5",
+		"@types/xml2js": "^0.4.14",
+		"rollup": "^4.9.1",
+		"tslib": "^2.6.2",
+		"typescript": "^5.3.3"
+	}
 }
