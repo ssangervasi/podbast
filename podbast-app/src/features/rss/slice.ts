@@ -3,7 +3,7 @@ import { createSelector, createSlice } from '@reduxjs/toolkit'
 
 import { FEED } from '/src/features/rss/fixtures'
 import { Feed } from '/src/features/rss/guards'
-import { EMPTY_ARRAY, wrapEmpty } from '/src/store/utils'
+import { EMPTY_ARRAY, mapToMap, wrapEmpty } from '/src/store/utils'
 import { log } from '/src/utils'
 
 import { fetchFeed } from './thunks'
@@ -33,20 +33,6 @@ export const slice = createSlice({
 	name: 'rss',
 	initialState,
 	reducers: {
-		// requestPull: (state, action: PayloadAction<string>) => {
-		// 	const url = action.payload
-
-		// 	const existing = state.pulls.find(ru => ru.url === url)
-		// 	if (existing) {
-		// 		existing.status = 'requested'
-		// 		return
-		// 	}
-
-		// 	state.pulls.push({
-		// 		url,
-		// 		status: 'requested',
-		// 	})
-		// },
 		makeReady: (state, action: PayloadAction<string>) => {
 			const url = action.payload
 			const pull = state.pulls.find(p => p.url === url)
@@ -108,10 +94,12 @@ export const slice = createSlice({
 	},
 	selectors: {
 		selectPulls: (state): RssPull[] => state.pulls,
+		selectFeedUrlToPull: state =>
+			mapToMap(state.pulls, pull => [pull.url, pull]),
 	},
 })
 
-export const { selectPulls } = slice.selectors
+export const { selectPulls, selectFeedUrlToPull } = slice.selectors
 
 export const selectPullsByStatus = createSelector(
 	[selectPulls, (_, status: RssPull['status']) => status],

@@ -18,3 +18,8 @@ export const wrapEmpty = Object.assign(_wrapEmpty, {
 
 export const compact = <I>(a: Emptyish<Nullish<I>>): I[] =>
 	wrapEmpty(wrapEmpty(a).filter((i): i is I => i !== null && i !== undefined))
+
+export const mapToMap = <IIn, KOut, IOut>(
+	items: IIn[],
+	mapper: (i: IIn) => Nullish<[KOut, IOut]>,
+) => new Map(compact(items.map(mapper)))

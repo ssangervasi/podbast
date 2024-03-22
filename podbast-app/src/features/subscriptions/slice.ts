@@ -29,7 +29,8 @@ export const slice = createSlice({
 	reducers: create => ({
 		subscribe: create.reducer<Feed>((state, action) => {
 			const feed = action.payload
-			const existing = state.find(sub => sub.link === sub.feed.link)
+			// Doing this by `link` instead of `feedUrl` might not work out
+			const existing = state.find(sub => sub.link === feed.link)
 			if (existing) {
 				log.error('Repeat feed', feed.link)
 				return
@@ -40,6 +41,17 @@ export const slice = createSlice({
 				feed,
 			})
 		}),
+		updateSubscriptionFeed: create.reducer<Feed>((state, action) => {
+			const feed = action.payload
+			const existing = state.find(sub => sub.link === feed.link)
+			if (!existing) {
+				log.error('Updating feed that is not subscribed', feed.link)
+				return
+			}
+
+			// Replace whole thing?
+			existing.feed = feed
+		}),
 	}),
 	selectors: {
 		selectSubscriptions: state => state,
@@ -49,7 +61,7 @@ export const slice = createSlice({
 })
 
 export const { actions, reducer, selectors } = slice
-export const { subscribe } = actions
+export const { subscribe, updateSubscriptionFeed } = actions
 export const { selectSubscriptions, selectFeedSubscription } = selectors
 
 export type SubEp = {

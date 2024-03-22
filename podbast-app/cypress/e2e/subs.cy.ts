@@ -1,3 +1,5 @@
+import { FeedResponse } from '/src/features/rss'
+
 describe('find feed', () => {
 	it('passes', () => {
 		cy.visit('/')
@@ -53,38 +55,69 @@ describe('latest episodes', () => {
 		cy.fixtures({
 			feedCBB: 'feedStubs/comedy_bang_bang_the_podcast.json',
 			feedTF: 'feedStubs/trashfuture.json',
-		}).then(({ feedCBB, feedTF }) => {
-			cy.appStateReset({
-				layout: {
-					layout: 'latest',
-				},
-				subscriptions: [
-					{
-						link: feedCBB.content.link,
-						title: feedCBB.content.title,
-						feed: feedCBB.content,
+		}).then(
+			({
+				feedCBB,
+				feedTF,
+			}: {
+				feedTF: FeedResponse
+				feedCBB: FeedResponse
+			}) => {
+				cy.appStateReset({
+					layout: {
+						layout: 'latest',
 					},
-					{
-						link: feedTF.content.link,
-						title: feedTF.content.title,
-						feed: feedTF.content,
-					},
-				],
-			})
-		})
-
-		cy.intercept(
-			{
-				pathname: '/api/rss',
-				query: {
-					url: /trashfuture/,
-				},
+					subscriptions: [
+						{
+							link: feedCBB.content.link,
+							title: feedCBB.content.title,
+							feed: feedCBB.content,
+						},
+						{
+							link: feedTF.content.link,
+							title: feedTF.content.title,
+							feed: feedTF.content,
+						},
+					],
+				})
 			},
-			{ fixture: 'feedStubs/trashfuture.json' },
-		).as('getTF')
+		)
+
+		cy.produce<FeedResponse>('@feedTF', draft => {
+			draft.content.items.unshift({
+				title: 'Big snorbins',
+				link: '',
+				guid: '',
+				enclosure: {
+					url: '',
+					length: '',
+					type: '',
+				},
+				pubDate: undefined,
+				content: undefined,
+				contentSnippet: undefined,
+				isoDate: undefined,
+			})
+		}).then(updatedBody => {
+			cy.intercept(
+				{
+					pathname: '/api/rss',
+					query: {
+						url: /trashfuture/,
+					},
+				},
+				{
+					statusCode: 200,
+					body: updatedBody,
+				},
+			).as('getTF')
+		})
 
 		cy.findByText('Refresh').click()
 
 		cy.wait('@getTF')
+
+		// cy.appStateSnapshot()
+		cy.findByText('Big snorbins')
 	})
 })

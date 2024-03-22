@@ -1,7 +1,4 @@
 /// <reference types="cypress" />
-
-import '@testing-library/cypress/add-commands'
-
 // ***********************************************
 // This example commands.ts shows you how to
 // create various custom commands and overwrite
@@ -11,32 +8,11 @@ import '@testing-library/cypress/add-commands'
 // commands please read more here:
 // https://on.cypress.io/custom-commands
 // ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-//
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//     }
-//   }
-// }
+
+import '@testing-library/cypress/add-commands'
+
+import { Draft, produce } from 'immer'
+
 import { type RootState, TEST_reset } from '/src/devtools/cypressImportable'
 
 Cypress.Commands.add('appStateReset', appState => {
@@ -68,6 +44,18 @@ Cypress.Commands.add('fixtures', aliasToPath => {
 	return cy.aliases(...Object.keys(aliasToPath))
 })
 
+Cypress.Commands.add(
+	'produce',
+	<R>(
+		selector: string,
+		producer: (draft: Draft<R>) => Draft<R> | void,
+	): Cypress.Chainable<R> => {
+		return cy.get<R>(selector).then(content => {
+			return produce(content, producer)
+		})
+	},
+)
+
 declare global {
 	namespace Cypress {
 		interface Chainable {
@@ -80,11 +68,17 @@ declare global {
 			): Chainable<{
 				[alias in AN[number]]: any
 			}>
+
 			fixtures<ATP extends Record<string, string>>(
 				aliasToPath: ATP,
 			): Chainable<{
 				[alias in keyof ATP]: any
 			}>
+
+			produce<R>(
+				selector: string,
+				producer: (draft: Draft<R>) => Draft<R> | void,
+			): Chainable<R>
 		}
 	}
 }
