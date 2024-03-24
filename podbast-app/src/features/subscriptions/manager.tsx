@@ -13,7 +13,7 @@ export const useSubscriptionManager = () => {
 
 	const refresh = useCallback(() => {
 		subscriptions.forEach(sub => {
-			dispatch(fetchFeed({ feedUrl: sub.feed.feedUrl }))
+			dispatch(fetchFeed({ feedUrl: sub.feedUrl }))
 		})
 	}, [dispatch, subscriptions])
 
@@ -29,7 +29,7 @@ export const Manager = () => {
 	useEffect(() => {
 		log.info('pulls changed')
 		subscriptions.forEach(sub => {
-			const pull = feedUrlToPull.get(sub.feed.feedUrl)
+			const pull = feedUrlToPull.get(sub.feedUrl)
 			if (!(pull && pull.status === 'ready')) {
 				return
 			}

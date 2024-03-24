@@ -42,9 +42,25 @@ const writeStub = async json => {
 	await fs.promises.writeFile(feedPath, JSON.stringify(json, null, 2))
 }
 
+const normalize = json => {
+	const {
+		content: { items, ...content },
+	} = json
+	const truncatedItems = items.slice(0, 10)
+	// console.log(content)
+	return {
+		content: {
+			...content,
+			items: truncatedItems,
+		},
+	}
+}
+
 const createStub = async feedUrl => {
 	const json = await fetchFeedThroughServer(feedUrl)
-	await writeStub(json)
+	const normalized = normalize(json)
+	// console.log('>>>', normalized)
+	await writeStub(normalized)
 }
 
 const loadEnv = () => {

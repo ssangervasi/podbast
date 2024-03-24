@@ -19,8 +19,7 @@ export const FeedResponseGuard = Guard.narrow({
 					length: 'string',
 					type: 'string',
 				},
-				// Optional
-				pubDate: some('undefined', 'string'),
+				pubDate: 'string',
 				content: some('undefined', 'string'),
 				contentSnippet: some('undefined', 'string'),
 				isoDate: some('undefined', 'string'),
@@ -33,12 +32,16 @@ export const FeedResponseGuard = Guard.narrow({
 			url: 'string',
 			title: 'string',
 		}),
+		pubDate: some('undefined', 'string'),
+		language: some('undefined', 'string'),
+
+		// Detecting feed changes
+		lastBuildDate: some('undefined', 'string'),
+
+		// Atom stuff?
 		paginationLinks: some('undefined', {
 			self: 'string',
 		}),
-		pubDate: some('undefined', 'string'),
-		language: some('undefined', 'string'),
-		lastBuildDate: some('undefined', 'string'),
 	},
 })
 

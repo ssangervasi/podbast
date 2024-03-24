@@ -1,62 +1,73 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
+import { type Draft } from 'immer'
 
-import { Feed, FeedImage, FeedItem } from '/src/features/rss/guards'
-import { compact, wrapEmpty } from '/src/store'
-import { log } from '/src/utils'
+import { Feed } from '/src/features/rss/guards'
+import {
+	cmpDate,
+	Episode,
+	Subscription,
+	SubscriptionsState,
+	transformFeedToSubscription,
+	transformFeedToSubscriptionItems,
+} from '/src/features/subscriptions/models'
+import { compact, entries, log, values } from '/src/utils'
 
-export type Subscription = {
-	// Replicating the feed link to get a canonical website for the podcast
-	link: string
-	title: string
-	// Do I want to replicate the whole thing?
-	feed: Feed
+export const initialState: SubscriptionsState = {
+	feedUrlToSubscription: {},
+	feedUrlToItemIdToItem: {},
 }
 
-export type FeedInfo = {
-	feedUrl: string
-	title: string
-	link: string
-	image: FeedImage
+export const updateStateFromFeed = (
+	draft: Draft<SubscriptionsState>,
+	feed: Feed,
+): void => {
+	const { feedUrl } = feed
+	const existing = draft.feedUrlToSubscription[feedUrl]
+
+	if (!existing) {
+		log.error('Updating feed that is not subscribed', feed.link)
+		return
+	}
+
+	const existingItems = draft.feedUrlToItemIdToItem[feedUrl] ?? {}
+	draft.feedUrlToItemIdToItem[feedUrl] = existingItems
+
+	const items = transformFeedToSubscriptionItems(feed)
+	entries(items).forEach(([id, item]) => {
+		existingItems[id] = item
+	})
 }
-
-export type SubscriptionsState = Subscription[]
-
-export const initialState: SubscriptionsState = []
 
 export const slice = createSlice({
 	name: 'subscriptions',
 	initialState,
 	reducers: create => ({
-		subscribe: create.reducer<Feed>((state, action) => {
+		subscribe: create.reducer<Feed>((draft, action) => {
 			const feed = action.payload
-			// Doing this by `link` instead of `feedUrl` might not work out
-			const existing = state.find(sub => sub.link === feed.link)
+			const { feedUrl } = feed
+			const existing = draft.feedUrlToSubscription[feedUrl]
+
 			if (existing) {
-				log.error('Repeat feed', feed.link)
-				return
-			}
-			state.push({
-				link: feed.link,
-				title: feed.title,
-				feed,
-			})
-		}),
-		updateSubscriptionFeed: create.reducer<Feed>((state, action) => {
-			const feed = action.payload
-			const existing = state.find(sub => sub.link === feed.link)
-			if (!existing) {
-				log.error('Updating feed that is not subscribed', feed.link)
+				log.info('Subscribe to existing feed', feed.feedUrl)
+				updateStateFromFeed(draft, feed)
 				return
 			}
 
-			// Replace whole thing?
-			existing.feed = feed
+			const subscription = transformFeedToSubscription(feed)
+			const items = transformFeedToSubscriptionItems(feed)
+			draft.feedUrlToSubscription[feedUrl] = subscription
+			draft.feedUrlToItemIdToItem[feedUrl] = items
+		}),
+		updateSubscriptionFeed: create.reducer<Feed>((state, action) => {
+			const feed = action.payload
+			updateStateFromFeed(state, feed)
 		}),
 	}),
 	selectors: {
-		selectSubscriptions: state => state,
-		selectFeedSubscription: (state, link: string) =>
-			state.find(sub => sub.link === link),
+		selectSubscriptions: (state): Subscription[] =>
+			values(state.feedUrlToSubscription),
+		selectFeedSubscription: (state, feedUrl: string) =>
+			state.feedUrlToSubscription[feedUrl],
 	},
 })
 
@@ -64,32 +75,23 @@ export const { actions, reducer, selectors } = slice
 export const { subscribe, updateSubscriptionFeed } = actions
 export const { selectSubscriptions, selectFeedSubscription } = selectors
 
-export type SubEp = {
-	item: FeedItem
-	feed: FeedInfo
-}
-
 export const selectRecentEpisodes = createSelector(
-	[selectSubscriptions],
-	(subs): SubEp[] =>
-		compact(
-			subs.map(sub => {
-				const { feed } = sub
-				const item = feed.items[0]
-				if (!item) {
-					return undefined
-				}
+	[slice.selectSlice],
+	(state): Episode[] => {
+		const items = values(state.feedUrlToItemIdToItem).flatMap(items =>
+			values(items).flatMap(item => {
+				const { feedUrl } = item
+				const subscription = state.feedUrlToSubscription[feedUrl]!
 				return {
+					subscription,
 					item,
-					feed: {
-						title: feed.title,
-						image: feed.image,
-						link: feed.link,
-						feedUrl: feed.feedUrl,
-					},
 				}
 			}),
-		),
+		)
+		// Date late to early
+		items.sort((a, b) => -cmpDate(a.item.isoDate, b.item.isoDate))
+		return items
+	},
 )
 
 export const selectSubSummaries = createSelector([selectSubscriptions], subs =>

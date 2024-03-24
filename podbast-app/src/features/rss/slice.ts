@@ -3,9 +3,9 @@ import { createSelector, createSlice } from '@reduxjs/toolkit'
 
 import { FEED } from '/src/features/rss/fixtures'
 import { Feed } from '/src/features/rss/guards'
-import { EMPTY_ARRAY, mapToMap, wrapEmpty } from '/src/store/utils'
 import { log } from '/src/utils'
 
+import { EMPTY_ARRAY, mapToMap, wrapEmpty } from '../../utils/collections'
 import { fetchFeed } from './thunks'
 
 export type RssPull = {
