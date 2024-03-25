@@ -94,12 +94,14 @@ export const slice = createSlice({
 	},
 	selectors: {
 		selectPulls: (state): RssPull[] => state.pulls,
-		selectFeedUrlToPull: state =>
-			mapToMap(state.pulls, pull => [pull.url, pull]),
 	},
 })
 
-export const { selectPulls, selectFeedUrlToPull } = slice.selectors
+export const { selectPulls } = slice.selectors
+
+export const selectFeedUrlToPull = createSelector([selectPulls], pulls =>
+	mapToMap(pulls, pull => [pull.url, pull]),
+)
 
 export const selectPullsByStatus = createSelector(
 	[selectPulls, (_, status: RssPull['status']) => status],

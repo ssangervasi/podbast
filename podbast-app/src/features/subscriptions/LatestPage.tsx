@@ -10,23 +10,28 @@ import {
 } from '@chakra-ui/react'
 
 import { useSubscriptionManager } from '/src/features/subscriptions/manager'
+import { Episode } from '/src/features/subscriptions/models'
 import { useAppSelector } from '/src/store'
 import { HCenter, HStack, Stack } from '/src/ui'
 
 import { EpisodeControls } from './EpisodeControls'
 import { ExpandableLines } from './ExpandableLines'
-import { selectRecentEpisodes, SubEp } from './slice'
+import { selectRecentEpisodes } from './slice'
 
-export const EpisodeRow = ({ episode }: { episode: SubEp }) => (
+export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 	<>
 		<GridItem colSpan={2}>
 			<HStack alignItems="center">
 				<Box>
-					<Image src={episode.feed.image?.url} objectFit="cover" maxW="30px" />
+					<Image
+						src={episode.subscription.image?.url}
+						objectFit="cover"
+						maxW="30px"
+					/>
 				</Box>
 
 				<Text noOfLines={3} fontSize="sm" fontWeight="bold">
-					{episode.feed.title}
+					{episode.subscription.title}
 				</Text>
 			</HStack>
 		</GridItem>
@@ -69,7 +74,7 @@ export const LatestPage = () => {
 
 				<SimpleGrid columns={12} spacing={2} w="full">
 					{episodes.map(episode => (
-						<EpisodeRow key={episode.item.link} episode={episode} />
+						<EpisodeRow key={episode.item.id} episode={episode} />
 					))}
 				</SimpleGrid>
 			</Stack>

@@ -64,19 +64,24 @@ export const slice = createSlice({
 		}),
 	}),
 	selectors: {
-		selectSubscriptions: (state): Subscription[] =>
-			values(state.feedUrlToSubscription),
+		selectState: state => state,
 		selectFeedSubscription: (state, feedUrl: string) =>
 			state.feedUrlToSubscription[feedUrl],
+		selectFeedUrlToSubscription: state => state.feedUrlToSubscription,
 	},
 })
 
 export const { actions, reducer, selectors } = slice
 export const { subscribe, updateSubscriptionFeed } = actions
-export const { selectSubscriptions, selectFeedSubscription } = selectors
+export const { selectState, selectFeedSubscription } = selectors
+
+export const selectSubscriptions = createSelector(
+	[selectState],
+	(state): Subscription[] => values(state.feedUrlToSubscription),
+)
 
 export const selectRecentEpisodes = createSelector(
-	[slice.selectSlice],
+	[selectState],
 	(state): Episode[] => {
 		const items = values(state.feedUrlToItemIdToItem).flatMap(items =>
 			values(items).flatMap(item => {

@@ -18,12 +18,16 @@ import { type RootState, TEST_reset } from '/src/devtools/cypressImportable'
 Cypress.Commands.add('appStateReset', appState => {
 	cy.window().then(win => {
 		win.TEST.store.dispatch(TEST_reset(appState))
+		return win.TEST.store.getState()
 	})
 })
 
+Cypress.Commands.add('appStateGet', () =>
+	cy.window().then(win => win.TEST.store.getState()),
+)
+
 Cypress.Commands.add('appStateSnapshot', () => {
-	cy.window().then(win => {
-		const appState = win.TEST.store.getState()
+	cy.appStateGet().then(appState => {
 		cy.log('appStateSnapshot', JSON.stringify(appState, null, 2))
 	})
 })
@@ -59,7 +63,8 @@ Cypress.Commands.add(
 declare global {
 	namespace Cypress {
 		interface Chainable {
-			appStateReset(appState: Partial<RootState>): Chainable<void>
+			appStateReset(appState: Partial<RootState>): Chainable<RootState>
+			appStateGet(): Chainable<RootState>
 			appStateSnapshot(): Chainable<void>
 
 			//

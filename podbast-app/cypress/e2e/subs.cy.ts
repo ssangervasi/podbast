@@ -17,101 +17,73 @@ describe('find feed', () => {
 		cy.findByRole('button', { name: 'Subscribe' }).click()
 
 		cy.findByRole('button', { name: 'Subscriptions' }).click()
+
+		cy.appStateSnapshot()
 	})
 })
 
 describe('latest episodes', () => {
-	it('loads from existing store', () => {
+	const preloadState = () => {
 		cy.visit('/')
 
-		cy.fixtures({
-			feedCBB: 'feedStubs/comedy_bang_bang_the_podcast.json',
-			feedTF: 'feedStubs/trashfuture.json',
-		}).then(({ feedCBB, feedTF }) => {
-			cy.appStateReset({
-				layout: {
-					layout: 'latest',
-				},
-				subscriptions: [
-					{
-						link: feedCBB.content.link,
-						title: feedCBB.content.title,
-						feed: feedCBB.content,
-					},
-					{
-						link: feedTF.content.link,
-						title: feedTF.content.title,
-						feed: feedTF.content,
-					},
-				],
-			})
-		})
+		cy.findByRole('button', { name: 'Add feed' }).click()
+		cy.findByRole('textbox').type('fake-search')
+
+		cy.intercept(
+			{
+				pathname: '/api/rss',
+			},
+			{ fixture: 'feedStubs/trashfuture.json' },
+		).as('getTF')
+		cy.findByRole('button', { name: 'Request' }).click()
+		cy.wait('@getTF')
+		cy.findByRole('button', { name: 'Subscribe' }).click()
+
+		cy.intercept(
+			{
+				pathname: '/api/rss',
+			},
+			{ fixture: 'feedStubs/comedy_bang_bang_the_podcast.json' },
+		).as('getCBB')
+		cy.findByRole('button', { name: 'Request' }).click()
+		cy.wait('@getCBB')
+		cy.findByRole('button', { name: 'Subscribe' }).click()
+
+		// cy.appStateSnapshot()
+		cy.findByRole('button', { name: 'Latest episodes' }).click()
+	}
+
+	it('loads from existing store', () => {
+		preloadState()
 		cy.findAllByLabelText('Expand text').first().click()
 	})
 
-	it.only('refreshes when the feed has new items', () => {
-		cy.visit('/')
+	it('refreshes when the feed has new items', () => {
+		preloadState()
 
-		cy.fixtures({
-			feedCBB: 'feedStubs/comedy_bang_bang_the_podcast.json',
-			feedTF: 'feedStubs/trashfuture.json',
-		}).then(
-			({
-				feedCBB,
-				feedTF,
-			}: {
-				feedTF: FeedResponse
-				feedCBB: FeedResponse
-			}) => {
-				cy.appStateReset({
-					layout: {
-						layout: 'latest',
-					},
-					subscriptions: [
-						{
-							link: feedCBB.content.link,
-							title: feedCBB.content.title,
-							feed: feedCBB.content,
-						},
-						{
-							link: feedTF.content.link,
-							title: feedTF.content.title,
-							feed: feedTF.content,
-						},
-					],
+		cy.fixture('feedStubs/trashfuture.json')
+			.as('feedTF')
+			.produce<FeedResponse>('@feedTF', draft => {
+				draft.content.items.unshift({
+					...draft.content.items[0]!,
+					title: 'Big snorbins',
+					guid: 'big-snorbins',
 				})
-			},
-		)
-
-		cy.produce<FeedResponse>('@feedTF', draft => {
-			draft.content.items.unshift({
-				title: 'Big snorbins',
-				link: '',
-				guid: '',
-				enclosure: {
-					url: '',
-					length: '',
-					type: '',
-				},
-				pubDate: undefined,
-				content: undefined,
-				contentSnippet: undefined,
-				isoDate: undefined,
 			})
-		}).then(updatedBody => {
-			cy.intercept(
-				{
-					pathname: '/api/rss',
-					query: {
-						url: /trashfuture/,
+			.then(updatedBody => {
+				cy.intercept(
+					{
+						pathname: '/api/rss',
+						query: {
+							url: /trashfuture/,
+						},
 					},
-				},
-				{
-					statusCode: 200,
-					body: updatedBody,
-				},
-			).as('getTF')
-		})
+					{
+						statusCode: 200,
+						body: updatedBody,
+					},
+				).as('getTF')
+			})
 
 		cy.findByText('Refresh').click()
 
