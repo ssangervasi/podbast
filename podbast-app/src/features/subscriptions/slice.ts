@@ -80,22 +80,31 @@ export const selectSubscriptions = createSelector(
 	(state): Subscription[] => values(state.feedUrlToSubscription),
 )
 
+/**
+ * Latest to oldest, in-place
+ */
+const sortEpisodes = (episodes: Episode[]): void => {
+	episodes.sort((a, b) => -cmpDate(a.item.isoDate, b.item.isoDate))
+}
+
 export const selectRecentEpisodes = createSelector(
 	[selectState],
 	(state): Episode[] => {
-		const items = values(state.feedUrlToItemIdToItem).flatMap(items =>
-			values(items).flatMap(item => {
+		const eps = values(state.feedUrlToItemIdToItem).flatMap(items => {
+			const subEps = values(items).flatMap(item => {
 				const { feedUrl } = item
 				const subscription = state.feedUrlToSubscription[feedUrl]!
 				return {
 					subscription,
 					item,
 				}
-			}),
-		)
-		// Date late to early
-		items.sort((a, b) => -cmpDate(a.item.isoDate, b.item.isoDate))
-		return items
+			})
+			sortEpisodes(subEps)
+			subEps.splice(2, Infinity)
+			return subEps
+		})
+		sortEpisodes(eps)
+		return eps
 	},
 )
 

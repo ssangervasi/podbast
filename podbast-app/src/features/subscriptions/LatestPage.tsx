@@ -30,13 +30,18 @@ export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 					/>
 				</Box>
 
-				<Text noOfLines={3} fontSize="sm" fontWeight="bold">
+				<Text
+					noOfLines={3}
+					fontSize="sm"
+					fontWeight="bold"
+					data-testid="EpisodeRow-subscription-title"
+				>
 					{episode.subscription.title}
 				</Text>
 			</HStack>
 		</GridItem>
 
-		<GridItem colSpan={2}>
+		<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
 			<Text maxW="40ch" noOfLines={3} fontStyle="italic">
 				{episode.item.title}
 			</Text>

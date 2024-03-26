@@ -26,9 +26,32 @@ Cypress.Commands.add('appStateGet', () =>
 	cy.window().then(win => win.TEST.store.getState()),
 )
 
-Cypress.Commands.add('appStateSnapshot', () => {
-	cy.appStateGet().then(appState => {
-		cy.log('appStateSnapshot', JSON.stringify(appState, null, 2))
+Cypress.Commands.add('appStateSnapshotPath', name => {
+	const specDir = Cypress.spec.fileName
+	if (!specDir) {
+		throw 'WTF no spec spec fileName!'
+	}
+
+	return cy.wrap(`cypress/fixtures/appStates/${specDir}/${name}.json`)
+})
+
+Cypress.Commands.add('appStateSnapshotSave', name => {
+	return cy.appStateGet().then(appState => {
+		cy.log(`Saving appState ${name}`)
+
+		cy.appStateSnapshotPath(name).then(snapshotPath => {
+			cy.writeFile(snapshotPath, JSON.stringify(appState, null, 2))
+		})
+		return cy.wrap(appState)
+	})
+})
+
+Cypress.Commands.add('appStateSnapshotLoad', name => {
+	return cy.appStateSnapshotPath(name).then(snapshotPath => {
+		return cy.readFile(snapshotPath).then(appState => {
+			cy.log(`Loading appState ${name}`)
+			return cy.appStateReset(appState)
+		})
 	})
 })
 
@@ -65,7 +88,10 @@ declare global {
 		interface Chainable {
 			appStateReset(appState: Partial<RootState>): Chainable<RootState>
 			appStateGet(): Chainable<RootState>
-			appStateSnapshot(): Chainable<void>
+
+			appStateSnapshotPath(name: string): Chainable<string>
+			appStateSnapshotSave(name: string): Chainable<RootState>
+			appStateSnapshotLoad(name: string): Chainable<RootState>
 
 			//
 			aliases<AN extends string[]>(
