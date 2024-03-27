@@ -25,15 +25,15 @@ export const PullViewer = ({ pull }: { pull: RssPull }) => {
 	)
 }
 
-const FeedRequested = ({ pull }: { pull: RssPullRequested }) => {
+const FeedRequested = ({ pull: _pull }: { pull: RssPullRequested }) => {
 	return <>'FeedRequested'</>
 }
-const FeedNotFound = ({ pull }: { pull: RssPullNotFound }) => {
+const FeedNotFound = ({ pull: _pull }: { pull: RssPullNotFound }) => {
 	return <>'FeedNotFound'</>
 }
 
 const FeedViewer = ({ pull }: { pull: RssPullReady }) => {
-	const { feed, status, url: requestedUrl } = pull
+	const { feed, status: _status, url: _requestedUrl } = pull
 
 	const dispatch = useAppDispatch()
 	const subscription = useAppSelector(state =>

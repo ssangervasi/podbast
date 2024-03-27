@@ -1,11 +1,11 @@
-import { Box, Button, chakra, HStack, VStack } from '@chakra-ui/react'
+import { Button, HStack } from '@chakra-ui/react'
 
 import { play } from '/src/features/player'
 import { useAppDispatch } from '/src/store'
 
-import { SubEp } from './slice'
+import { Episode } from './models'
 
-export const EpisodeControls = ({ episode }: { episode: SubEp }) => {
+export const EpisodeControls = ({ episode }: { episode: Episode }) => {
 	const { item } = episode
 	const dispatch = useAppDispatch()
 

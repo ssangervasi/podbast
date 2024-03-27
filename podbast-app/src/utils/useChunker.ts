@@ -7,7 +7,7 @@ export const useChunker = <I>({ items }: { items: I[] }) => {
 	const size = INIT_SIZE
 
 	const [state, dispatch] = useReducer(
-		(prevState, action: 'next') => {
+		(prevState, _action: 'next') => {
 			const start = prevState.start + size
 			const chunk = items.slice(start, start + size)
 			return {

@@ -1,6 +1,7 @@
-import { isDev } from '../utils/isDev'
 import { store } from '/src/store/store'
 import { log } from '/src/utils'
+
+import { isDev } from '../utils/isDev'
 
 export const decorateWindow = () => {
 	if (typeof window !== 'object') {

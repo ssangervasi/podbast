@@ -1,6 +1,6 @@
 import { Box, Text } from '@chakra-ui/react'
 
-import { useAppDispatch, useAppSelector } from '/src/store'
+import { useAppSelector } from '/src/store'
 
 import { selectSubscriptions } from './slice'
 

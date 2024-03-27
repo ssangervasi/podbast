@@ -1,9 +1,6 @@
 import { Box, Text, useTimeout } from '@chakra-ui/react'
 import { useMeasure } from '@uidotdev/usehooks'
-import { RefObject } from 'preact'
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 
-import { log } from '/src/utils'
 import { CATJAM } from '/src/utils/images'
 
 import { CorePlayer } from './corePlayer'
