@@ -3,7 +3,12 @@ import { narrow } from 'narrow-minded'
 import xml from 'xml2js'
 import multer from 'multer'
 
-const uploader = multer({ storage: multer.memoryStorage() })
+const uploader = multer({
+	storage: multer.memoryStorage(),
+	limits: {
+		fileSize: 1 * 1000 ** 2,
+	},
+})
 
 //
 export const app = new App()
@@ -14,7 +19,7 @@ const parseOpml = async (body: string) => {
 	return parsed
 }
 
-app.post('/opml', uploader.single('content'), async (req, res) => {
+app.post('/opml', uploader.single('content') as any, async (req, res) => {
 	const file = (req as any).file as Express.Multer.File
 	console.log('>>>>>', {
 		file: file.size,
