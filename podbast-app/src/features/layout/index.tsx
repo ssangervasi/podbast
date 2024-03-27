@@ -1,33 +1,11 @@
-import { Box, Flex, HStack, Link, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex,  } from '@chakra-ui/react'
 
 import { Player } from '/src/features/player'
 
 import { Main } from './main'
 import { Side } from './side'
-
-export const Top = () => (
-	<HStack
-		justify="space-between"
-		bg="gray.700"
-		borderBottomWidth={2}
-		borderBottomColor="black"
-		paddingX={2}
-		paddingY={0.5}
-	>
-		<HStack as="header">
-			<Text fontSize="3xl" fontWeight="bold" color="purple.100" children="🜪" />
-			<Text fontSize="xl" fontWeight="bold">
-				podbast
-			</Text>
-		</HStack>
-
-		<HStack>
-			<Link href="https://github.com/ssangervasi/podbast" isExternal>
-				source
-			</Link>
-		</HStack>
-	</HStack>
-)
+import { Top } from './top'
+import { VStack } from '/src/ui'
 
 export const SideWrapper = () => (
 	<Box
@@ -42,7 +20,7 @@ export const SideWrapper = () => (
 )
 
 export const MainWrapper = () => (
-	<VStack padding={2} width="full">
+	<VStack padding={2} paddingTop={4} width="full">
 		<Main />
 	</VStack>
 )

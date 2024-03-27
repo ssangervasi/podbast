@@ -27,7 +27,7 @@ export const Rss = () => {
 
 	return (
 		<VStack>
-			<Heading as="h1">Load RSS feed</Heading>
+			<Heading as='h1' size="lg">Load RSS feed</Heading>
 
 			<LocalUrlForm />
 

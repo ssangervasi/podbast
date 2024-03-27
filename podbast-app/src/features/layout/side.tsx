@@ -1,4 +1,4 @@
-import { Button, chakra, Text, useBreakpointValue } from '@chakra-ui/react'
+import { Button, chakra,  useBreakpointValue } from '@chakra-ui/react'
 import { ReactNode } from 'preact/compat'
 
 import { LAYOUT_ENTRIES, LayoutName } from './layouts'
@@ -6,8 +6,7 @@ import { useLayout } from './useLayout'
 
 export const Side = () => {
 	return (
-		<chakra.nav>
-			<Text>Sidebar</Text>
+		<chakra.nav paddingTop={2}>
 			{LAYOUT_ENTRIES.map(({ layoutName, sideTitle }) => (
 				<SideButton to={layoutName}>{sideTitle}</SideButton>
 			))}
@@ -29,7 +28,7 @@ const SideButton = ({
 		<Button
 			variant="ghost"
 			width="full"
-			textOverflow="ellipsis"
+			HeadingOverflow="ellipsis"
 			justifyContent="flex-start"
 			paddingX="1"
 			onClick={() => {

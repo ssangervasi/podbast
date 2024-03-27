@@ -2,13 +2,13 @@ import { Rss } from '/src/features/rss'
 import { LatestPage, SubscriptionsPage } from '/src/features/subscriptions'
 
 export const LAYOUTS = {
-	latest: {
-		main: LatestPage,
-		sideTitle: 'Latest episodes',
-	},
 	subscriptions: {
 		main: SubscriptionsPage,
 		sideTitle: 'Subscriptions',
+	},
+	latest: {
+		main: LatestPage,
+		sideTitle: 'Latest episodes',
 	},
 	rss: {
 		main: Rss,

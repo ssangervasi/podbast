@@ -72,7 +72,7 @@ export const LatestPage = () => {
 	return (
 		<>
 			<Stack w="full">
-				<Heading size="md">Recent episodes</Heading>
+				<Heading as='h1' size="lg">Latest episodes</Heading>
 				<HStack>
 					<Button onClick={refresh}>Refresh</Button>
 				</HStack>
