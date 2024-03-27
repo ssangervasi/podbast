@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+source $(dirname "$BASH_SOURCE")/env.sh
+
+set -e
+
+cd "$PB_APP"
+npm ci
+npm run build
+
+cd "$PB_SERVER"
+npm ci
+npm run build
+

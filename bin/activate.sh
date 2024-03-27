@@ -1,7 +1,4 @@
-PB_BIN=$(realpath $(dirname "$BASH_SOURCE"))
-export PATH="$PATH:$PB_BIN"
-
-export PB_ROOT=$(realpath "$PB_BIN"/..)
+source $(dirname "$BASH_SOURCE")/env.sh
 
 nvm use $(cat "$PB_ROOT"/.nvmrc)
 
@@ -10,11 +7,11 @@ alias pm2='npx pm2'
 alias pm='pm2'
 
 app() {
-  cd "$PB_ROOT"/podbast-app
+  cd "$PB_APP"
 }
 
 server() {
-  cd "$PB_ROOT"/podbast-server
+  cd "$PB_SERVER"
 }
 
 dev() {
