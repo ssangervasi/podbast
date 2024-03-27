@@ -1,13 +1,20 @@
 import process from 'node:process'
 import { App } from '@tinyhttp/app'
 import { narrow } from 'narrow-minded'
+import serveStatic from 'serve-static'
 
 import { app as rssApp } from './rss.js'
 import { app as opmlApp } from './opmls.js'
+import { PATHS } from './paths.js'
 
 export const PORT = Number(process.env.PORT) || 42993
 
 const app = new App()
+
+app.use((req, res, next) =>
+	//
+	serveStatic(PATHS.PUBLIC)(req, res, () => next && next()),
+)
 
 app.use(rssApp)
 app.use(opmlApp)
@@ -40,7 +47,7 @@ app.get('/debug', async (req, res) => {
 })
 
 app.get('/', (req, res) => {
-	res.send('Index')
+	res.sendFile(PATHS.INDEX)
 })
 
 app.listen(PORT)

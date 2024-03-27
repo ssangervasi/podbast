@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 source $(dirname "$BASH_SOURCE")/env.sh
 
-set -e
+set -ex
 
 cd "$PB_APP"
 npm ci
 npm run build
+
+rm -rf "$PB_SERVER/public/"
+cp -r "$PB_APP/dist/" "$PB_SERVER/public/"
 
 cd "$PB_SERVER"
 npm ci

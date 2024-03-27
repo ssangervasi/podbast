@@ -14,9 +14,11 @@
 	"license": "ISC",
 	"dependencies": {
 		"@tinyhttp/app": "^2.2.1",
+		"@types/serve-static": "^1.15.5",
 		"multer": "^1.4.5-lts.1",
 		"narrow-minded": "^1.2.1",
 		"rss-parser": "^3.13.0",
+		"serve-static": "^1.15.0",
 		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {
