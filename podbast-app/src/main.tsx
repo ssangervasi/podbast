@@ -1,4 +1,6 @@
-if (import.meta.env.DEV) {
+import { isDev } from './utils/isDev'
+
+if (isDev()) {
 	import('preact/debug')
 }
 
@@ -8,6 +10,6 @@ import { App } from './app'
 
 render(<App />, document.getElementById('app')!)
 
-if (import.meta.env.DEV) {
+if (isDev()) {
 	import('/src/devtools/windowDecorator')
 }

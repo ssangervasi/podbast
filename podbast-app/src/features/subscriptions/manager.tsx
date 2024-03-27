@@ -19,6 +19,7 @@ export const useSubscriptionManager = () => {
 
 	return { refresh, subscriptions }
 }
+
 export const Manager = () => {
 	const dispatch = useAppDispatch()
 

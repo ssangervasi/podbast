@@ -3,7 +3,7 @@
     "value": 0
   },
   "layout": {
-    "layout": "rss"
+    "layout": "subscriptions"
   },
   "player": {
     "status": "stopped"

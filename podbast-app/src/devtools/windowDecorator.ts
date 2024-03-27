@@ -1,3 +1,4 @@
+import { isDev } from '../utils/isDev'
 import { store } from '/src/store/store'
 import { log } from '/src/utils'
 
@@ -18,6 +19,6 @@ export const decorateWindow = () => {
 	log('debug', 'testTools', 'defined window.TEST', window.TEST)
 }
 
-if (import.meta.env.DEV) {
+if (isDev()) {
 	decorateWindow()
 }

@@ -1,12 +1,6 @@
 import { FeedResponseGuard } from '/src/features/rss/guards'
 import { log } from '/src/utils'
 
-const LOCAL_URLS_VAR = `${import.meta.env.VITE_LOCAL_RSS_FEEDS ?? ''}`
-
-export const LOCAL_URLS = LOCAL_URLS_VAR.split(/\s+/).filter(
-	u => u.length && URL.canParse(u),
-)
-
 export const getFeed = async (url: string) => {
 	try {
 		if (!url) {

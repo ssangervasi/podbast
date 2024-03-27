@@ -8,18 +8,26 @@ import { log } from '/src/utils'
 import { EMPTY_ARRAY, mapToMap, wrapEmpty } from '../../utils/collections'
 import { fetchFeed } from './thunks'
 
-export type RssPull = {
+export type RssPullBase = {
 	url: string
-} & (
-	| {
-			status: 'requested'
-			feed?: undefined
-	  }
-	| {
-			status: 'ready'
-			feed: Feed
-	  }
-)
+	status: string
+	feed?: Feed
+}
+
+export type RssPullRequested = RssPullBase & {
+	status: 'requested'
+}
+
+export type RssPullReady = RssPullBase & {
+	status: 'ready'
+	feed: Feed
+}
+
+export type RssPullNotFound = RssPullBase & {
+	status: 'notFound'
+}
+
+export type RssPull = RssPullRequested | RssPullReady | RssPullNotFound
 
 export interface RssState {
 	pulls: RssPull[]
@@ -74,22 +82,26 @@ export const slice = createSlice({
 				const { feedUrl } = action.meta.arg
 				log.info('fetchFeed.fulfilled', { feedUrl })
 
-				const rsub = state.pulls.find(ruc => ruc.url === feedUrl)
+				const pull = state.pulls.find(ruc => ruc.url === feedUrl)
 
-				const attrs = {
-					status: 'ready',
-					feed: action.payload,
+				if (!pull) {
+					log.error('Fulfilled missing feed pull')
+					return
 				}
 
-				if (rsub) {
-					Object.assign(rsub, attrs)
-				} else {
-					log.info('No RU for feed fulf')
-				}
+				pull.status = 'ready'
+				pull.feed = action.payload
 			})
-			.addCase(fetchFeed.rejected, (_, action) => {
+			.addCase(fetchFeed.rejected, (state, action) => {
 				const { feedUrl } = action.meta.arg
-				log.info('fetchFeed.v', { feedUrl })
+				log.error('fetchFeed.rejected', { feedUrl })
+
+				const pull = state.pulls.find(ruc => ruc.url === feedUrl)
+				if (!pull) {
+					log.error('Rejected missing feed pull')
+					return
+				}
+				pull.status = 'notFound'
 			})
 	},
 	selectors: {
@@ -105,10 +117,7 @@ export const selectFeedUrlToPull = createSelector([selectPulls], pulls =>
 
 export const selectPullsByStatus = createSelector(
 	[selectPulls, (_, status: RssPull['status']) => status],
-	(pulls, status) => {
-		log.info('selecty', pulls, status)
-		return wrapEmpty(pulls.filter(ru => ru.status === status))
-	},
+	(pulls, status) => wrapEmpty(pulls.filter(ru => ru.status === status)),
 )
 
 export const { actions, reducer } = slice

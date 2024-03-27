@@ -1,6 +1,4 @@
-/**
- * Logging
- */
+import { isDev } from './isDev'
 
 const logState = {
 	lastMs: 0,
@@ -23,7 +21,7 @@ const _log = (
 	prefix = '',
 	...args: unknown[]
 ) => {
-	if (!import.meta.env.DEV) {
+	if (!isDev()) {
 		return
 	}
 	const preArr = prefix ? `[${prefix}]` : []

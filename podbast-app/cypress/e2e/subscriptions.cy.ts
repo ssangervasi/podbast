@@ -26,15 +26,15 @@ describe('subscriptions', () => {
 		cy.findByRole('button', { name: 'Request' }).click()
 		cy.wait('@getCBB')
 		cy.findByRole('button', { name: 'Subscribe' }).click()
+		cy.findByRole('button', { name: 'Subscriptions' }).click()
 
 		cy.appStateSnapshotSave('snappy')
-		cy.findByRole('button', { name: 'Subscriptions' }).click()
 	})
 
 	beforeEach(() => {
 		cy.visit('/')
-
 		cy.appStateSnapshotLoad('snappy')
+		// cy.
 	})
 
 	it('shows the two most recent per subscription', () => {

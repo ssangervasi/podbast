@@ -1,16 +1,40 @@
-import { Button, chakra, HStack, List, ListItem } from '@chakra-ui/react'
-import { Suspense } from 'preact/compat'
+import { Button, chakra, Divider, GridItem } from '@chakra-ui/react'
 import { useCallback } from 'preact/hooks'
 
 import { play } from '/src/features/player'
-import { Feed, FeedItem } from '/src/features/rss/guards'
+import { FeedItem } from '/src/features/rss/guards'
+import {
+	RssPull,
+	RssPullNotFound,
+	RssPullReady,
+	RssPullRequested,
+} from '/src/features/rss/slice'
 import { selectFeedSubscription, subscribe } from '/src/features/subscriptions'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { VStack } from '/src/ui'
 
 import { useChunker } from '../../utils/useChunker'
 
-export const FeedViewer = ({ feed }: { feed: Feed }) => {
+export const PullViewer = ({ pull }: { pull: RssPull }) => {
+	return pull.status === 'requested' ? (
+		<FeedRequested pull={pull} />
+	) : pull.status === 'ready' ? (
+		<FeedViewer pull={pull} />
+	) : (
+		<FeedNotFound pull={pull} />
+	)
+}
+
+const FeedRequested = ({ pull }: { pull: RssPullRequested }) => {
+	return <>'FeedRequested'</>
+}
+const FeedNotFound = ({ pull }: { pull: RssPullNotFound }) => {
+	return <>'FeedNotFound'</>
+}
+
+const FeedViewer = ({ pull }: { pull: RssPullReady }) => {
+	const { feed, status, url: requestedUrl } = pull
+
 	const dispatch = useAppDispatch()
 	const subscription = useAppSelector(state =>
 		selectFeedSubscription(state, feed.feedUrl),
@@ -24,55 +48,71 @@ export const FeedViewer = ({ feed }: { feed: Feed }) => {
 	const chunker = useChunker({ items: feed.items })
 
 	return (
-		<VStack maxWidth={['full', 'container.lg']}>
-			<chakra.b fontSize="lg">{feed.title}</chakra.b>
+		<>
+			<GridItem colSpan={2}>
+				<chakra.b fontSize="lg">{feed.title}</chakra.b>
+			</GridItem>
 
-			<HStack>
+			<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
 				<Button size="sm" onClick={handleSubscribe} isDisabled={isSubscribed}>
 					{isSubscribed ? 'Subscribed' : 'Subscribe'}
 				</Button>
-			</HStack>
+			</GridItem>
 
-			<chakra.span>{feed.description}</chakra.span>
+			<GridItem colSpan={6}>
+				<chakra.span>{feed.description}</chakra.span>
+			</GridItem>
 
-			<chakra.b>Episodes</chakra.b>
-			<Suspense fallback={<chakra.span>...</chakra.span>}>
-				<List spacing={2}>
-					{chunker.chunk.map(item => (
-						<ListItem key={item.guid}>
-							<FeedItemViewer item={item} />
-						</ListItem>
-					))}
-				</List>
-			</Suspense>
-		</VStack>
+			<GridItem colSpan={2}>asdf</GridItem>
+
+			<GridItem colSpan={12}>
+				<chakra.b>Episodes</chakra.b>
+			</GridItem>
+
+			{chunker.chunk.map(item => (
+				<FeedItemViewer item={item} key={item.guid} />
+			))}
+
+			{chunker.itemsAfter > 0 ? (
+				<GridItem colSpan={12}>... and {chunker.itemsAfter} more</GridItem>
+			) : null}
+		</>
 	)
 }
 
-export const FeedItemViewer = ({ item }: { item: FeedItem }) => {
+const FeedItemViewer = ({ item }: { item: FeedItem }) => {
 	const dispatch = useAppDispatch()
 
 	return (
-		<HStack borderTopColor="gray.700" borderTopWidth={1} padding={1}>
-			<Button
-				size="sm"
-				onClick={() => {
-					dispatch(
-						play({
-							title: item.title,
-							url: item.enclosure.url,
-						}),
-					)
-				}}
-			>
-				▶
-			</Button>
-			<VStack spacing={1}>
-				<chakra.i>{item.title}</chakra.i>
-				<chakra.span fontSize="md" noOfLines={1}>
-					{item.contentSnippet}
-				</chakra.span>
-			</VStack>
-		</HStack>
+		<>
+			<GridItem colSpan={10}>
+				<VStack spacing={1}>
+					<chakra.i>{item.title}</chakra.i>
+					<chakra.span fontSize="md" noOfLines={1}>
+						{item.contentSnippet}
+					</chakra.span>
+				</VStack>
+			</GridItem>
+
+			<GridItem colSpan={2}>
+				<Button
+					size="sm"
+					onClick={() => {
+						dispatch(
+							play({
+								title: item.title,
+								url: item.enclosure.url,
+							}),
+						)
+					}}
+				>
+					▶
+				</Button>
+			</GridItem>
+
+			<GridItem colSpan={12}>
+				<Divider />
+			</GridItem>
+		</>
 	)
 }
