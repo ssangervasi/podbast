@@ -1,2 +1,2 @@
-export * from './component'
+export * from './AddFeedPage'
 export * from './guards'

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<opml version="1.0">
+  <head>
+    <title>Google Podcasts Feeds</title>
+  </head>
+  <body>
+    <outline text="feeds">
+      <outline
+        xmlUrl="https://a.sangervasi.net/podcast.rss"
+        type="rss" text="a" />
+      <outline
+        xmlUrl="https://b.sangervasi.net/podcast.rss"
+        type="rss" text="b" />
+      <outline
+        xmlUrl="https://c.sangervasi.net/podcast.rss"
+        type="rss" text="c" />
+    </outline>
+  </body>
+</opml>

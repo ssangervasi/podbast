@@ -21,12 +21,8 @@ const parseOpml = async (body: string) => {
 
 app.post('/opml', uploader.single('content') as any, async (req, res) => {
 	const file = (req as any).file as Express.Multer.File
-	console.log('>>>>>', {
-		file: file.size,
-		body: JSON.stringify(req.body, null, 2),
-		asf: 'asdf',
-	})
 
+	console.log(file)
 	if (!file) {
 		return res.sendStatus(400)
 	}

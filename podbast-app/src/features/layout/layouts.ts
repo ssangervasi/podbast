@@ -1,4 +1,4 @@
-import { Rss } from '/src/features/rss'
+import { AddFeedPage } from '/src/features/rss'
 import { LatestPage, SubscriptionsPage } from '/src/features/subscriptions'
 
 export const LAYOUTS = {
@@ -11,7 +11,7 @@ export const LAYOUTS = {
 		sideTitle: 'Latest episodes',
 	},
 	rss: {
-		main: Rss,
+		main: AddFeedPage,
 		sideTitle: 'Add feed',
 	},
 } satisfies {

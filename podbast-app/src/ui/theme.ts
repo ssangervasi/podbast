@@ -212,5 +212,17 @@ export const theme = extendTheme({
 				}),
 			},
 		},
+		FormLabel: {
+			defaultProps: {
+				variant: 'vibe',
+			},
+			variants: {
+				vibe: (_props: StyleFunctionProps) => ({
+					fontWeight: '600',
+					color: 'purple.100',
+					// backgroundColor: 'hotpink',
+				}),
+			},
+		},
 	},
 } satisfies Partial<ChakraTheme>) as ChakraTheme

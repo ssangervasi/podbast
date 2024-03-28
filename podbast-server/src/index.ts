@@ -16,10 +16,16 @@ app.use((req, res, next) =>
 	serveStatic(PATHS.PUBLIC)(req, res, () => next && next()),
 )
 
-app.use(rssApp)
-app.use(opmlApp)
+app.get('/', (req, res) => {
+	res.sendFile(PATHS.INDEX)
+})
 
-app.get('/debug', async (req, res) => {
+const apiApp = new App()
+
+apiApp.use(rssApp)
+apiApp.use(opmlApp)
+
+apiApp.get('/debug', async (req, res) => {
 	console.log('/debug requested ')
 	if (process.env.NODE_ENV !== 'development') {
 		console.log('/debug not dev env ')
@@ -46,9 +52,7 @@ app.get('/debug', async (req, res) => {
 	res.send(await fres.text())
 })
 
-app.get('/', (req, res) => {
-	res.sendFile(PATHS.INDEX)
-})
+app.use('/api', apiApp)
 
 app.listen(PORT)
 
