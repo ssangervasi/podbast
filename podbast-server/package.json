@@ -8,7 +8,8 @@
 		"start": "node dist/index.js",
 		"build": "npm run rollup",
 		"build:watch": "npm run rollup -- -w",
-		"rollup": "npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript"
+		"rollup": "npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+		"test": "node --import=tsx tests/runner.ts"
 	},
 	"author": "",
 	"license": "ISC",
@@ -26,8 +27,11 @@
 		"@types/multer": "^1.4.11",
 		"@types/node": "^20.10.5",
 		"@types/xml2js": "^0.4.14",
+		"fdir": "^6.1.1",
+		"picomatch": "^3.0",
 		"rollup": "^4.9.1",
 		"tslib": "^2.6.2",
+		"tsx": "^4.7.1",
 		"typescript": "^5.3.3"
 	}
 }

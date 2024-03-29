@@ -1,13 +1,18 @@
 {
-  "compilerOptions": {
-    // "composite": true,
-    "skipLibCheck": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "outDir": "dist"
-  },
-  "include": ["src/**/*", "rollup.config.ts"]
+	"compilerOptions": {
+		// "composite": true,
+		"skipLibCheck": true,
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"outDir": "dist",
+
+		"baseUrl": ".",
+		"paths": {
+			"/src/*": ["./src/*"]
+		}
+	},
+	"include": ["src/**/*", "rollup.config.ts", "tests/**/*.test.ts"]
 }

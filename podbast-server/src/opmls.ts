@@ -3,6 +3,59 @@ import { narrow } from 'narrow-minded'
 import xml from 'xml2js'
 import multer from 'multer'
 
+export const parseXml = async (body: string): Promise<unknown> => {
+	try {
+		const parser = new xml.Parser()
+		return await parser.parseStringPromise(body)
+	} catch (e) {
+		console.error('Parse OPML error', e)
+		return undefined
+	}
+}
+
+export type OutlineFeed = {
+	title: string
+	url: string
+}
+
+export type Outline = {
+	feeds: Array<Outline>
+}
+
+export const transformOpmlToOutline = (opml: unknown): Outline | undefined => {
+	if (
+		!narrow(
+			{
+				opml: {
+					body: [
+						{
+							outline: [
+								{
+									$: {
+										text: 'string',
+										type: 'string',
+										xmlUrl: 'string',
+									},
+								},
+							],
+						},
+					],
+				},
+			},
+			opml,
+		)
+	) {
+		return undefined
+	}
+	return {
+		feeds: opml.opml.body.flatMap(({ outline }) => outline) as any,
+	}
+}
+
+export const parseOpmlOutline = async (body: string): Promise<unknown> => {
+	return transformOpmlToOutline(await parseXml(body))
+}
+
 const uploader = multer({
 	storage: multer.memoryStorage(),
 	limits: {
@@ -12,12 +65,6 @@ const uploader = multer({
 
 //
 export const app = new App()
-
-const parseOpml = async (body: string) => {
-	const parser = new xml.Parser()
-	const parsed = await parser.parseStringPromise(body)
-	return parsed
-}
 
 app.post('/opml', uploader.single('content') as any, async (req, res) => {
 	const file = (req as any).file as Express.Multer.File
