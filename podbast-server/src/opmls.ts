@@ -1,5 +1,5 @@
 import { App } from '@tinyhttp/app'
-import { narrow } from 'narrow-minded'
+import { narrow, some } from 'narrow-minded'
 import xml from 'xml2js'
 import multer from 'multer'
 
@@ -19,10 +19,11 @@ export type OutlineFeed = {
 }
 
 export type Outline = {
-	feeds: Array<Outline>
+	feeds: Array<OutlineFeed>
 }
 
 export const transformOpmlToOutline = (opml: unknown): Outline | undefined => {
+	// XML madness. Elements are grouped by their tag name?
 	if (
 		!narrow(
 			{
@@ -33,9 +34,19 @@ export const transformOpmlToOutline = (opml: unknown): Outline | undefined => {
 								{
 									$: {
 										text: 'string',
-										type: 'string',
-										xmlUrl: 'string',
 									},
+									outline: [
+										{
+											$: some(
+												{
+													text: 'string',
+													type: 'string',
+													xmlUrl: 'string',
+												},
+												'undefined',
+											),
+										},
+									],
 								},
 							],
 						},
@@ -47,8 +58,22 @@ export const transformOpmlToOutline = (opml: unknown): Outline | undefined => {
 	) {
 		return undefined
 	}
+
 	return {
-		feeds: opml.opml.body.flatMap(({ outline }) => outline) as any,
+		feeds: opml.opml.body.flatMap(({ outline }) =>
+			outline.flatMap(entry =>
+				entry.outline.flatMap(child => {
+					if (!child.$) {
+						return []
+					}
+
+					return {
+						title: child.$.text,
+						url: child.$.xmlUrl,
+					}
+				}),
+			),
+		),
 	}
 }
 
@@ -74,7 +99,7 @@ app.post('/opml', uploader.single('content') as any, async (req, res) => {
 		return res.sendStatus(400)
 	}
 
-	const parsed = await parseOpml(file.buffer.toString())
+	const parsed = await parseOpmlOutline(file.buffer.toString())
 
 	res.json({
 		content: parsed,

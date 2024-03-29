@@ -1,0 +1,16 @@
+{
+	"feeds": [
+		{
+			"title": "a",
+			"url": "https://a.sangervasi.net/podcast.rss"
+		},
+		{
+			"title": "b",
+			"url": "https://b.sangervasi.net/podcast.rss"
+		},
+		{
+			"title": "c",
+			"url": "https://c.sangervasi.net/podcast.rss"
+		}
+	]
+}

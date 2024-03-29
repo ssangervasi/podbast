@@ -3,19 +3,31 @@ import { fdir } from 'fdir'
 import { run } from 'node:test'
 import process from 'node:process'
 
-const paths = await new fdir()
-	.glob('**/*.test.ts')
-	.withBasePath()
-	.crawl('.')
-	.withPromise()
+const parseArgOptions = () => {
+	const watch = process.argv.includes('--watch')
+	return { watch }
+}
 
-console.log('files', paths)
+const main = async () => {
+	const paths = await new fdir()
+		.glob('**/*.test.ts')
+		.withBasePath()
+		.crawl('.')
+		.withPromise()
 
-run({
-	files: paths,
-})
-	.on('test:fail', () => {
-		process.exitCode = 1
+	console.log(`Found ${paths.length} paths`)
+
+	const options = parseArgOptions()
+
+	run({
+		files: paths,
+		watch: options.watch,
 	})
-	.compose(spec as any)
-	.pipe(process.stdout)
+		.on('test:fail', () => {
+			process.exitCode = 1
+		})
+		.compose(spec as any)
+		.pipe(process.stdout)
+}
+
+main()

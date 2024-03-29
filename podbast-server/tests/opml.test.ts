@@ -3,8 +3,8 @@ import { describe, it } from 'node:test'
 
 import { parseOpmlOutline } from '/src/opmls.js'
 
-describe('opml', () => {
-	it('works', async () => {
+describe('parseOpmlOutline', () => {
+	it('works on Google Podcasts export format', async () => {
 		const parsed = await parseOpmlOutline(`
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <opml version="1.0">
@@ -13,6 +13,7 @@ describe('opml', () => {
   </head>
   <body>
     <outline text="feeds">
+			snoosh
       <outline
         xmlUrl="https://a.sangervasi.net/podcast.rss"
         type="rss" text="a" />
@@ -26,7 +27,7 @@ describe('opml', () => {
   </body>
 </opml>		
 `)
-		assert.equal(parsed, {
+		assert.deepEqual(parsed, {
 			feeds: [
 				{
 					title: 'a',
@@ -42,5 +43,22 @@ describe('opml', () => {
 				},
 			],
 		})
+	})
+
+	it('return undefined for an unknown format', async () => {
+		const parsed = await parseOpmlOutline(`
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<opml version="1.0">
+  <head>
+    <title>Unknown format</title>
+  </head>
+  <body>
+    <stuff text="feeds">
+      <thing url="a" name="a" />
+    </stuff>
+  </body>
+</opml>		
+`)
+		assert.equal(parsed, undefined)
 	})
 })
