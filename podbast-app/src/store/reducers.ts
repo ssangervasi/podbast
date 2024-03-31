@@ -13,3 +13,6 @@ export const rootReducer = combineReducers({
 	[rssSlice.name]: rssSlice.reducer,
 	[subscriptionsSlice.name]: subscriptionsSlice.reducer,
 })
+
+export type RootReducerReturn = ReturnType<typeof rootReducer>
+export type RootReducerKey = keyof RootReducerReturn

@@ -338,7 +338,9 @@
           "title": "TRASHFUTURE",
           "width": "144",
           "height": "144"
-        }
+        },
+        "isoDate": "2024-03-22T03:37:21.000-07:00",
+        "pulledIsoDate": "2024-03-30T20:56:57.834-07:00"
       },
       "https://feeds.simplecast.com/byb4nhvN": {
         "feedUrl": "https://feeds.simplecast.com/byb4nhvN",
@@ -349,7 +351,9 @@
           "link": "https://www.earwolf.com",
           "url": "https://image.simplecastcdn.com/images/a35fca4e-944a-4ccb-bc7b-d678b2c11e9d/ff9cb7ab-74e1-4a8a-98c5-48613e5d500b/3000x3000/ear-cover-comedybangbang-2018refresh-3000x3000-final-1.jpg?aid=rss_feed",
           "title": "Comedy Bang Bang: The Podcast"
-        }
+        },
+        "isoDate": "2024-03-17T23:05:00.000-07:00",
+        "pulledIsoDate": "2024-03-30T20:56:58.117-07:00"
       }
     },
     "feedUrlToItemIdToItem": {

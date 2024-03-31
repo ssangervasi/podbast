@@ -15,15 +15,20 @@ import storage from 'redux-persist/lib/storage'
 
 import { wrapTestableReducer } from '/src/devtools/wrapReducer'
 
-import { rootReducer } from './reducers'
+import {
+	rootReducer,
+	type RootReducerKey,
+	type RootReducerReturn,
+} from './reducers'
 
 // Immer plugin
 enableMapSet()
 
 // Persistence
-const persistConfig: PersistConfig<ReturnType<typeof rootReducer>> = {
+const persistConfig: PersistConfig<RootReducerReturn> = {
 	key: 'root',
 	storage,
+	whitelist: ['layout', 'player', 'subscriptions'] satisfies RootReducerKey[],
 }
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 const testableReducer = wrapTestableReducer(persistedReducer)

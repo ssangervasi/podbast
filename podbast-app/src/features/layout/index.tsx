@@ -1,16 +1,16 @@
-import { Box, Flex,  } from '@chakra-ui/react'
+import { Box, Flex } from '@chakra-ui/react'
 
 import { Player } from '/src/features/player'
+import { VStack } from '/src/ui'
 
 import { Main } from './main'
 import { Side } from './side'
 import { Top } from './top'
-import { VStack } from '/src/ui'
 
 export const SideWrapper = () => (
 	<Box
 		bg="gray.700"
-		width={[10, 200]}
+		width={[20, 200]}
 		padding={[1, 2]}
 		borderRightWidth={2}
 		borderRightColor="black"
@@ -20,7 +20,7 @@ export const SideWrapper = () => (
 )
 
 export const MainWrapper = () => (
-	<VStack padding={2} paddingTop={4} width="full">
+	<VStack paddingX={2} paddingY={4} width="full">
 		<Main />
 	</VStack>
 )

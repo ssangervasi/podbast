@@ -1,14 +1,18 @@
-import { Button, chakra,  useBreakpointValue } from '@chakra-ui/react'
+import { Button, chakra, useBreakpointValue } from '@chakra-ui/react'
 import { ReactNode } from 'preact/compat'
 
 import { LAYOUT_ENTRIES, LayoutName } from './layouts'
 import { useLayout } from './useLayout'
 
 export const Side = () => {
+	const needsTiny = useBreakpointValue([true, false])
+
 	return (
 		<chakra.nav paddingTop={2}>
-			{LAYOUT_ENTRIES.map(({ layoutName, sideTitle }) => (
-				<SideButton to={layoutName}>{sideTitle}</SideButton>
+			{LAYOUT_ENTRIES.map(({ layoutName, sideTitle, sideTiny }) => (
+				<SideButton to={layoutName}>
+					{needsTiny ? sideTiny : sideTitle}
+				</SideButton>
 			))}
 		</chakra.nav>
 	)
@@ -22,7 +26,6 @@ const SideButton = ({
 	children: ReactNode
 }) => {
 	const { layoutName, show } = useLayout()
-	const needsTiny = useBreakpointValue([true, false])
 
 	return (
 		<Button
@@ -36,7 +39,7 @@ const SideButton = ({
 			}}
 			leftIcon={<span>{layoutName === to ? '»' : ' '}</span>}
 		>
-			{needsTiny ? to[0] : children}
+			{children}
 		</Button>
 	)
 }

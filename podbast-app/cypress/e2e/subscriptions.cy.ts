@@ -34,14 +34,13 @@ describe('subscriptions', () => {
 	beforeEach(() => {
 		cy.visit('/')
 		cy.appStateSnapshotLoad('snappy')
-		// cy.
 	})
 
 	it('shows the two most recent per subscription', () => {
-		cy.findByText(/trashfuture/i)
+		cy.findAllByText(/trashfuture/i).should('exist')
 	})
 
-	it('shows the two most recent per subscription', () => {
-		cy.findByText(/trashfuture/i)
-	})
+	// it('shows the two most recent per subscription', () => {
+	// 	cy.findByText(/trashfuture/i)
+	// })
 })

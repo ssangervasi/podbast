@@ -1,7 +1,6 @@
-import { DateTime } from 'luxon'
-
 import { Feed, FeedItem } from '/src/features/rss'
 import { Indexed, mapToIndexed } from '/src/utils/collections'
+import { DateTime, getNow, parseDate } from '/src/utils/datetime'
 
 export type Subscription = {
 	// Unique ID
@@ -10,6 +9,11 @@ export type Subscription = {
 	link: string
 	title: string
 	description: string
+
+	// Pub date
+	isoDate: string
+	// Pulled date
+	pulledIsoDate: string
 
 	image?: {
 		url: string
@@ -32,6 +36,7 @@ export type SubscriptionItem = {
 	guid?: string
 	content?: string
 	contentSnippet?: string
+	// Pub date
 	isoDate: string
 }
 
@@ -49,7 +54,7 @@ export const getFeedItemId = (feedItem: FeedItem): string =>
 	feedItem.guid ?? feedItem.enclosure.url
 
 export const getFeedItemIsoDate = (feedItem: FeedItem): string =>
-	feedItem.isoDate ?? new Date(feedItem.pubDate).toISOString()
+	feedItem.isoDate ?? parseDate(feedItem.pubDate).toISO()
 
 export const transformFeedItemToSubscriptionItem = (
 	feed: Feed,
@@ -85,7 +90,10 @@ export const transformFeedToSubscriptionItems = (
 }
 
 export const transformFeedToSubscription = (feed: Feed): Subscription => {
-	const { feedUrl, link, title, description, image } = feed
+	const { feedUrl, link, title, description, image, pubDate } = feed
+
+	const isoDate = parseDate(pubDate).toISO()
+	const pulledIsoDate = getNow().toISO()
 
 	return {
 		feedUrl,
@@ -93,6 +101,8 @@ export const transformFeedToSubscription = (feed: Feed): Subscription => {
 		title,
 		description,
 		image,
+		isoDate,
+		pulledIsoDate,
 	}
 }
 

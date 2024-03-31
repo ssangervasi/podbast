@@ -12,10 +12,10 @@ import {
 import { useSubscriptionManager } from '/src/features/subscriptions/manager'
 import { Episode } from '/src/features/subscriptions/models'
 import { useAppSelector } from '/src/store'
-import { HCenter, HStack, Stack } from '/src/ui'
+import { HCenter, HStack, PageStack, Stack } from '/src/ui'
+import { ExpandableLines } from '/src/ui/ExpandableLines'
 
 import { EpisodeControls } from './EpisodeControls'
-import { ExpandableLines } from './ExpandableLines'
 import { selectRecentEpisodes } from './slice'
 
 export const EpisodeRow = ({ episode }: { episode: Episode }) => (
@@ -66,23 +66,23 @@ export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 )
 
 export const LatestPage = () => {
-	const { refresh } = useSubscriptionManager()
+	const { refreshAll } = useSubscriptionManager()
 	const episodes = useAppSelector(selectRecentEpisodes)
 
 	return (
-		<>
-			<Stack w="full">
-				<Heading as='h1' size="lg">Latest episodes</Heading>
-				<HStack>
-					<Button onClick={refresh}>Refresh</Button>
-				</HStack>
+		<PageStack>
+			<Heading as="h1" size="lg">
+				Latest episodes
+			</Heading>
+			<HStack>
+				<Button onClick={refreshAll}>Refresh all</Button>
+			</HStack>
 
-				<SimpleGrid columns={12} spacing={2} w="full">
-					{episodes.map(episode => (
-						<EpisodeRow key={episode.item.id} episode={episode} />
-					))}
-				</SimpleGrid>
-			</Stack>
-		</>
+			<SimpleGrid columns={12} spacing={2} w="full">
+				{episodes.map(episode => (
+					<EpisodeRow key={episode.item.id} episode={episode} />
+				))}
+			</SimpleGrid>
+		</PageStack>
 	)
 }

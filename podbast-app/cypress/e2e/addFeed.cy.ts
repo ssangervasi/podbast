@@ -20,8 +20,13 @@ describe('add feed', () => {
 	})
 
 	it('can import an opml file', () => {
+		cy.fixture('feedImportable/feeds.opml').as('feedsOpml')
+		cy.get('input[type=file]').selectFile('@feedsOpml')
+		cy.intercept(
+			{ pathname: '/api/opml', method: 'post' },
+			{ fixture: 'feedImportable/feeds.json' },
+		)
 		cy.findByRole('button', { name: 'Import' }).click()
-
-		
+		cy.viewport(400, 600)
 	})
 })

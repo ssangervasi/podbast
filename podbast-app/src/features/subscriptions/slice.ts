@@ -29,6 +29,10 @@ export const updateStateFromFeed = (
 		return
 	}
 
+	const subscription = transformFeedToSubscription(feed)
+	existing.isoDate = subscription.isoDate
+	existing.pulledIsoDate = subscription.pulledIsoDate
+
 	const existingItems = draft.feedUrlToItemIdToItem[feedUrl] ?? {}
 	draft.feedUrlToItemIdToItem[feedUrl] = existingItems
 

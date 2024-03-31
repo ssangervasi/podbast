@@ -1,4 +1,4 @@
-import { isDev } from './utils/isDev'
+import { isDev, isTest } from './utils/isDev'
 
 if (isDev()) {
 	import('preact/debug')
@@ -10,6 +10,8 @@ import { App } from './app'
 
 render(<App />, document.getElementById('app')!)
 
-if (isDev()) {
-	import('/src/devtools/windowDecorator')
+if (isTest()) {
+	import('/src/devtools/windowDecorator').then(({ decorateWindow }) => {
+		decorateWindow()
+	})
 }

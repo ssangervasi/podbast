@@ -3,7 +3,8 @@ import { useCallback, useEffect } from 'preact/hooks'
 import { selectFeedUrlToPull } from '/src/features/rss/slice'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
-import { log } from '/src/utils'
+import { log, useInterval } from '/src/utils'
+import { DateTime, Duration, fromIso, getNow } from '/src/utils/datetime'
 
 import { selectSubscriptions, updateSubscriptionFeed } from './slice'
 
@@ -11,24 +12,33 @@ export const useSubscriptionManager = () => {
 	const dispatch = useAppDispatch()
 	const subscriptions = useAppSelector(selectSubscriptions)
 
-	const refresh = useCallback(() => {
+	const refreshAll = useCallback(() => {
 		subscriptions.forEach(sub => {
 			dispatch(fetchFeed({ feedUrl: sub.feedUrl }))
 		})
 	}, [dispatch, subscriptions])
 
-	return { refresh, subscriptions }
+	const checkRefresh = useCallback(() => {
+		const now = getNow()
+		subscriptions.forEach(sub => {
+			const diff = now.diff(fromIso(sub.pulledIsoDate))
+			if (diff.hours > 1) {
+				dispatch(fetchFeed({ feedUrl: sub.feedUrl }))
+			}
+		})
+	}, [dispatch, subscriptions])
+
+	return { refreshAll, checkRefresh, subscriptions }
 }
 
 export const Manager = () => {
 	const dispatch = useAppDispatch()
 
-	const { subscriptions } = useSubscriptionManager()
+	const { subscriptions, checkRefresh } = useSubscriptionManager()
 
 	const feedUrlToPull = useAppSelector(selectFeedUrlToPull)
 
 	useEffect(() => {
-		log.info('pulls changed')
 		subscriptions.forEach(sub => {
 			const pull = feedUrlToPull.get(sub.feedUrl)
 			if (!(pull && pull.status === 'ready')) {
@@ -38,9 +48,13 @@ export const Manager = () => {
 		})
 	}, [feedUrlToPull])
 
-	useEffect(() => {
-		log.info('subscriptions changed')
-	}, [subscriptions])
+	useInterval(
+		() => {
+			checkRefresh
+		},
+		Duration.fromObject({ minutes: 5 }).toMillis(),
+		{ immediate: true },
+	)
 
 	return <></>
 }

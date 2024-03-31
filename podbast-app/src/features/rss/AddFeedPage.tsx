@@ -14,7 +14,8 @@ import { useCallback, useEffect, useState } from 'preact/hooks'
 import { PullViewer } from '/src/features/rss/feedViewer'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
-import { HStack, VStack } from '/src/ui'
+import { HStack, PageStack, VStack } from '/src/ui'
+import { PageGrid } from '/src/ui/grids'
 
 import { LocalUrlForm } from './LocalUrlForm'
 import { clearPending, selectPulls } from './slice'
@@ -29,7 +30,7 @@ export const AddFeedPage = () => {
 	}, [])
 
 	return (
-		<VStack>
+		<PageStack>
 			<Heading as="h1" size="lg">
 				Load RSS feed
 			</Heading>
@@ -62,12 +63,7 @@ export const AddFeedPage = () => {
 			<Heading as="h2" size="lg">
 				Results
 			</Heading>
-			<SimpleGrid
-				columns={12}
-				spacing={2}
-				w="full"
-				maxWidth={['full', 'container.lg']}
-			>
+			<PageGrid>
 				{pulls.length === 0 ? (
 					<GridItem colSpan={12}>
 						<chakra.i>... load a feed</chakra.i>
@@ -77,12 +73,14 @@ export const AddFeedPage = () => {
 				{pulls.map(p => (
 					<PullViewer key={p.url} pull={p} />
 				))}
-			</SimpleGrid>
-		</VStack>
+			</PageGrid>
+		</PageStack>
 	)
 }
 
 const ImportForm = () => {
+	const dispatch = useAppDispatch()
+
 	const [response, setResponse] = useState<{
 		status: number
 		json: object
@@ -128,6 +126,7 @@ const ImportForm = () => {
 					which the format Google Podcasts (
 					<Link href="https://killedbygoogle.com/">RIP</Link>) used.
 				</chakra.p>
+
 				<HStack alignItems="end">
 					<FormControl maxWidth="200px">
 						<FormLabel>RSS feed list</FormLabel>
@@ -137,7 +136,20 @@ const ImportForm = () => {
 				</HStack>
 			</form>
 
-			<pre>{JSON.stringify(response, null, 2)}</pre>
+			{/* <pre>{JSON.stringify(response, null, 2)}</pre> */}
+
+			<Heading as="h2" size="lg">
+				Importable feeds
+			</Heading>
+			<PageGrid>
+				{response?.json
+					? (response.json as any).feeds.map(f => (
+							<GridItem colSpan={12} key={f.url}>
+								{f.title}
+							</GridItem>
+						))
+					: null}
+			</PageGrid>
 		</>
 	)
 }
