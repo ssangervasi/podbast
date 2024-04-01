@@ -46,8 +46,18 @@ export const slice = createSlice({
 			url: string
 			currentTime?: number
 		}>((state, action) => {
-			// state
-			log.info('subs _receiveMediaUpdate', action)
+			const { url, currentTime } = action.payload
+			// Ok, gotta stash the current subscription too
+			const item = values(state.feedUrlToItemIdToItem)
+				.map(itemIdToItem =>
+					values(itemIdToItem).find(item => item.enclosure.url === url),
+				)
+				.find(item => item !== undefined)
+			if (!item) {
+				log.error("Couldn't find subscription item by url")
+				return
+			}
+			item.activity.progressTime = currentTime
 		}),
 	}),
 	selectors: {

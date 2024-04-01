@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
+import throttle from 'lodash.throttle'
 
 import {
 	_receiveMediaUpdate as player_receiveMediaUpdate,
@@ -8,6 +9,10 @@ import { _receiveMediaUpdate as subscriptions_receiveMediaUpdate } from '/src/fe
 import type { RootState } from '/src/store/store'
 
 // import { _receiveMediaUpdate } from './slice'
+
+const throttledWrapper = throttle((f: () => void) => {
+	f()
+}, 2_000)
 
 export const updateMedia = createAsyncThunk(
 	'player/updateMedia',
@@ -19,13 +24,16 @@ export const updateMedia = createAsyncThunk(
 	) => {
 		thunkAPI.dispatch(player_receiveMediaUpdate(mediaUpdate))
 
-		const media = selectMedia(thunkAPI.getState() as RootState)
-		thunkAPI.dispatch(
-			subscriptions_receiveMediaUpdate({
-				...media!,
-				...mediaUpdate,
-			}),
-		)
+		throttledWrapper(() => {
+			const media = selectMedia(thunkAPI.getState() as RootState)
+
+			thunkAPI.dispatch(
+				subscriptions_receiveMediaUpdate({
+					...media!,
+					...mediaUpdate,
+				}),
+			)
+		})
 		// const response = await getFeed(feedUrl)
 		// return response
 	},
