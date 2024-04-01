@@ -65,7 +65,7 @@ describe('latest episodes', () => {
 				).as('getTF')
 			})
 
-		cy.findByText('Refresh').click()
+		cy.findByText('Refresh all').click()
 
 		cy.wait('@getTF')
 

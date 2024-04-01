@@ -1,6 +1,8 @@
+import { CheckCircleIcon, TimeIcon } from '@chakra-ui/icons'
 import {
 	Box,
 	Button,
+	chakra,
 	Divider,
 	GridItem,
 	Heading,
@@ -10,10 +12,18 @@ import {
 } from '@chakra-ui/react'
 
 import { useSubscriptionManager } from '/src/features/subscriptions/manager'
-import { Episode } from '/src/features/subscriptions/models'
+import {
+	Episode,
+	SubscriptionItemActivity,
+} from '/src/features/subscriptions/models'
 import { useAppSelector } from '/src/store'
-import { HCenter, HStack, PageStack, Stack } from '/src/ui'
+import { HCenter, HStack, PageStack } from '/src/ui'
 import { ExpandableLines } from '/src/ui/ExpandableLines'
+import {
+	fromIso,
+	isoToShortDate,
+	secondsToTimeString,
+} from '/src/utils/datetime'
 
 import { EpisodeControls } from './EpisodeControls'
 import { selectRecentEpisodes } from './slice'
@@ -39,6 +49,7 @@ export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 					{episode.subscription.title}
 				</Text>
 			</HStack>
+			<Date isoDate={episode.item.isoDate} />
 		</GridItem>
 
 		<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
@@ -47,7 +58,11 @@ export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 			</Text>
 		</GridItem>
 
-		<GridItem colSpan={6}>
+		<GridItem colSpan={1}>
+			<EpisodeActivity activity={episode.item.activity} />
+		</GridItem>
+
+		<GridItem colSpan={5}>
 			<HCenter>
 				<ExpandableLines maxW="40ch" noOfLines={2}>
 					{episode.item.contentSnippet}
@@ -64,6 +79,51 @@ export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 		</GridItem>
 	</>
 )
+
+const Time = ({ seconds }: { seconds: number }) => (
+	<chakra.span fontFamily="monospace" fontSize="x-small">
+		{secondsToTimeString(seconds)}
+	</chakra.span>
+)
+
+const Date = ({ isoDate }: { isoDate: string }) => (
+	<chakra.span fontFamily="monospace" fontSize="x-small">
+		{isoToShortDate(isoDate)}
+	</chakra.span>
+)
+
+const EpisodeActivity = ({
+	activity,
+}: {
+	activity: SubscriptionItemActivity
+}) => {
+	const { durationTime, progressTime, completedIsoDate, playedIsoDate } =
+		activity
+	return (
+		<>
+			{progressTime !== undefined ? (
+				<>
+					<Time seconds={progressTime} />
+					<chakra.span>{' /\n'}</chakra.span>
+				</>
+			) : null}
+			{durationTime !== undefined ? (
+				<Time seconds={durationTime} />
+			) : (
+				<chakra.span>...</chakra.span>
+			)}
+			{completedIsoDate !== undefined ? (
+				//
+				<CheckCircleIcon boxSize={30} />
+			) : playedIsoDate !== undefined ? (
+				<Box data-testid="EpisodeRow-item-playedDate">
+					<TimeIcon boxSize={30} />
+					<Date isoDate={playedIsoDate} />
+				</Box>
+			) : null}
+		</>
+	)
+}
 
 export const LatestPage = () => {
 	const { refreshAll } = useSubscriptionManager()

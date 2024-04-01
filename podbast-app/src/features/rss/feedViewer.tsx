@@ -2,7 +2,7 @@ import { Button, chakra, Divider, GridItem } from '@chakra-ui/react'
 import { useCallback } from 'preact/hooks'
 
 import { play } from '/src/features/player'
-import { FeedItem } from '/src/features/rss/guards'
+import { FeedItem } from './models'
 import {
 	RssPull,
 	RssPullNotFound,

@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 
 export { DateTime, Duration } from 'luxon'
 
@@ -19,6 +19,9 @@ export const parseDate = (du: unknown): DateTime<true> => {
 	return ensureValid(dt)
 }
 
+export const isoToShortDate = (isoDate: string) =>
+	fromIso(isoDate).toLocaleString(DateTime.DATE_SHORT)
+
 export const ensureValid = (dt: DateTime | undefined): DateTime<true> => {
 	if (dt && dt.isValid) {
 		return dt
@@ -34,3 +37,52 @@ export const getEpoch = (): DateTime<true> => {
 export const getNow = (): DateTime<true> => {
 	return DateTime.now()
 }
+
+export const parseDurationString = (ds: string): Duration => {
+	const nums = ds
+		.split(':')
+		.map(part => Number.parseFloat(part.trim()))
+		.filter(n => !Number.isNaN(n))
+
+	if (nums.length === 0) {
+		return Duration.invalid('No numerical parts')
+	}
+
+	if (nums.length === 1) {
+		const [seconds] = nums
+		return Duration.fromObject({ seconds })
+	}
+	if (nums.length === 2) {
+		const [minutes, seconds] = nums
+		return Duration.fromObject({ minutes, seconds })
+	}
+	if (nums.length === 3) {
+		const [hours, minutes, seconds] = nums
+		return Duration.fromObject({ hours, minutes, seconds })
+	}
+
+	return Duration.invalid(
+		'Too many parts in duration (only hours:minutes:seconds allowed)',
+	)
+}
+
+export const parseDurationToSeconds = (ds: unknown): number | undefined => {
+	if (typeof ds === 'number') {
+		return ds
+	}
+
+	if (typeof ds === 'string') {
+		const dur = parseDurationString(ds)
+		if (dur.isValid) {
+			return dur.as('seconds')
+		}
+	}
+
+	return undefined
+}
+
+export const durationFromSeconds = (time: number) =>
+	Duration.fromObject({ seconds: time })
+
+export const secondsToTimeString = (time: number) =>
+	durationFromSeconds(time).toFormat('hh:mm:ss')

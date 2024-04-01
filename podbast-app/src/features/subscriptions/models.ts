@@ -1,6 +1,14 @@
+import { type Draft, produce } from 'immer'
+
 import { Feed, FeedItem } from '/src/features/rss'
+import { entries, log } from '/src/utils'
 import { Indexed, mapToIndexed } from '/src/utils/collections'
-import { DateTime, getNow, parseDate } from '/src/utils/datetime'
+import {
+	DateTime,
+	getNow,
+	parseDate,
+	parseDurationToSeconds,
+} from '/src/utils/datetime'
 
 export type Subscription = {
 	// Unique ID
@@ -38,6 +46,18 @@ export type SubscriptionItem = {
 	contentSnippet?: string
 	// Pub date
 	isoDate: string
+	activity: SubscriptionItemActivity
+}
+
+export type SubscriptionItemActivity = {
+	/**
+	 * Duration may be included in the feed's itunes data, but otherwise it has to be determined at
+	 * playtime.
+	 */
+	durationTime?: number
+	progressTime?: number
+	playedIsoDate?: string
+	completedIsoDate?: string
 }
 
 export type Episode = {
@@ -61,10 +81,12 @@ export const transformFeedItemToSubscriptionItem = (
 	feedItem: FeedItem,
 ): SubscriptionItem => {
 	const { feedUrl } = feed
-	const { guid, title, link, enclosure, content, contentSnippet } = feedItem
+	const { guid, title, link, enclosure, content, contentSnippet, itunes } =
+		feedItem
 
 	const id = getFeedItemId(feedItem)
 	const isoDate = getFeedItemIsoDate(feedItem)
+	const durationTime = parseDurationToSeconds(itunes?.duration)
 
 	return {
 		feedUrl,
@@ -76,6 +98,9 @@ export const transformFeedItemToSubscriptionItem = (
 		contentSnippet,
 		guid,
 		isoDate,
+		activity: {
+			durationTime,
+		},
 	}
 }
 
@@ -110,4 +135,34 @@ export const cmpDate = (a: string, b: string): number => {
 	const da = DateTime.fromISO(a)
 	const db = DateTime.fromISO(b)
 	return da.toMillis() - db.toMillis()
+}
+
+export const mergeFeedIntoState = (
+	draft: Draft<SubscriptionsState>,
+	feed: Feed,
+): void => {
+	const { feedUrl } = feed
+	const existing = draft.feedUrlToSubscription[feedUrl]
+
+	if (!existing) {
+		log.error('Updating feed that is not subscribed', feed.link)
+		return
+	}
+
+	const subscription = transformFeedToSubscription(feed)
+	existing.isoDate = subscription.isoDate
+	existing.pulledIsoDate = subscription.pulledIsoDate
+
+	const existingItems = draft.feedUrlToItemIdToItem[feedUrl] ?? {}
+	draft.feedUrlToItemIdToItem[feedUrl] = existingItems
+
+	const items = transformFeedToSubscriptionItems(feed)
+	entries(items).forEach(([id, item]) => {
+		const existingItem = existingItems[id]
+		existingItems[id] = {
+			...existingItem,
+			...item,
+			activity: { ...item.activity, ...existingItem?.activity },
+		}
+	})
 }

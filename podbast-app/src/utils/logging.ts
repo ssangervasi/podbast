@@ -1,4 +1,4 @@
-import { isDev } from './isDev'
+import { isDev, isTest } from './isDev'
 
 const logState = {
 	lastMs: 0,
@@ -21,7 +21,7 @@ const _log = (
 	prefix = '',
 	...args: unknown[]
 ) => {
-	if (!isDev()) {
+	if (!(isDev() || isTest())) {
 		return
 	}
 	const preArr = prefix ? `[${prefix}]` : []

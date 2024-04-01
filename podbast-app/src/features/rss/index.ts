@@ -1,2 +1,2 @@
 export * from './AddFeedPage'
-export * from './guards'
+export * from './models'

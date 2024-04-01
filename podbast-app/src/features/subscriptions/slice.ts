@@ -1,45 +1,21 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
-import { type Draft } from 'immer'
 
-import { Feed } from '/src/features/rss/guards'
+import { Feed } from '/src/features/rss/models'
+import { compact, log, values } from '/src/utils'
+
 import {
 	cmpDate,
 	Episode,
+	mergeFeedIntoState,
 	Subscription,
 	SubscriptionsState,
 	transformFeedToSubscription,
 	transformFeedToSubscriptionItems,
-} from '/src/features/subscriptions/models'
-import { compact, entries, log, values } from '/src/utils'
+} from './models'
 
 export const initialState: SubscriptionsState = {
 	feedUrlToSubscription: {},
 	feedUrlToItemIdToItem: {},
-}
-
-export const updateStateFromFeed = (
-	draft: Draft<SubscriptionsState>,
-	feed: Feed,
-): void => {
-	const { feedUrl } = feed
-	const existing = draft.feedUrlToSubscription[feedUrl]
-
-	if (!existing) {
-		log.error('Updating feed that is not subscribed', feed.link)
-		return
-	}
-
-	const subscription = transformFeedToSubscription(feed)
-	existing.isoDate = subscription.isoDate
-	existing.pulledIsoDate = subscription.pulledIsoDate
-
-	const existingItems = draft.feedUrlToItemIdToItem[feedUrl] ?? {}
-	draft.feedUrlToItemIdToItem[feedUrl] = existingItems
-
-	const items = transformFeedToSubscriptionItems(feed)
-	entries(items).forEach(([id, item]) => {
-		existingItems[id] = item
-	})
 }
 
 export const slice = createSlice({
@@ -53,7 +29,7 @@ export const slice = createSlice({
 
 			if (existing) {
 				log.info('Subscribe to existing feed', feed.feedUrl)
-				updateStateFromFeed(draft, feed)
+				mergeFeedIntoState(draft, feed)
 				return
 			}
 
@@ -64,7 +40,14 @@ export const slice = createSlice({
 		}),
 		updateSubscriptionFeed: create.reducer<Feed>((state, action) => {
 			const feed = action.payload
-			updateStateFromFeed(state, feed)
+			mergeFeedIntoState(state, feed)
+		}),
+		_receiveMediaUpdate: create.reducer<{
+			url: string
+			currentTime?: number
+		}>((state, action) => {
+			// state
+			log.info('subs _receiveMediaUpdate', action)
 		}),
 	}),
 	selectors: {
@@ -76,7 +59,8 @@ export const slice = createSlice({
 })
 
 export const { actions, reducer, selectors } = slice
-export const { subscribe, updateSubscriptionFeed } = actions
+export const { subscribe, updateSubscriptionFeed, _receiveMediaUpdate } =
+	actions
 export const { selectState, selectFeedSubscription } = selectors
 
 export const selectSubscriptions = createSelector(

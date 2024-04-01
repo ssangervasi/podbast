@@ -1,4 +1,4 @@
-import { FeedResponseGuard } from '/src/features/rss/guards'
+import { FeedResponseGuard } from './models'
 import { log } from '/src/utils'
 
 export const getFeed = async (url: string) => {

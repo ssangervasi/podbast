@@ -10,8 +10,4 @@ import { App } from './app'
 
 render(<App />, document.getElementById('app')!)
 
-if (isTest()) {
-	import('/src/devtools/windowDecorator').then(({ decorateWindow }) => {
-		decorateWindow()
-	})
-}
+import('/src/devtools/windowDecorator')

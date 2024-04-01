@@ -1,5 +1,5 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { createSlice, prepareAutoBatched } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 
 export type Media = {
 	title: string
@@ -10,10 +10,6 @@ export type Media = {
 export type PlayRequest = {
 	status: Status
 	media?: Media
-}
-
-type ReceiveMediaPlayer = {
-	currentTime: number
 }
 
 /**
@@ -48,14 +44,14 @@ export const slice = createSlice({
 			// Race condition?
 			state.pendingRequest = undefined
 		},
-		_receiveMediaPlayer: {
-			reducer: (state, action: PayloadAction<ReceiveMediaPlayer>) => {
-				if (!state.media) {
-					return
-				}
-				state.media.currentTime = action.payload.currentTime
-			},
-			prepare: prepareAutoBatched<ReceiveMediaPlayer>(),
+		_receiveMediaUpdate: (
+			state,
+			action: PayloadAction<{ currentTime: number }>,
+		) => {
+			if (!state.media) {
+				return
+			}
+			state.media.currentTime = action.payload.currentTime
 		},
 	},
 	selectors: {
@@ -66,6 +62,6 @@ export const slice = createSlice({
 })
 
 export const { actions, reducer } = slice
-export const { play, _receiveMediaPlayer, _clearRequest } = actions
+export const { play, _receiveMediaUpdate, _clearRequest } = actions
 export const { selectStatus, selectMedia, selectPendingRequest } =
 	slice.selectors

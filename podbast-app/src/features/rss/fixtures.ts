@@ -1,4 +1,4 @@
-import { Feed, FeedResponse } from '/src/features/rss/guards'
+import { Feed, FeedResponse } from './models'
 
 export const FEED: Feed = {
 	items: [

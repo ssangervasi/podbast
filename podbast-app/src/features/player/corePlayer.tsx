@@ -1,5 +1,7 @@
 import '@vidstack/react/player/styles/default/theme.css'
+import '@vidstack/react/player/styles/default/layouts/audio.css'
 
+import { Box } from '@chakra-ui/react'
 import {
 	MediaPlayer,
 	MediaPlayerInstance,
@@ -17,12 +19,12 @@ import { useUpdatingRef } from '/src/utils'
 
 import {
 	_clearRequest,
-	_receiveMediaPlayer,
 	PlayRequest,
 	selectMedia,
 	selectPendingRequest,
 	Status,
 } from './slice'
+import { updateMedia } from './thunks'
 
 const stateToStatus = (mediaPlayerState: MediaPlayerState): Status => {
 	const { paused, playing } = mediaPlayerState
@@ -130,19 +132,42 @@ export const CorePlayer = () => {
 			}
 
 			const { currentTime } = mediaPlayerState
-			dispatch(_receiveMediaPlayer({ currentTime }))
+			dispatch(updateMedia({ currentTime }))
 		})
 	}, [])
 
 	return (
-		<MediaPlayer
-			ref={mediaPlayerRef}
-			src={media?.url ?? ''}
-			title={media?.title ?? ''}
-			viewType="audio"
+		<Box
+			height="full"
+			width="full"
+			sx={{
+				'--audio-bg': 'transparent',
+			}}
 		>
-			<MediaProvider />
-			<DefaultAudioLayout icons={defaultLayoutIcons} smallLayoutWhen />
-		</MediaPlayer>
+			<MediaPlayer
+				ref={mediaPlayerRef}
+				src={media?.url ?? ''}
+				title={media?.title ?? ''}
+				viewType="audio"
+			>
+				<MediaProvider />
+				<DefaultAudioLayout
+					icons={defaultLayoutIcons}
+					// slots={{
+					// 	beforePlayButton: (
+					// 		<Box boxSize={10} bg="hotpink">
+					// 			sdf
+					// 		</Box>
+					// 	),
+					// 	afterPlayButton: () => (
+					// 		<Box boxSize={10} bg="hotpink">
+					// 			sdf
+					// 		</Box>
+					// 	),
+					// }}
+					// smallLayoutWhen={true}
+				/>
+			</MediaPlayer>
+		</Box>
 	)
 }

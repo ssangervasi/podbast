@@ -27,12 +27,12 @@ Cypress.Commands.add('appStateGet', () =>
 )
 
 Cypress.Commands.add('appStateSnapshotPath', name => {
-	const specDir = Cypress.spec.fileName
-	if (!specDir) {
-		throw 'WTF no spec spec fileName!'
-	}
+	// const specDir = Cypress.spec.fileName
+	// if (!specDir) {
+	// 	throw 'WTF no spec spec fileName!'
+	// }
 
-	return cy.wrap(`cypress/fixtures/appStates/${specDir}/${name}.json`)
+	return cy.wrap(`cypress/fixtures/appStates/${name}.json`)
 })
 
 Cypress.Commands.add('appStateSnapshotSave', name => {
@@ -50,6 +50,7 @@ Cypress.Commands.add('appStateSnapshotLoad', name => {
 	return cy.appStateSnapshotPath(name).then(snapshotPath => {
 		return cy.readFile(snapshotPath).then(appState => {
 			cy.log(`Loading appState ${name}`)
+
 			return cy.appStateReset(appState)
 		})
 	})

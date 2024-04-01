@@ -34,6 +34,7 @@ const SideButton = ({
 			HeadingOverflow="ellipsis"
 			justifyContent="flex-start"
 			paddingX="1"
+			data-nav={to}
 			onClick={() => {
 				show(to)
 			}}

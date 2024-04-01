@@ -2,7 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 
 import { FEED } from '/src/features/rss/fixtures'
-import { Feed } from '/src/features/rss/guards'
+import { Feed } from './models'
 import { log } from '/src/utils'
 
 import { EMPTY_ARRAY, mapToMap, wrapEmpty } from '../../utils/collections'

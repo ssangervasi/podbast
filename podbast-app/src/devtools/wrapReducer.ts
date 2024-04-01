@@ -1,14 +1,14 @@
 import { Action, Reducer } from 'redux'
 
 import { log } from '/src/utils'
-import { isDev } from '/src/utils/isDev'
+import { isTest } from '/src/utils/isDev'
 
 import { TEST_reset } from './cypressImportable'
 
 export const wrapTestableReducer = <S, A extends Action>(
 	baseReducer: Reducer<S, A>,
 ): Reducer<S, A> => {
-	if (!isDev()) {
+	if (!isTest()) {
 		return baseReducer
 	}
 

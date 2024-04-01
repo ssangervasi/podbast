@@ -1,15 +1,13 @@
 import { Box, Text, useTimeout } from '@chakra-ui/react'
-import { useMeasure } from '@uidotdev/usehooks'
+import { useRef } from 'preact/hooks'
 
 import { CATJAM } from '/src/utils/images'
 
 import { CorePlayer } from './corePlayer'
 
+const PLAYER_HEIGHT = 100
+
 export const Player = () => {
-	const [fixedRef, rect] = useMeasure()
-
-	useTimeout
-
 	return (
 		<>
 			{/* Spacer to ensure fixed content position doesn't hide main content*/}
@@ -17,28 +15,29 @@ export const Player = () => {
 				sx={{
 					position: 'relative',
 					overflow: 'hidden',
-					height: rect.height ? rect.height * 0.95 : 0,
+					height: PLAYER_HEIGHT * 0.95,
+					marginTop: PLAYER_HEIGHT * 0.95,
 					width: 'full',
 					// JAMJAMJAMJAM
-					backgroundImage: rect.height ? CATJAM : 'none',
+					backgroundImage: CATJAM,
 					backgroundRepeat: 'round',
 				}}
 			></Box>
 
 			<Box
-				ref={fixedRef}
 				sx={{
 					position: 'fixed',
 					right: 0,
 					bottom: 0,
 					left: 0,
 					backgroundColor: '#202535',
-					minHeight: 50,
+					height: PLAYER_HEIGHT,
 					//
 					display: 'flex',
 					flexDirection: 'row',
 					placeContent: 'center',
 					placeItems: 'center',
+					padding: 2,
 
 					// JAMJAMJAM
 					transitionProperty: 'opacity',
@@ -49,20 +48,7 @@ export const Player = () => {
 					},
 				}}
 			>
-				<Box
-					sx={{
-						height: '100%',
-						display: 'flex',
-						flexDirection: 'column',
-						placeContent: 'center',
-						placeItems: 'start',
-						gap: '8px',
-					}}
-				>
-					<Text>Player</Text>
-
-					<CorePlayer />
-				</Box>
+				<CorePlayer />
 			</Box>
 		</>
 	)
