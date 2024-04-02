@@ -1,4 +1,4 @@
-import { type Draft, produce } from 'immer'
+import { type Draft } from 'immer'
 
 import { Feed, FeedItem } from '/src/features/rss'
 import { entries, log } from '/src/utils'

@@ -1,5 +1,4 @@
-import { CheckCircleIcon } from '@chakra-ui/icons'
-import { Box, Button, HStack, Icon } from '@chakra-ui/react'
+import { Box, Button, HStack } from '@chakra-ui/react'
 
 import { play } from '/src/features/player'
 import { useAppDispatch } from '/src/store'

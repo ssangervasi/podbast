@@ -1,7 +1,7 @@
 import { GridItem, Heading, SimpleGrid, Text } from '@chakra-ui/react'
 
 import { useAppSelector } from '/src/store'
-import { PageStack, Stack } from '/src/ui'
+import { PageStack } from '/src/ui'
 
 import { selectSubSummaries } from './slice'
 

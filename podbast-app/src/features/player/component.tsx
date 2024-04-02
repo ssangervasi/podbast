@@ -1,5 +1,4 @@
-import { Box, Text, useTimeout } from '@chakra-ui/react'
-import { useRef } from 'preact/hooks'
+import { Box } from '@chakra-ui/react'
 
 import { CATJAM } from '/src/utils/images'
 

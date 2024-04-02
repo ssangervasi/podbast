@@ -7,14 +7,13 @@ import {
 	Heading,
 	Input,
 	Link,
-	SimpleGrid,
 } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'preact/hooks'
 
 import { PullViewer } from '/src/features/rss/feedViewer'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
-import { HStack, PageStack, VStack } from '/src/ui'
+import { HStack, PageStack } from '/src/ui'
 import { PageGrid } from '/src/ui/grids'
 
 import { LocalUrlForm } from './LocalUrlForm'
@@ -79,7 +78,7 @@ export const AddFeedPage = () => {
 }
 
 const ImportForm = () => {
-	const dispatch = useAppDispatch()
+	// const dispatch = useAppDispatch()
 
 	const [response, setResponse] = useState<{
 		status: number
@@ -143,7 +142,7 @@ const ImportForm = () => {
 			</Heading>
 			<PageGrid>
 				{response?.json
-					? (response.json as any).feeds.map(f => (
+					? (response.json as any).feeds.map((f: any) => (
 							<GridItem colSpan={12} key={f.url}>
 								{f.title}
 							</GridItem>

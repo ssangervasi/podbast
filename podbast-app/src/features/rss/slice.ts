@@ -1,11 +1,9 @@
-import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 
-import { FEED } from '/src/features/rss/fixtures'
-import { Feed } from './models'
 import { log } from '/src/utils'
 
 import { EMPTY_ARRAY, mapToMap, wrapEmpty } from '../../utils/collections'
+import { Feed } from './models'
 import { fetchFeed } from './thunks'
 
 export type RssPullBase = {
@@ -41,17 +39,6 @@ export const slice = createSlice({
 	name: 'rss',
 	initialState,
 	reducers: {
-		makeReady: (state, action: PayloadAction<string>) => {
-			const url = action.payload
-			const pull = state.pulls.find(p => p.url === url)
-			if (!pull) {
-				log.info('makeReady: No subscription for url')
-				return
-			}
-
-			pull.status = 'ready'
-			pull.feed = FEED
-		},
 		clearPending: state => {
 			state.pulls = state.pulls.filter(p => {
 				if (p.status !== 'ready') {
@@ -121,4 +108,4 @@ export const selectPullsByStatus = createSelector(
 )
 
 export const { actions, reducer } = slice
-export const { makeReady, clearPending } = actions
+export const { clearPending } = actions

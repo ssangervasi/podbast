@@ -3,8 +3,8 @@ import { useCallback, useEffect } from 'preact/hooks'
 import { selectFeedUrlToPull } from '/src/features/rss/slice'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
-import { log, useInterval } from '/src/utils'
-import { DateTime, Duration, fromIso, getNow } from '/src/utils/datetime'
+import { useInterval } from '/src/utils'
+import { Duration, fromIso, getNow } from '/src/utils/datetime'
 
 import { selectSubscriptions, updateSubscriptionFeed } from './slice'
 

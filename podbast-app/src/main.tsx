@@ -1,4 +1,4 @@
-import { isDev, isTest } from './utils/isDev'
+import { isDev } from './utils/isDev'
 
 if (isDev()) {
 	import('preact/debug')
