@@ -3,38 +3,22 @@ import throttle from 'lodash.throttle'
 
 import {
 	_receiveMediaUpdate as player_receiveMediaUpdate,
-	selectMedia,
+	type MediaUpdate,
 } from '/src/features/player/slice'
 import { _receiveMediaUpdate as subscriptions_receiveMediaUpdate } from '/src/features/subscriptions/slice'
-import type { RootState } from '/src/store/store'
-
-// import { _receiveMediaUpdate } from './slice'
+// import type { RootState } from '/src/store/store'
 
 const throttledWrapper = throttle((f: () => void) => {
 	f()
-}, 2_000)
+}, 1_000)
 
 export const updateMedia = createAsyncThunk(
 	'player/updateMedia',
-	async (
-		mediaUpdate: {
-			currentTime: number
-		},
-		thunkAPI,
-	) => {
-		thunkAPI.dispatch(player_receiveMediaUpdate(mediaUpdate))
-
+	async (mediaUpdate: MediaUpdate, thunkAPI) => {
+		// Maybe status changes shouldn't be throttled
 		throttledWrapper(() => {
-			const media = selectMedia(thunkAPI.getState() as RootState)
-
-			thunkAPI.dispatch(
-				subscriptions_receiveMediaUpdate({
-					...media!,
-					...mediaUpdate,
-				}),
-			)
+			thunkAPI.dispatch(player_receiveMediaUpdate(mediaUpdate))
+			thunkAPI.dispatch(subscriptions_receiveMediaUpdate(mediaUpdate))
 		})
-		// const response = await getFeed(feedUrl)
-		// return response
 	},
 )

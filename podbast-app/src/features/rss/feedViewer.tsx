@@ -1,8 +1,7 @@
 import { Button, chakra, Divider, GridItem } from '@chakra-ui/react'
 import { useCallback } from 'preact/hooks'
 
-import { play } from '/src/features/player'
-import { FeedItem } from './models'
+import { makeRequest } from '/src/features/player'
 import {
 	RssPull,
 	RssPullNotFound,
@@ -12,8 +11,9 @@ import {
 import { selectFeedSubscription, subscribe } from '/src/features/subscriptions'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { VStack } from '/src/ui'
+import { useChunker } from '/src/utils/useChunker'
 
-import { useChunker } from '../../utils/useChunker'
+import { FeedItem } from './models'
 
 export const PullViewer = ({ pull }: { pull: RssPull }) => {
 	return pull.status === 'requested' ? (
@@ -99,9 +99,12 @@ const FeedItemViewer = ({ item }: { item: FeedItem }) => {
 					size="sm"
 					onClick={() => {
 						dispatch(
-							play({
-								title: item.title,
-								url: item.enclosure.url,
+							makeRequest({
+								status: 'playing',
+								media: {
+									title: item.title,
+									src: item.enclosure.url,
+								},
 							}),
 						)
 					}}

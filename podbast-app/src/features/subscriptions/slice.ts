@@ -1,5 +1,6 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 
+import type { MediaUpdate } from '/src/features/player/slice'
 import { Feed } from '/src/features/rss/models'
 import { compact, log, values } from '/src/utils'
 
@@ -42,21 +43,22 @@ export const slice = createSlice({
 			const feed = action.payload
 			mergeFeedIntoState(state, feed)
 		}),
-		_receiveMediaUpdate: create.reducer<{
-			url: string
-			currentTime?: number
-		}>((state, action) => {
-			const { url, currentTime } = action.payload
-			// Ok, gotta stash the current subscription too
-			const item = values(state.feedUrlToItemIdToItem)
-				.map(itemIdToItem =>
-					values(itemIdToItem).find(item => item.enclosure.url === url),
-				)
-				.find(item => item !== undefined)
-			if (!item) {
-				log.error("Couldn't find subscription item by url")
+		_receiveMediaUpdate: create.reducer<MediaUpdate>((state, action) => {
+			const {
+				//
+				media: { item: itemUpdate, currentTime } = {},
+			} = action.payload
+			if (!itemUpdate) {
 				return
 			}
+
+			const item =
+				state.feedUrlToItemIdToItem[itemUpdate.feedUrl]?.[itemUpdate.id]
+			if (!item) {
+				log.error("Couldn't find subscription item from update")
+				return
+			}
+
 			item.activity.progressTime = currentTime
 		}),
 	}),

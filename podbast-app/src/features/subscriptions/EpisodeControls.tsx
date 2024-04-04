@@ -1,6 +1,6 @@
 import { Box, Button, HStack } from '@chakra-ui/react'
 
-import { play } from '/src/features/player'
+import { makeRequest } from '/src/features/player'
 import { useAppDispatch } from '/src/store'
 
 import { Episode } from './models'
@@ -17,9 +17,16 @@ export const EpisodeControls = ({ episode }: { episode: Episode }) => {
 					size="sm"
 					onClick={() => {
 						dispatch(
-							play({
-								title: item.title,
-								url: item.enclosure.url,
+							makeRequest({
+								status: 'playing',
+								media: {
+									title: item.title,
+									src: item.enclosure.url,
+									item: {
+										id: item.id,
+										feedUrl: item.feedUrl,
+									},
+								},
 							}),
 						)
 					}}

@@ -17,20 +17,23 @@ const nextDelta = () => {
 }
 
 const _log = (
-	level: 'error' | 'info' | 'debug' = 'info',
+	level: 'error' | 'info' | 'debug' | 'warn' = 'info',
 	prefix = '',
 	...args: unknown[]
 ) => {
 	if (!(isDev() || isTest())) {
 		return
 	}
-	const preArr = prefix ? `[${prefix}]` : []
+	const preArr = prefix ? [`[${prefix}]`] : []
 	console[level](...preArr, ...args)
 }
 
 export const log = Object.assign(_log, {
 	info: (...args: unknown[]) => {
 		_log('info', '', ...args)
+	},
+	warn: (...args: unknown[]) => {
+		_log('warn', '', ...args)
 	},
 	error: (...args: unknown[]) => {
 		_log('error', '', ...args)

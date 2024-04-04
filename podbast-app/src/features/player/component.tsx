@@ -14,8 +14,8 @@ export const Player = () => {
 				sx={{
 					position: 'relative',
 					overflow: 'hidden',
-					height: PLAYER_HEIGHT * 0.95,
-					marginTop: PLAYER_HEIGHT * 0.95,
+					height: PLAYER_HEIGHT,
+					margin: 0,
 					width: 'full',
 					// JAMJAMJAMJAM
 					backgroundImage: CATJAM,

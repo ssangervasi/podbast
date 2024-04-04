@@ -25,7 +25,7 @@ describe('parseOpmlOutline', () => {
         type="rss" text="c" />
     </outline>
   </body>
-</opml>		
+</opml>
 `)
 		assert.deepEqual(parsed, {
 			feeds: [

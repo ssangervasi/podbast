@@ -1,13 +1,24 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 
+import { log } from '/src/utils'
+
+/**
+ * Just the item stuff we need within the player
+ */
+export type MediaItem = {
+	id: string
+	feedUrl: string
+}
+
 export type Media = {
-	title: string
-	url: string
+	title?: string
+	src?: string
+	item?: MediaItem
 	currentTime?: number
 }
 
-export type PlayRequest = {
+export type MediaUpdate = {
 	status: Status
 	media?: Media
 }
@@ -20,7 +31,7 @@ export type Status = 'stopped' | 'paused' | 'playing'
 export type PlayerState = {
 	status: Status
 	media?: Media
-	pendingRequest?: PlayRequest
+	pendingRequest?: MediaUpdate
 }
 
 export const initialState: PlayerState = {
@@ -31,27 +42,22 @@ export const slice = createSlice({
 	name: 'player',
 	initialState,
 	reducers: {
-		play: (state, action: PayloadAction<Media>) => {
-			const media = action.payload
-
-			state.media = media
-			state.pendingRequest = {
-				status: 'playing',
-				media,
-			}
+		makeRequest: (state, action: PayloadAction<MediaUpdate>) => {
+			state.pendingRequest = action.payload
 		},
 		_clearRequest(state) {
-			// Race condition?
-			state.pendingRequest = undefined
-		},
-		_receiveMediaUpdate: (
-			state,
-			action: PayloadAction<{ currentTime: number }>,
-		) => {
-			if (!state.media) {
+			if (!state.pendingRequest) {
+				log.warn('Clearing no pending request')
 				return
 			}
-			state.media.currentTime = action.payload.currentTime
+			state.status = state.pendingRequest.status
+			state.media = state.pendingRequest.media
+			state.pendingRequest = undefined
+		},
+		_receiveMediaUpdate: (state, action: PayloadAction<MediaUpdate>) => {
+			const mediaUpdate = action.payload
+			state.status = mediaUpdate.status
+			state.media = mediaUpdate.media
 		},
 	},
 	selectors: {
@@ -62,6 +68,6 @@ export const slice = createSlice({
 })
 
 export const { actions, reducer } = slice
-export const { play, _receiveMediaUpdate, _clearRequest } = actions
+export const { makeRequest, _receiveMediaUpdate, _clearRequest } = actions
 export const { selectStatus, selectMedia, selectPendingRequest } =
 	slice.selectors
