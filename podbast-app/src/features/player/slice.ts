@@ -43,6 +43,7 @@ export const slice = createSlice({
 	initialState,
 	reducers: {
 		makeRequest: (state, action: PayloadAction<MediaUpdate>) => {
+			log.info('makeRequest', action.payload)
 			state.pendingRequest = action.payload
 		},
 		_clearRequest(state) {

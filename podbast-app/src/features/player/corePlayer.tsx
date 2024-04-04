@@ -13,7 +13,7 @@ import {
 	DefaultAudioLayout,
 	defaultLayoutIcons,
 } from '@vidstack/react/player/layouts/default'
-import { Ref, useCallback, useEffect, useRef } from 'preact/hooks'
+import { Ref, useCallback, useEffect, useMemo, useRef } from 'preact/hooks'
 
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { AppDispatch } from '/src/store/store'
@@ -42,163 +42,123 @@ const stateToStatus = (mediaPlayerState: MediaPlayerState): Status => {
 }
 
 const isInSync = ({
-	pendingRequest,
+	scope: { pendingRequest, media },
 	mediaPlayerState,
-}: {
-	pendingRequest: MediaUpdate
-	mediaPlayerState: MediaPlayerState
-}): boolean => {
-	const src = mediaPlayerState.source.src
+}: SubscriberHandlerContext): boolean => {
+	if (!pendingRequest) {
+		return true
+	}
+
 	const status = stateToStatus(mediaPlayerState)
-
-	const statusIsSync = pendingRequest.status === status
-	const srcIsSync = !pendingRequest.media || pendingRequest.media.src === src
-
-	return statusIsSync && srcIsSync
+	return pendingRequest.status === status
 }
 
 const needsPlay = ({
-	pendingRequest,
+	scope: { pendingRequest },
 	mediaPlayerState,
-}: {
-	pendingRequest: MediaUpdate
-	mediaPlayerState: MediaPlayerState
-}): boolean => {
-	if (pendingRequest.status !== 'playing') {
+}: SubscriberHandlerContext): boolean => {
+	if (pendingRequest?.status !== 'playing') {
 		return false
 	}
 	return stateToStatus(mediaPlayerState) !== 'playing'
 }
 
 const needsPause = ({
-	pendingRequest,
+	scope: { pendingRequest },
 	mediaPlayerState,
-}: {
-	pendingRequest: MediaUpdate
-	mediaPlayerState: MediaPlayerState
-}): boolean => {
-	if (pendingRequest.status !== 'paused') {
+}: SubscriberHandlerContext): boolean => {
+	if (pendingRequest?.status !== 'paused') {
 		return false
 	}
 	return stateToStatus(mediaPlayerState) !== 'paused'
 }
 
 const needsStop = ({
-	pendingRequest,
+	scope: { pendingRequest },
 	mediaPlayerState,
-}: {
-	pendingRequest: MediaUpdate
-	mediaPlayerState: MediaPlayerState
-}): boolean => {
-	if (pendingRequest.status !== 'stopped') {
+}: SubscriberHandlerContext): boolean => {
+	if (pendingRequest?.status !== 'stopped') {
 		return false
 	}
 	return stateToStatus(mediaPlayerState) === 'playing'
 }
 
 // Should probably just put stuff in a thunk
-type LastSliceState = {
+type Scope = {
 	media: Media | undefined
 	pendingRequest: MediaUpdate | undefined
 }
 
 type SubscriberContext = {
 	dispatch: AppDispatch
-	lastSliceRef: Ref<LastSliceState>
+	scopeRef: Ref<Scope>
 	mediaPlayerRef: Ref<MediaPlayerInstance>
 }
 
 type SubscriberHandlerContext = {
 	dispatch: AppDispatch
-	lastSlice: LastSliceState
+	scope: Scope
 	mediaPlayer: MediaPlayerInstance
 	mediaPlayerState: MediaPlayerState
 }
 
 const handleUpdateMedia = ({
 	dispatch,
-	lastSlice,
+	scope,
 	mediaPlayerState,
 }: SubscriberHandlerContext) => {
-	const { currentTime } = mediaPlayerState
 	const status = stateToStatus(mediaPlayerState)
+	const { currentTime } = mediaPlayerState
+	const media = scope.media
+		? {
+				...scope.media,
+				currentTime,
+			}
+		: undefined
+
 	log.info('handleUpdateMedia', { status, currentTime })
 	dispatch(
 		updateMedia({
 			status,
-			media: {
-				...lastSlice.media,
-				currentTime,
-			},
+			media,
 		}),
 	)
 }
 
-const handlePendingRequest = ({
-	dispatch,
-	lastSlice,
-	mediaPlayer,
-	mediaPlayerState,
-}: SubscriberHandlerContext) => {
-	const { pendingRequest } = lastSlice
-	log.info('handlePendingRequest', pendingRequest)
-	if (!pendingRequest) {
-		return
-	}
-
-	if (
-		isInSync({
-			pendingRequest,
-			mediaPlayerState,
-		})
-	) {
+const handlePendingRequest = (context: SubscriberHandlerContext) => {
+	if (isInSync(context)) {
 		log.info('in sync')
-		dispatch(_clearRequest())
+		context.dispatch(_clearRequest())
 		return
 	}
 
-	if (
-		needsPause({
-			pendingRequest,
-			mediaPlayerState,
-		})
-	) {
-		mediaPlayer.paused = true
+	if (needsPause(context)) {
+		context.mediaPlayer.paused = true
 		return
 	}
 
-	if (
-		needsPlay({
-			pendingRequest,
-			mediaPlayerState,
-		})
-	) {
-		mediaPlayer.paused = false
+	if (needsPlay(context)) {
+		context.mediaPlayer.paused = false
 		return
 	}
 
-	if (
-		needsStop({
-			pendingRequest,
-			mediaPlayerState,
-		})
-	) {
-		mediaPlayer.paused = true
+	if (needsStop(context)) {
+		context.mediaPlayer.paused = true
 		return
 	}
 }
 
 const createMediaPlayerSubscriber =
-	({ lastSliceRef, mediaPlayerRef, dispatch }: SubscriberContext) =>
+	({ scopeRef, mediaPlayerRef, dispatch }: SubscriberContext) =>
 	(mediaPlayerState: MediaPlayerState) => {
 		const mediaPlayer = mediaPlayerRef.current
-		const lastSlice = lastSliceRef.current
-		if (!(mediaPlayer && lastSlice)) {
+		const scope = scopeRef.current
+		if (!(mediaPlayer && scope)) {
 			return
 		}
 
 		const handlerContext: SubscriberHandlerContext = {
-			lastSlice,
+			scope,
 			mediaPlayer,
 			mediaPlayerState,
 			dispatch,
@@ -214,35 +174,53 @@ export const CorePlayer = () => {
 	const media = useAppSelector(selectMedia)
 	const pendingRequest = useAppSelector(selectPendingRequest)
 
-	const lastSliceRef = useUpdatingRef({
+	const mediaForPlayer: Media | undefined = useMemo(() => {
+		if (pendingRequest?.status === 'stopped') {
+			return undefined
+		}
+		if (pendingRequest?.media) {
+			return pendingRequest.media
+		}
+		return media
+	}, [media, pendingRequest])
+
+	const scopeRef = useUpdatingRef({
 		media,
 		pendingRequest,
+		mediaForPlayer,
 	})
 
 	const mediaPlayerRef = useRef<MediaPlayerInstance>(null)
 
-	// const subscriber = useMemo(() => {
-	// 	return createMediaPlayerSubscriber({
-	// 		lastSliceRef,
-	// 		mediaPlayerRef,
-	// 		dispatch,
-	// 	}),
-	// }, [])
+	const subscriber = useMemo(() => {
+		return createMediaPlayerSubscriber({
+			scopeRef,
+			mediaPlayerRef,
+			dispatch,
+		})
+	}, [])
+
+	useEffect(() => {
+		const mediaPlayer = mediaPlayerRef.current
+		if (!mediaPlayer) {
+			log.info('pendingRequest no media player')
+		}
+	}, [subscriber, pendingRequest])
 
 	useEffect(() => {
 		const mediaPlayer = mediaPlayerRef.current
 		if (!mediaPlayer) {
 			log.info('no media player')
+			// dispatch(
+			// 	updateMedia({
+			// 		status: 'stopped',
+			// 		media: undefined,
+			// 	}),
+			// )
 			return () => {}
 		}
 
-		return mediaPlayer.subscribe(
-			createMediaPlayerSubscriber({
-				lastSliceRef,
-				mediaPlayerRef,
-				dispatch,
-			}),
-		)
+		return mediaPlayer.subscribe(subscriber)
 	}, [])
 
 	const handleClickStop = useCallback(() => {
@@ -252,8 +230,6 @@ export const CorePlayer = () => {
 			}),
 		)
 	}, [])
-
-	const mediaForPlayer = media ?? pendingRequest?.media
 
 	useEffect(() => {
 		log.info('mediaForPlayer', mediaForPlayer)
