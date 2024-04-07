@@ -9,8 +9,11 @@ import {
 	Link,
 } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'preact/hooks'
+import { Fragment } from 'preact/jsx-runtime'
 
+import { Outline, OutlineFeed } from '/src/features/rss'
 import { PullViewer } from '/src/features/rss/feedViewer'
+import { postOpml } from '/src/features/rss/opmlClient'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { HStack, PageStack } from '/src/ui'
@@ -28,6 +31,19 @@ export const AddFeedPage = () => {
 		dispatch(clearPending())
 	}, [])
 
+	const handleSubmitRssUrl = useCallback(async (evt: SubmitEvent) => {
+		evt.preventDefault()
+		if (!(evt.currentTarget instanceof HTMLFormElement)) {
+			return
+		}
+		const urlEl = evt.currentTarget.elements.namedItem('url')
+		if (!(urlEl instanceof HTMLInputElement)) {
+			return
+		}
+		const url = urlEl.value
+		dispatch(fetchFeed({ feedUrl: url }))
+	}, [])
+
 	return (
 		<PageStack>
 			<Heading as="h1" size="lg">
@@ -36,15 +52,7 @@ export const AddFeedPage = () => {
 
 			<LocalUrlForm />
 
-			<form
-				name="inputRssUrl"
-				onSubmit={evt => {
-					evt.preventDefault()
-					const urlEl = evt.currentTarget.elements.namedItem('url')
-					const url = (urlEl as HTMLInputElement).value
-					dispatch(fetchFeed({ feedUrl: url }))
-				}}
-			>
+			<form name="inputRssUrl" onSubmit={handleSubmitRssUrl}>
 				<chakra.p>Load a podcast by RSS feed</chakra.p>
 
 				<HStack alignItems="end">
@@ -60,7 +68,7 @@ export const AddFeedPage = () => {
 			<ImportForm />
 
 			<Heading as="h2" size="lg">
-				Results
+				Loaded feeds
 			</Heading>
 			<PageGrid>
 				{pulls.length === 0 ? (
@@ -77,53 +85,25 @@ export const AddFeedPage = () => {
 	)
 }
 
-export type OutlineFeed = {
-	title: string
-	url: string
-}
-
-export type Outline = {
-	feeds: OutlineFeed[]
-}
+// const
 
 const ImportForm = () => {
-	// const dispatch = useAppDispatch()
+	const dispatch = useAppDispatch()
 
-	const [response, setResponse] = useState<{
-		status: number
-		json: object
-	}>()
+	const [outline, setOutline] = useState<Outline>()
 
 	const handleSubmit = useCallback(async (evt: SubmitEvent) => {
 		evt.preventDefault()
 		if (!(evt.currentTarget instanceof HTMLFormElement)) {
 			return
 		}
+		const opmlForm = new FormData(evt.currentTarget)
+		const resOutline = await postOpml(opmlForm)
+		setOutline(resOutline)
+	}, [])
 
-		// const fileEl = evt.currentTarget.elements.namedItem('file')
-		// if (!(fileEl instanceof HTMLInputElement)) {
-		// 	return
-		// }
-
-		// const file = fileEl.files?.[0]
-		// if (!file) {
-		// 	return
-		// }
-
-		const res = await fetch('/api/opml', {
-			method: 'POST',
-			body: new FormData(evt.currentTarget),
-		})
-		let json
-		try {
-			json = await res.json()
-		} catch {
-			json = null
-		}
-		setResponse({
-			status: res.status,
-			json,
-		})
+	const handleLoad = useCallback(async (outlineFeed: OutlineFeed) => {
+		dispatch(fetchFeed({ feedUrl: outlineFeed.url }))
 	}, [])
 
 	return (
@@ -144,17 +124,23 @@ const ImportForm = () => {
 				</HStack>
 			</form>
 
-			{/* <pre>{JSON.stringify(response, null, 2)}</pre> */}
-
 			<Heading as="h2" size="lg">
 				Importable feeds
 			</Heading>
 			<PageGrid>
-				{response?.json
-					? (response.json as any).feeds.map((f: any) => (
-							<GridItem colSpan={12} key={f.url}>
-								{f.title}
-							</GridItem>
+				{outline
+					? outline.feeds.map(f => (
+							<Fragment key={f.url}>
+								<GridItem colSpan={3}>
+									<chakra.b fontSize="lg">{f.title}</chakra.b>
+								</GridItem>
+								<GridItem colSpan={8}>
+									<chakra.span fontFamily="monospace">{f.url}</chakra.span>
+								</GridItem>
+								<GridItem colSpan={1}>
+									<Button onClick={() => handleLoad(f)}>Load</Button>
+								</GridItem>
+							</Fragment>
 						))
 					: null}
 			</PageGrid>

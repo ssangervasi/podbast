@@ -65,3 +65,17 @@ export type FeedResponse = Payload<typeof FeedResponseGuard>
 export type Feed = FeedResponse['content']
 export type FeedImage = Feed['image']
 export type FeedItem = Feed['items'][number]
+
+export const OpmlResponseGuard = Guard.narrow({
+	content: {
+		feeds: [{ title: 'string', url: 'string' }],
+	},
+})
+export type OpmlResponse = Payload<typeof OpmlResponseGuard>
+export type OutlineFeed = {
+	title: string
+	url: string
+}
+export type Outline = {
+	feeds: OutlineFeed[]
+}
