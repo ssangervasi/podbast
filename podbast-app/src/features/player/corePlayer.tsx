@@ -17,7 +17,7 @@ import { Ref, useCallback, useEffect, useMemo, useRef } from 'preact/hooks'
 
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { AppDispatch } from '/src/store/store'
-import { log, useUpdatingRef } from '/src/utils'
+import { isAround, log, useUpdatingRef } from '/src/utils'
 
 import {
 	_clearRequest,
@@ -39,18 +39,6 @@ const stateToStatus = (mediaPlayerState: MediaPlayerState): Status => {
 		return 'playing'
 	}
 	return 'stopped'
-}
-
-const isInSync = ({
-	scope: { pendingRequest, media },
-	mediaPlayerState,
-}: SubscriberHandlerContext): boolean => {
-	if (!pendingRequest) {
-		return true
-	}
-
-	const status = stateToStatus(mediaPlayerState)
-	return pendingRequest.status === status
 }
 
 const needsPlay = ({
@@ -81,6 +69,23 @@ const needsStop = ({
 		return false
 	}
 	return stateToStatus(mediaPlayerState) === 'playing'
+}
+
+const checkSeek = ({
+	scope: { pendingRequest },
+	mediaPlayerState,
+}: SubscriberHandlerContext): undefined | { seekTime: number } => {
+	const seekTime = pendingRequest?.media?.currentTime
+	if (seekTime === undefined) {
+		return undefined
+	}
+
+	const mediaTime = mediaPlayerState.currentTime
+	if (isAround(seekTime, 1, mediaTime)) {
+		return undefined
+	}
+
+	return { seekTime }
 }
 
 // Should probably just put stuff in a thunk
@@ -126,25 +131,33 @@ const handleUpdateMedia = ({
 }
 
 const handlePendingRequest = (context: SubscriberHandlerContext) => {
-	if (isInSync(context)) {
-		log.info('in sync')
-		context.dispatch(_clearRequest())
-		return
-	}
-
-	if (needsPause(context)) {
-		context.mediaPlayer.paused = true
-		return
-	}
-
 	if (needsPlay(context)) {
+		log.info('needsPlay')
 		context.mediaPlayer.paused = false
 		return
 	}
 
-	if (needsStop(context)) {
+	if (needsPause(context)) {
+		log.info('needsPause')
 		context.mediaPlayer.paused = true
 		return
+	}
+
+	if (needsStop(context)) {
+		log.info('needsStop')
+		context.mediaPlayer.paused = true
+		return
+	}
+
+	const seekResult = checkSeek(context)
+	if (seekResult) {
+		log.info('seekResult', seekResult)
+		context.mediaPlayer.currentTime = seekResult.seekTime
+		return
+	}
+
+	if (context.scope.pendingRequest) {
+		context.dispatch(_clearRequest())
 	}
 }
 
@@ -203,25 +216,19 @@ export const CorePlayer = () => {
 	useEffect(() => {
 		const mediaPlayer = mediaPlayerRef.current
 		if (!mediaPlayer) {
-			log.info('pendingRequest no media player')
+			return
 		}
-	}, [subscriber, pendingRequest])
+		subscriber(mediaPlayer.state)
+	}, [subscriber, pendingRequest, mediaPlayerRef.current])
 
 	useEffect(() => {
 		const mediaPlayer = mediaPlayerRef.current
 		if (!mediaPlayer) {
-			log.info('no media player')
-			// dispatch(
-			// 	updateMedia({
-			// 		status: 'stopped',
-			// 		media: undefined,
-			// 	}),
-			// )
 			return () => {}
 		}
 
 		return mediaPlayer.subscribe(subscriber)
-	}, [])
+	}, [mediaPlayerRef.current])
 
 	const handleClickStop = useCallback(() => {
 		dispatch(

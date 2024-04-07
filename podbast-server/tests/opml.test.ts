@@ -45,7 +45,7 @@ describe('parseOpmlOutline', () => {
 		})
 	})
 
-	it('return undefined for an unknown format', async () => {
+	it('returns undefined for an unknown format', async () => {
 		const parsed = await parseOpmlOutline(`
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <opml version="1.0">

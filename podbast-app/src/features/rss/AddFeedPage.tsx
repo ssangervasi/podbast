@@ -77,6 +77,15 @@ export const AddFeedPage = () => {
 	)
 }
 
+export type OutlineFeed = {
+	title: string
+	url: string
+}
+
+export type Outline = {
+	feeds: OutlineFeed[]
+}
+
 const ImportForm = () => {
 	// const dispatch = useAppDispatch()
 
