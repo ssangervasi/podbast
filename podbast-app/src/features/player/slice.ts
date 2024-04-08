@@ -12,8 +12,8 @@ export type MediaItem = {
 }
 
 export type Media = {
+	src: string
 	title?: string
-	src?: string
 	item?: MediaItem
 	currentTime?: number
 }

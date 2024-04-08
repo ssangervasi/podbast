@@ -13,6 +13,7 @@ import {
 	transformFeedToSubscription,
 	transformFeedToSubscriptionItems,
 } from './models'
+import { getNow } from '/src/utils/datetime'
 
 export const initialState: SubscriptionsState = {
 	feedUrlToSubscription: {},
@@ -60,6 +61,7 @@ export const slice = createSlice({
 			}
 
 			item.activity.progressTime = currentTime
+			item.activity.playedIsoDate = getNow().toISO()
 		}),
 	}),
 	selectors: {
@@ -73,7 +75,11 @@ export const slice = createSlice({
 export const { actions, reducer, selectors } = slice
 export const { subscribe, updateSubscriptionFeed, _receiveMediaUpdate } =
 	actions
-export const { selectState, selectFeedSubscription } = selectors
+export const {
+	selectState,
+	selectFeedSubscription,
+	selectFeedUrlToSubscription,
+} = selectors
 
 export const selectSubscriptions = createSelector(
 	[selectState],
@@ -115,4 +121,39 @@ export const selectSubSummaries = createSelector([selectSubscriptions], subs =>
 			link: sub.link,
 		})),
 	),
+)
+
+export const selectExportable = createSelector(
+	[selectSubscriptions, selectFeedUrlToSubscription],
+	subs =>
+		compact(
+			subs.map(sub => ({
+				title: sub.title,
+				link: sub.link,
+			})),
+		),
+)
+
+export const selectExportableSubscriptions = createSelector(
+	[selectState],
+	state => {
+		return compact(
+			values(state.feedUrlToSubscription).map(sub => {
+				const items = compact(
+					values(state.feedUrlToItemIdToItem[sub.feedUrl] ?? {}).map(item => {
+						const { playedIsoDate } = item.activity
+						if (!playedIsoDate) {
+							return undefined
+						}
+						return item
+					}),
+				)
+
+				return {
+					...sub,
+					items,
+				}
+			}),
+		)
+	},
 )

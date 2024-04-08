@@ -1,3 +1,4 @@
+import { ImpExpPage } from '/src/features/impexp/ImpExpPage'
 import { AddFeedPage } from '/src/features/rss'
 import { LatestPage, SubscriptionsPage } from '/src/features/subscriptions'
 
@@ -16,6 +17,11 @@ export const LAYOUTS = {
 		main: AddFeedPage,
 		sideTitle: 'Add feed',
 		sideTiny: 'Add',
+	},
+	impexp: {
+		main: ImpExpPage,
+		sideTitle: 'Import/Export',
+		sideTiny: 'I/E',
 	},
 } satisfies {
 	[k: string]: {
