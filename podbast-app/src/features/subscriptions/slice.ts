@@ -3,6 +3,7 @@ import { createSelector, createSlice } from '@reduxjs/toolkit'
 import type { MediaUpdate } from '/src/features/player/slice'
 import { Feed } from '/src/features/rss/models'
 import { compact, log, values } from '/src/utils'
+import { getNow } from '/src/utils/datetime'
 
 import {
 	cmpDate,
@@ -13,7 +14,6 @@ import {
 	transformFeedToSubscription,
 	transformFeedToSubscriptionItems,
 } from './models'
-import { getNow } from '/src/utils/datetime'
 
 export const initialState: SubscriptionsState = {
 	feedUrlToSubscription: {},

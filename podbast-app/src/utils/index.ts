@@ -1,5 +1,7 @@
 export * from './collections'
+export * from './DevOnly'
 export * from './hooks'
 export * from './images'
+export * from './isDev'
 export * from './logging'
 export * from './math'
