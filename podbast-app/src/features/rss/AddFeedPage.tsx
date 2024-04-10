@@ -58,7 +58,12 @@ export const AddFeedPage = () => {
 				<HStack alignItems="end">
 					<FormControl>
 						<FormLabel>RSS URL</FormLabel>
-						<Input type="text" name="url" placeholder="rss.url.com"></Input>
+						<Input
+							type="url"
+							name="url"
+							placeholder="rss.url.com"
+							isRequired
+						></Input>
 					</FormControl>
 
 					<Button type="submit">Load</Button>
@@ -118,7 +123,7 @@ const ImportForm = () => {
 				<HStack alignItems="end">
 					<FormControl maxWidth="200px">
 						<FormLabel>RSS feed list</FormLabel>
-						<Input type="file" name="content" padding={1}></Input>
+						<Input type="file" name="content" padding={1} isRequired></Input>
 					</FormControl>
 					<Button type="submit">Import</Button>
 				</HStack>

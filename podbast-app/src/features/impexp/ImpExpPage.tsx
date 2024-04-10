@@ -2,7 +2,6 @@ import { DownloadIcon } from '@chakra-ui/icons'
 import {
 	Box,
 	Button,
-	chakra,
 	FormControl,
 	FormLabel,
 	Heading,
@@ -13,9 +12,9 @@ import {
 import { useCallback, useMemo, useState } from 'preact/hooks'
 
 import { selectExportableSubscriptions } from '/src/features/subscriptions'
-import { useAppDispatch, useAppSelector } from '/src/store'
+import { useAppSelector } from '/src/store'
 import { HStack, PageStack } from '/src/ui'
-import { getNow, isoToShortDate } from '/src/utils/datetime'
+import { getNow } from '/src/utils/datetime'
 import { DevOnly } from '/src/utils/DevOnly'
 
 const encodeJsonDataUrl = (jsonData: any) => {
@@ -37,8 +36,8 @@ export const ImpExpPage = () => {
 	const expDataUrl = useMemo(() => encodeJsonDataUrl(expData), [expData])
 
 	const expFilename = useMemo(() => {
-		const filesafeDate = getNow().toFormat('yyyy-mm-dd')
-		return `${filesafeDate}.podbast.json`
+		const fileSafeDate = getNow().toFormat('yyyy-mm-dd')
+		return `${fileSafeDate}.podbast.json`
 	}, [expSubs])
 
 	// const export = useAppDispatch()
@@ -77,19 +76,50 @@ export const ImpExpPage = () => {
 }
 
 const ImpForm = () => {
-	const handleSubmit = useCallback(() => {}, [])
+	const [res, setRes] = useState<string>()
+
+	const handleSubmit = useCallback(async (evt: SubmitEvent) => {
+		evt.preventDefault()
+		if (!(evt.currentTarget instanceof HTMLFormElement)) {
+			return
+		}
+		const fileEl = evt.currentTarget.elements.namedItem('content')
+		if (!(fileEl instanceof HTMLInputElement)) {
+			return
+		}
+
+		const file = fileEl.files?.[0]
+		if (!file) {
+			return
+		}
+		const text = await file.text()
+		try {
+			JSON.parse(text)
+			setRes(text)
+		} catch {
+			setRes('invalid file')
+		}
+	}, [])
 
 	return (
 		<>
-			<form name="importFeedList" onSubmit={handleSubmit}>
+			<form name="importPodbastJson" onSubmit={handleSubmit}>
 				<HStack alignItems="end">
 					<FormControl maxWidth="200px">
 						<FormLabel>podbast.json file</FormLabel>
-						<Input type="file" name="content" padding={1}></Input>
+						<Input
+							type="file"
+							name="content"
+							padding={1}
+							isRequired
+							accept=".json"
+						></Input>
 					</FormControl>
 					<Button type="submit">Import</Button>
 				</HStack>
 			</form>
+
+			{res ? <pre>{res}</pre> : null}
 		</>
 	)
 }

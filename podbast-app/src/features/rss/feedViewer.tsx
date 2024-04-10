@@ -1,4 +1,4 @@
-import { Button, chakra, Divider, GridItem } from '@chakra-ui/react'
+import { Button, chakra, Divider, GridItem, Spinner } from '@chakra-ui/react'
 import { useCallback } from 'preact/hooks'
 
 import { makeRequest } from '/src/features/player'
@@ -25,8 +25,18 @@ export const PullViewer = ({ pull }: { pull: RssPull }) => {
 	)
 }
 
-const FeedRequested = ({ pull: _pull }: { pull: RssPullRequested }) => {
-	return <>'FeedRequested'</>
+const FeedRequested = ({ pull }: { pull: RssPullRequested }) => {
+	return (
+		<>
+			<GridItem colSpan={2}>
+				<Spinner />
+			</GridItem>
+
+			<GridItem colSpan={10}>
+				<chakra.span fontFamily="monospace">{pull.url}</chakra.span>
+			</GridItem>
+		</>
+	)
 }
 const FeedNotFound = ({ pull: _pull }: { pull: RssPullNotFound }) => {
 	return <>'FeedNotFound'</>
@@ -49,33 +59,46 @@ const FeedViewer = ({ pull }: { pull: RssPullReady }) => {
 
 	return (
 		<>
-			<GridItem colSpan={2}>
-				<chakra.b fontSize="lg">{feed.title}</chakra.b>
-			</GridItem>
+			<chakra.div
+				display="contents"
+				// sx={{
+				// 	'&:hover > div': {
+				// 		borderBottom: '2px dotted black',
+				// 	},
+				// }}
+			>
+				<GridItem colSpan={2}>
+					<chakra.b fontSize="lg">{feed.title}</chakra.b>
+				</GridItem>
 
-			<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
-				<Button size="sm" onClick={handleSubscribe} isDisabled={isSubscribed}>
-					{isSubscribed ? 'Subscribed' : 'Subscribe'}
-				</Button>
-			</GridItem>
+				<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
+					<Button size="sm" onClick={handleSubscribe} isDisabled={isSubscribed}>
+						{isSubscribed ? 'Subscribed' : 'Subscribe'}
+					</Button>
+				</GridItem>
 
-			<GridItem colSpan={6}>
-				<chakra.span>{feed.description}</chakra.span>
-			</GridItem>
+				<GridItem colSpan={6}>
+					<chakra.span>{feed.description}</chakra.span>
+				</GridItem>
 
-			<GridItem colSpan={2}>asdf</GridItem>
+				<GridItem colSpan={2}>
+					<chakra.span fontFamily="monospace">{feed.feedUrl}</chakra.span>
+				</GridItem>
+			</chakra.div>
 
-			<GridItem colSpan={12}>
-				<chakra.b>Episodes</chakra.b>
-			</GridItem>
+			<chakra.div display="contents">
+				<GridItem colSpan={12}>
+					<chakra.b>Episodes</chakra.b>
+				</GridItem>
 
-			{chunker.chunk.map(item => (
-				<FeedItemViewer item={item} key={item.guid} />
-			))}
+				{chunker.chunk.map(item => (
+					<FeedItemViewer item={item} key={item.guid} />
+				))}
 
-			{chunker.itemsAfter > 0 ? (
-				<GridItem colSpan={12}>... and {chunker.itemsAfter} more</GridItem>
-			) : null}
+				{chunker.itemsAfter > 0 ? (
+					<GridItem colSpan={12}>... and {chunker.itemsAfter} more</GridItem>
+				) : null}
+			</chakra.div>
 		</>
 	)
 }
