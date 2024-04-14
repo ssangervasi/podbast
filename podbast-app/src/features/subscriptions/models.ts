@@ -42,7 +42,6 @@ export type SubscriptionItem = {
 		type: string
 	}
 	guid?: string
-	content?: string
 	contentSnippet?: string
 	// Pub date
 	isoDate: string
@@ -81,8 +80,7 @@ export const transformFeedItemToSubscriptionItem = (
 	feedItem: FeedItem,
 ): SubscriptionItem => {
 	const { feedUrl } = feed
-	const { guid, title, link, enclosure, content, contentSnippet, itunes } =
-		feedItem
+	const { guid, title, link, enclosure, contentSnippet, itunes } = feedItem
 
 	const id = getFeedItemId(feedItem)
 	const isoDate = getFeedItemIsoDate(feedItem)
@@ -94,7 +92,6 @@ export const transformFeedItemToSubscriptionItem = (
 		title,
 		link,
 		enclosure,
-		content,
 		contentSnippet,
 		guid,
 		isoDate,

@@ -3,7 +3,7 @@ import { navigate } from '../support/navigate'
 describe('player', () => {
 	it('shows the two most recent per subscription', () => {
 		cy.visit('/')
-		cy.appStateLoad('snappy')
+		cy.appStateLoad('subscriber')
 		navigate('latest')
 
 		cy.findAllByLabelText('Play episode').first().click()
