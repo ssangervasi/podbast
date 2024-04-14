@@ -1,9 +1,9 @@
 describe('generate states', () => {
-	it('generates snappy', () => {
+	it('generates subscriber', () => {
 		cy.visit('/')
 
 		cy.findByRole('button', { name: 'Add feed' }).click()
-		cy.findByRole('textbox').type('fake-search')
+		cy.findByRole('textbox').type('https://fake-search.sangervasi.net/rss.xml')
 
 		cy.intercept(
 			{
@@ -26,6 +26,6 @@ describe('generate states', () => {
 		cy.findByRole('button', { name: 'Subscribe' }).click()
 		cy.findByRole('button', { name: 'Subscriptions' }).click()
 
-		cy.appStateSnapshotSave('snappy')
+		cy.appStateSave('subscriber', 'two subscribed podcsts')
 	})
 })

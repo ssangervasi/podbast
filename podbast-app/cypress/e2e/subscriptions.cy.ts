@@ -1,9 +1,7 @@
-import { FeedResponse } from '/src/features/rss'
-
 describe('subscriptions', () => {
 	beforeEach(() => {
 		cy.visit('/')
-		cy.appStateSnapshotLoad('snappy')
+		cy.appStateLoad('subscriber')
 	})
 
 	it('shows the two most recent per subscription', () => {

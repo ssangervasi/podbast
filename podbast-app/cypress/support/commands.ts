@@ -15,7 +15,7 @@ import { Draft, produce } from 'immer'
 
 import { type RootState, TEST_reset } from '/src/devtools/cypressImportable'
 
-Cypress.Commands.add('appStateReset', appState => {
+Cypress.Commands.add('appStateSet', appState => {
 	cy.window().then(win => {
 		win.TEST.store.dispatch(TEST_reset(appState))
 		return win.TEST.store.getState()
@@ -26,32 +26,45 @@ Cypress.Commands.add('appStateGet', () =>
 	cy.window().then(win => win.TEST.store.getState()),
 )
 
-Cypress.Commands.add('appStateSnapshotPath', name => {
+Cypress.Commands.add('appStatePath', name => {
+	return cy.wrap(`cypress/fixtures/appStates/${name}.json`)
+})
+
+type AppStateBody = {
+	description: string
+	generatedBy: string
+	appState: RootState
+}
+
+Cypress.Commands.add('appStateSave', (name, description = undefined) => {
 	// const specDir = Cypress.spec.fileName
 	// if (!specDir) {
 	// 	throw 'WTF no spec spec fileName!'
 	// }
 
-	return cy.wrap(`cypress/fixtures/appStates/${name}.json`)
-})
-
-Cypress.Commands.add('appStateSnapshotSave', name => {
 	return cy.appStateGet().then(appState => {
-		cy.log(`Saving appState ${name}`)
+		const specFileName = Cypress.spec.fileName ?? ''
+		cy.log(`Saving appState "${name}" from "${specFileName}"`)
 
-		cy.appStateSnapshotPath(name).then(snapshotPath => {
-			cy.writeFile(snapshotPath, JSON.stringify(appState, null, 2))
+		cy.appStatePath(name).then(path => {
+			const appStateBody: AppStateBody = {
+				description: description ?? name,
+				generatedBy: specFileName,
+				appState,
+			}
+			cy.writeFile(path, JSON.stringify(appStateBody, null, 2))
 		})
 		return cy.wrap(appState)
 	})
 })
 
-Cypress.Commands.add('appStateSnapshotLoad', name => {
-	return cy.appStateSnapshotPath(name).then(snapshotPath => {
-		return cy.readFile(snapshotPath).then(appState => {
-			cy.log(`Loading appState ${name}`)
+Cypress.Commands.add('appStateLoad', name => {
+	return cy.appStatePath(name).then(path => {
+		cy.log(`Loading appState ${name}`)
 
-			return cy.appStateReset(appState)
+		return cy.readFile(path).then((appStateBody: AppStateBody) => {
+			const { appState } = appStateBody
+			return cy.appStateSet(appState)
 		})
 	})
 })
@@ -87,12 +100,11 @@ Cypress.Commands.add(
 declare global {
 	namespace Cypress {
 		interface Chainable {
-			appStateReset(appState: Partial<RootState>): Chainable<RootState>
+			appStateSet(appState: Partial<RootState>): Chainable<RootState>
 			appStateGet(): Chainable<RootState>
-
-			appStateSnapshotPath(name: string): Chainable<string>
-			appStateSnapshotSave(name: string): Chainable<RootState>
-			appStateSnapshotLoad(name: string): Chainable<RootState>
+			appStatePath(name: string): Chainable<string>
+			appStateSave(name: string, description?: string): Chainable<RootState>
+			appStateLoad(name: string): Chainable<RootState>
 
 			//
 			aliases<AN extends string[]>(

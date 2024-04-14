@@ -5,7 +5,7 @@ describe('add feed', () => {
 	})
 
 	it('can load a feed and subscribe', () => {
-		cy.findByRole('textbox').type('fake-search')
+		cy.findByRole('textbox').type('https://fake-search.sangervasi.net/rss.xml')
 
 		cy.intercept(
 			{ pathname: '/api/rss' },
