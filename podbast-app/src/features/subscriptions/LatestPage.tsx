@@ -3,7 +3,6 @@ import {
 	Box,
 	Button,
 	chakra,
-	Divider,
 	GridItem,
 	Heading,
 	Image,
@@ -17,7 +16,7 @@ import {
 	SubscriptionItemActivity,
 } from '/src/features/subscriptions/models'
 import { useAppSelector } from '/src/store'
-import { HCenter, HStack, PageStack } from '/src/ui'
+import { HCenter, HStack, PageStack, RowWrapper } from '/src/ui'
 import { ExpandableLines } from '/src/ui/ExpandableLines'
 import { isoToShortDate, secondsToTimeString } from '/src/utils/datetime'
 
@@ -26,53 +25,51 @@ import { selectRecentEpisodes } from './slice'
 
 export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 	<>
-		<GridItem colSpan={2}>
-			<HStack alignItems="center">
-				<Box>
-					<Image
-						src={episode.subscription.image?.url}
-						objectFit="cover"
-						maxW="30px"
-					/>
-				</Box>
+		<RowWrapper>
+			<GridItem colSpan={2}>
+				<HStack alignItems="center">
+					<Box>
+						<Image
+							src={episode.subscription.image?.url}
+							objectFit="cover"
+							maxW="30px"
+						/>
+					</Box>
 
-				<Text
-					noOfLines={3}
-					fontSize="sm"
-					fontWeight="bold"
-					data-testid="EpisodeRow-subscription-title"
-				>
-					{episode.subscription.title}
+					<Text
+						noOfLines={3}
+						fontSize="sm"
+						fontWeight="bold"
+						data-testid="EpisodeRow-subscription-title"
+					>
+						{episode.subscription.title}
+					</Text>
+				</HStack>
+				<Date isoDate={episode.item.isoDate} />
+			</GridItem>
+
+			<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
+				<Text maxW="40ch" noOfLines={3} fontStyle="italic">
+					{episode.item.title}
 				</Text>
-			</HStack>
-			<Date isoDate={episode.item.isoDate} />
-		</GridItem>
+			</GridItem>
 
-		<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
-			<Text maxW="40ch" noOfLines={3} fontStyle="italic">
-				{episode.item.title}
-			</Text>
-		</GridItem>
+			<GridItem colSpan={1}>
+				<EpisodeActivity activity={episode.item.activity} />
+			</GridItem>
 
-		<GridItem colSpan={1}>
-			<EpisodeActivity activity={episode.item.activity} />
-		</GridItem>
+			<GridItem colSpan={5}>
+				<HCenter>
+					<ExpandableLines maxW="40ch" noOfLines={2}>
+						{episode.item.contentSnippet}
+					</ExpandableLines>
+				</HCenter>
+			</GridItem>
 
-		<GridItem colSpan={5}>
-			<HCenter>
-				<ExpandableLines maxW="40ch" noOfLines={2}>
-					{episode.item.contentSnippet}
-				</ExpandableLines>
-			</HCenter>
-		</GridItem>
-
-		<GridItem colSpan={2}>
-			<EpisodeControls episode={episode} />
-		</GridItem>
-
-		<GridItem colSpan={12}>
-			<Divider />
-		</GridItem>
+			<GridItem colSpan={2}>
+				<EpisodeControls episode={episode} />
+			</GridItem>
+		</RowWrapper>
 	</>
 )
 

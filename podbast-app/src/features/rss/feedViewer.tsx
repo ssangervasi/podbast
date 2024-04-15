@@ -1,4 +1,4 @@
-import { Button, chakra, Divider, GridItem, Spinner } from '@chakra-ui/react'
+import { Button, chakra, GridItem, Spinner } from '@chakra-ui/react'
 import { useCallback } from 'preact/hooks'
 
 import { makeRequest } from '/src/features/player'
@@ -10,7 +10,7 @@ import {
 } from '/src/features/rss/slice'
 import { selectFeedSubscription, subscribe } from '/src/features/subscriptions'
 import { useAppDispatch, useAppSelector } from '/src/store'
-import { VStack } from '/src/ui'
+import { RowWrapper, VStack } from '/src/ui'
 import { useChunker } from '/src/utils/useChunker'
 
 import { FeedItem } from './models'
@@ -107,7 +107,7 @@ const FeedItemViewer = ({ item }: { item: FeedItem }) => {
 	const dispatch = useAppDispatch()
 
 	return (
-		<>
+		<RowWrapper>
 			<GridItem colSpan={10}>
 				<VStack spacing={1}>
 					<chakra.i>{item.title}</chakra.i>
@@ -135,10 +135,6 @@ const FeedItemViewer = ({ item }: { item: FeedItem }) => {
 					▶
 				</Button>
 			</GridItem>
-
-			<GridItem colSpan={12}>
-				<Divider />
-			</GridItem>
-		</>
+		</RowWrapper>
 	)
 }
