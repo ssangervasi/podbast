@@ -26,5 +26,8 @@ export const VCenter = withDefaults<FlexProps>(Flex, {
 
 export const PageStack = withDefaults<StackProps>(CVStack, {
 	alignItems: 'start',
-	maxWidth: ['full', 'container.lg'],
+	maxWidth: {
+		base: 'full',
+		xl: 'container.lg',
+	},
 })

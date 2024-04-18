@@ -1,7 +1,7 @@
 import { GridItem, Heading, SimpleGrid, Text } from '@chakra-ui/react'
 
 import { useAppSelector } from '/src/store'
-import { PageStack } from '/src/ui'
+import { PageStack, RowWrapper } from '/src/ui'
 
 import { selectSubSummaries } from './slice'
 
@@ -42,12 +42,15 @@ export const SummaryView = ({
 }) => {
 	return (
 		<>
-			<GridItem colSpan={4}>
-				<Text>{summary.title}</Text>
-			</GridItem>
-			<GridItem colSpan={8}>
-				<Text>{summary.link}</Text>
-			</GridItem>
+			<RowWrapper>
+				<GridItem colSpan={4}>
+					<Text>{summary.title}</Text>
+				</GridItem>
+
+				<GridItem colSpan={8}>
+					<Text>{summary.link}</Text>
+				</GridItem>
+			</RowWrapper>
 		</>
 	)
 }

@@ -1,4 +1,5 @@
 import { type Draft } from 'immer'
+import { Guard, Payload } from 'narrow-minded'
 
 import { Feed, FeedItem } from '/src/features/rss'
 import { entries, log } from '/src/utils'
@@ -163,3 +164,23 @@ export const mergeFeedIntoState = (
 		}
 	})
 }
+
+export const ExportableGuard = Guard.narrow({
+	subscriptions: [
+		{
+			items: [
+				{
+					feedUrl: 'string',
+				},
+			],
+			feedUrl: 'string',
+			link: 'string',
+			title: 'string',
+			description: 'string',
+			isoDate: 'string',
+			pulledIsoDate: 'string',
+		},
+	],
+})
+
+export type Exportable = Payload<typeof ExportableGuard>

@@ -10,10 +10,16 @@ import {
 	Text,
 } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'preact/hooks'
+import { useDispatch } from 'react-redux'
 
-import { selectExportableSubscriptions } from '/src/features/subscriptions'
+import {
+	receiveImport,
+	selectExportableSubscriptions,
+} from '/src/features/subscriptions'
+import { Exportable, ExportableGuard } from '/src/features/subscriptions/models'
 import { useAppSelector } from '/src/store'
 import { HStack, PageStack } from '/src/ui'
+import { ExpandableHeight } from '/src/ui/ExpandablHeight'
 import { getNow } from '/src/utils/datetime'
 import { DevOnly } from '/src/utils/DevOnly'
 
@@ -27,7 +33,7 @@ const encodeJsonDataUrl = (jsonData: any) => {
 export const ImpExpPage = () => {
 	const expSubs = useAppSelector(selectExportableSubscriptions)
 
-	const expData = useMemo(
+	const expData: Exportable = useMemo(
 		() => ({
 			subscriptions: expSubs,
 		}),
@@ -69,13 +75,19 @@ export const ImpExpPage = () => {
 			<ImpForm />
 
 			<DevOnly>
-				<Box as="pre">{JSON.stringify(expData, null, 2)}</Box>
+				<ExpandableHeight>
+					<Box as="pre" maxWidth="80ch" overflowX="auto">
+						{JSON.stringify(expData, null, 2)}
+					</Box>
+				</ExpandableHeight>
 			</DevOnly>
 		</PageStack>
 	)
 }
 
 const ImpForm = () => {
+	const dispatch = useDispatch()
+
 	const [res, setRes] = useState<string>()
 
 	const handleSubmit = useCallback(async (evt: SubmitEvent) => {
@@ -93,11 +105,17 @@ const ImpForm = () => {
 			return
 		}
 		const text = await file.text()
+		let json
 		try {
-			JSON.parse(text)
+			json = JSON.parse(text)
 			setRes(text)
 		} catch {
 			setRes('invalid file')
+			return
+		}
+
+		if (ExportableGuard.satisfied(json)) {
+			dispatch(receiveImport(json))
 		}
 	}, [])
 

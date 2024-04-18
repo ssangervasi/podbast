@@ -20,7 +20,7 @@ export const SideWrapper = () => (
 )
 
 export const MainWrapper = () => (
-	<VStack paddingX={2} paddingY={4} width="full">
+	<VStack paddingX={2} paddingY={4} flex="1" overflowX="hidden">
 		<Main />
 	</VStack>
 )
@@ -32,9 +32,9 @@ export const Bottom = () => (
 )
 
 export const Layout = () => (
-	<Flex direction="column" minH="100vh">
+	<Flex direction="column" minH="100vh" width="100vw" overflowX="hidden">
 		<Top />
-		<Flex flexGrow="1">
+		<Flex flexGrow="1" width="full">
 			<SideWrapper />
 			<MainWrapper />
 		</Flex>

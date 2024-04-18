@@ -8,8 +8,10 @@ import { getNow } from '/src/utils/datetime'
 import {
 	cmpDate,
 	Episode,
+	Exportable,
 	mergeFeedIntoState,
 	Subscription,
+	SubscriptionItem,
 	SubscriptionsState,
 	transformFeedToSubscription,
 	transformFeedToSubscriptionItems,
@@ -40,11 +42,11 @@ export const slice = createSlice({
 			draft.feedUrlToSubscription[feedUrl] = subscription
 			draft.feedUrlToItemIdToItem[feedUrl] = items
 		}),
-		updateSubscriptionFeed: create.reducer<Feed>((state, action) => {
+		updateSubscriptionFeed: create.reducer<Feed>((draft, action) => {
 			const feed = action.payload
-			mergeFeedIntoState(state, feed)
+			mergeFeedIntoState(draft, feed)
 		}),
-		_receiveMediaUpdate: create.reducer<MediaUpdate>((state, action) => {
+		_receiveMediaUpdate: create.reducer<MediaUpdate>((draft, action) => {
 			const {
 				//
 				media: { item: itemUpdate, currentTime } = {},
@@ -54,7 +56,7 @@ export const slice = createSlice({
 			}
 
 			const item =
-				state.feedUrlToItemIdToItem[itemUpdate.feedUrl]?.[itemUpdate.id]
+				draft.feedUrlToItemIdToItem[itemUpdate.feedUrl]?.[itemUpdate.id]
 			if (!item) {
 				log.error("Couldn't find subscription item from update")
 				return
@@ -62,6 +64,34 @@ export const slice = createSlice({
 
 			item.activity.progressTime = currentTime
 			item.activity.playedIsoDate = getNow().toISO()
+		}),
+		receiveImport: create.reducer<Exportable>((draft, action) => {
+			action.payload.subscriptions.forEach(expSub => {
+				const existingSub = draft.feedUrlToSubscription[expSub.feedUrl]
+				if (!existingSub) {
+					const sub: Subscription = {
+						feedUrl: expSub.feedUrl,
+						link: expSub.link,
+						title: expSub.title,
+						description: expSub.description,
+						isoDate: expSub.isoDate,
+						pulledIsoDate: expSub.pulledIsoDate,
+						image: (expSub as any)?.image,
+					}
+					draft.feedUrlToSubscription[expSub.feedUrl] = sub
+				}
+
+				const existingIt = draft.feedUrlToItemIdToItem[expSub.feedUrl]
+				if (!existingIt) {
+					draft.feedUrlToItemIdToItem[expSub.feedUrl] = {}
+				}
+
+				expSub.items.forEach(expItem => {
+					const itemIdToItem = draft.feedUrlToItemIdToItem[expSub.feedUrl]!
+					const item = expItem as SubscriptionItem
+					itemIdToItem[item.id] = item
+				})
+			})
 		}),
 	}),
 	selectors: {
@@ -73,8 +103,12 @@ export const slice = createSlice({
 })
 
 export const { actions, reducer, selectors } = slice
-export const { subscribe, updateSubscriptionFeed, _receiveMediaUpdate } =
-	actions
+export const {
+	subscribe,
+	updateSubscriptionFeed,
+	_receiveMediaUpdate,
+	receiveImport,
+} = actions
 export const {
 	selectState,
 	selectFeedSubscription,
@@ -121,17 +155,6 @@ export const selectSubSummaries = createSelector([selectSubscriptions], subs =>
 			link: sub.link,
 		})),
 	),
-)
-
-export const selectExportable = createSelector(
-	[selectSubscriptions, selectFeedUrlToSubscription],
-	subs =>
-		compact(
-			subs.map(sub => ({
-				title: sub.title,
-				link: sub.link,
-			})),
-		),
 )
 
 export const selectExportableSubscriptions = createSelector(
