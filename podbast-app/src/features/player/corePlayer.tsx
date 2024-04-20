@@ -121,7 +121,7 @@ const handleUpdateMedia = ({
 			}
 		: undefined
 
-	log.info('handleUpdateMedia', { status, currentTime })
+	log.debug('handleUpdateMedia', { status, currentTime })
 	dispatch(
 		updateMedia({
 			status,
@@ -132,26 +132,26 @@ const handleUpdateMedia = ({
 
 const handlePendingRequest = (context: SubscriberHandlerContext) => {
 	if (needsPlay(context)) {
-		log.info('needsPlay')
+		log.debug('needsPlay')
 		context.mediaPlayer.paused = false
 		return
 	}
 
 	if (needsPause(context)) {
-		log.info('needsPause')
+		log.debug('needsPause')
 		context.mediaPlayer.paused = true
 		return
 	}
 
 	if (needsStop(context)) {
-		log.info('needsStop')
+		log.debug('needsStop')
 		context.mediaPlayer.paused = true
 		return
 	}
 
 	const seekResult = checkSeek(context)
 	if (seekResult) {
-		log.info('seekResult', seekResult)
+		log.debug('seekResult', seekResult)
 		context.mediaPlayer.currentTime = seekResult.seekTime
 		return
 	}
@@ -239,7 +239,7 @@ export const CorePlayer = () => {
 	}, [])
 
 	useEffect(() => {
-		log.info('mediaForPlayer', mediaForPlayer)
+		log.debug('mediaForPlayer', mediaForPlayer)
 	}, [mediaForPlayer])
 
 	return (

@@ -1,9 +1,11 @@
 import { produce } from 'immer'
 import type { PersistedState } from 'redux-persist'
 
-import { log } from '/src/utils'
+import { entries, log, values } from '/src/utils'
 
 import type { RootReducerReturn } from './reducers'
+
+const logger = log.with({ prefix: 'Persist migrate' })
 
 export const persistanceMigrate = async (
 	state: PersistedState,
@@ -12,7 +14,32 @@ export const persistanceMigrate = async (
 	return produce(
 		state as PersistedState & Partial<RootReducerReturn>,
 		draft => {
-			log.with({ prefix: 'Persist migrate' }).debug(Object.keys(draft))
+			// log.with({ prefix: 'Persist migrate' }).debug(Object.keys(draft))
+			// if  "layout", "player", "subscriptions", "_persist" ]
+			if ('rss' in draft) {
+				logger.info('Removing stored RSS state')
+				delete draft['rss']
+			}
+
+			let delLen = 0
+
+			values(draft.subscriptions?.feedUrlToItemIdToItem ?? {}).forEach(
+				itemIdToItem => {
+					entries(itemIdToItem).forEach(([_k, v]) => {
+						if ('content' in v) {
+							const content = v['content']
+							if (typeof content === 'string') {
+								delLen += content.length
+								delete v['content']
+							}
+						}
+					})
+				},
+			)
+
+			if (delLen > 0) {
+				logger.info(`Deleted ${delLen} characters of sub content`)
+			}
 		},
 	)
 }

@@ -11,11 +11,12 @@ const DEFAULT_CONTEXT: LoggerContext = {
 }
 
 const endLog = (context: Partial<LoggerContext>, ...args: unknown[]) => {
-	if (!(isDev() || isTest())) {
+	const { prefix, level } = { ...DEFAULT_CONTEXT, ...context }
+
+	if (level === 'debug' && !(isDev() || isTest())) {
 		return
 	}
 
-	const { prefix, level } = { ...DEFAULT_CONTEXT, ...context }
 	const preArr = prefix ? [`[${prefix}]`] : []
 	console[level](...preArr, ...args)
 }
@@ -31,7 +32,6 @@ export type Logger = {
 }
 
 const withLoggerContext = (context: Partial<LoggerContext>): Logger => {
-	// console.log('withLoggerContext', context)
 	const innerLogger = (...args: unknown[]) => endLog(context, ...args)
 
 	return Object.assign(innerLogger, {
