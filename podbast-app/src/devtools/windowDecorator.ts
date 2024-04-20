@@ -2,13 +2,15 @@ import { store } from '/src/store/store'
 import { log } from '/src/utils'
 import { isTest } from '/src/utils/isDev'
 
+const logger = log.with({ prefix: 'testTools' })
+
 export const decorateWindow = () => {
 	if (typeof window !== 'object') {
-		log('debug', 'testTools', 'no window')
+		logger.debug('no window')
 		return
 	}
 	if (window.TEST) {
-		log('debug', 'testTools', 'window.TEST already defined')
+		logger.debug('window.TEST already defined')
 		return
 	}
 
@@ -16,7 +18,7 @@ export const decorateWindow = () => {
 		store,
 	}
 
-	log('debug', 'testTools', 'defined window.TEST', window.TEST)
+	logger.debug('defined window.TEST', window.TEST)
 }
 
 if (isTest()) {

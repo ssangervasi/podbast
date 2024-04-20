@@ -14,6 +14,7 @@ import {
 import storage from 'redux-persist/lib/storage'
 
 import { wrapTestableReducer } from '/src/devtools/wrapReducer'
+import { persistanceMigrate } from '/src/store/persistance'
 
 import {
 	rootReducer,
@@ -28,6 +29,7 @@ enableMapSet()
 const persistConfig: PersistConfig<RootReducerReturn> = {
 	key: 'root',
 	storage,
+	migrate: persistanceMigrate,
 	whitelist: ['layout', 'player', 'subscriptions'] satisfies RootReducerKey[],
 }
 const persistedReducer = persistReducer(persistConfig, rootReducer)

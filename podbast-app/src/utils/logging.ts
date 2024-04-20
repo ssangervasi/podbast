@@ -1,13 +1,67 @@
 import { isDev, isTest } from './isDev'
 
-const logState = {
+type LoggerContext = {
+	level: 'error' | 'info' | 'debug' | 'warn'
+	prefix: string
+}
+
+const DEFAULT_CONTEXT: LoggerContext = {
+	level: 'info',
+	prefix: '',
+}
+
+const endLog = (context: Partial<LoggerContext>, ...args: unknown[]) => {
+	if (!(isDev() || isTest())) {
+		return
+	}
+
+	const { prefix, level } = { ...DEFAULT_CONTEXT, ...context }
+	const preArr = prefix ? [`[${prefix}]`] : []
+	console[level](...preArr, ...args)
+}
+
+export type Logger = {
+	(...args: unknown[]): void
+	info: (...args: unknown[]) => void
+	warn: (...args: unknown[]) => void
+	debug: (...args: unknown[]) => void
+	error: (...args: unknown[]) => void
+
+	with: (innerContext: Partial<LoggerContext>) => Logger
+}
+
+const withLoggerContext = (context: Partial<LoggerContext>): Logger => {
+	// console.log('withLoggerContext', context)
+	const innerLogger = (...args: unknown[]) => endLog(context, ...args)
+
+	return Object.assign(innerLogger, {
+		info: (...args: unknown[]) =>
+			endLog({ ...context, level: 'info' }, ...args),
+		warn: (...args: unknown[]) =>
+			endLog({ ...context, level: 'warn' }, ...args),
+		debug: (...args: unknown[]) =>
+			endLog({ ...context, level: 'debug' }, ...args),
+		error: (...args: unknown[]) =>
+			endLog({ ...context, level: 'error' }, ...args),
+
+		with: (innerContext: Partial<LoggerContext>) =>
+			withLoggerContext({
+				...context,
+				...innerContext,
+			}),
+	})
+}
+
+export const log = withLoggerContext({})
+
+const deltaState = {
 	lastMs: 0,
 }
 
 const nextDelta = () => {
-	const prev = logState.lastMs
+	const prev = deltaState.lastMs
 	const now = Date.now()
-	logState.lastMs = now
+	deltaState.lastMs = now
 
 	if (prev === 0) {
 		return 0
@@ -16,29 +70,5 @@ const nextDelta = () => {
 	return now - prev
 }
 
-const _log = (
-	level: 'error' | 'info' | 'debug' | 'warn' = 'info',
-	prefix = '',
-	...args: unknown[]
-) => {
-	if (!(isDev() || isTest())) {
-		return
-	}
-	const preArr = prefix ? [`[${prefix}]`] : []
-	console[level](...preArr, ...args)
-}
-
-export const log = Object.assign(_log, {
-	info: (...args: unknown[]) => {
-		_log('info', '', ...args)
-	},
-	warn: (...args: unknown[]) => {
-		_log('warn', '', ...args)
-	},
-	error: (...args: unknown[]) => {
-		_log('error', '', ...args)
-	},
-	delta: (...args: unknown[]) => {
-		_log('info', `${nextDelta()}ms`, ...args)
-	},
-})
+export const logDelta = (...args: unknown[]) =>
+	withLoggerContext({ prefix: `${nextDelta()}ms` })(...args)

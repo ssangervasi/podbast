@@ -14,7 +14,7 @@ export const wrapTestableReducer = <S, A extends Action>(
 
 	return (state: any, action: any) => {
 		if (action.type === TEST_reset.type) {
-			log('debug', 'testTools', 'reducer resetting state')
+			log.with({ prefix: 'testTools' }).debug('reducer resetting state')
 			return baseReducer(action.payload, action)
 		}
 
