@@ -1,30 +1,31 @@
+import { apiFetch } from '/src/features/rss/apiClient'
 import { log } from '/src/utils'
 
 import { FeedResponseGuard } from './models'
 
-export const getFeed = async (url: string) => {
-	try {
-		if (!url) {
-			throw new Error('getFeed: Invalid feed url')
-		}
+export type FeedUrlParts = {
+	feedUrl: string | URL
+	params: URLSearchParams | Record<string, string>
+}
 
-		const apiUrl = new URL('/api/rss', window.location.origin)
-		apiUrl.searchParams.set('url', url)
+export const formatFeedUrl = (feedUrlParts: FeedUrlParts): string => {}
 
-		const res = await fetch(apiUrl)
-		if (400 <= res.status) {
-			throw new Error(`getFeed: Request failed. Status: ${res.status}`)
-		}
-
-		const json = await res.json()
-
-		if (FeedResponseGuard.satisfied(json)) {
-			return json.content
-		}
-
-		throw new Error('getFeed: Invalid feed JSON')
-	} catch (e) {
-		log.error('Feed error', JSON.stringify(url), e)
-		throw e
+export const getFeed = async (feedUrlParts: FeedUrlParts) => {
+	const feedUrl = formatFeedUrl(feedUrlParts)
+	if (!feedUrl) {
+		throw new Error('getFeed: Invalid feed url')
 	}
+
+	const { json } = await apiFetch({
+		route: 'rss',
+		params: {
+			url: feedUrl,
+		},
+	})
+
+	if (FeedResponseGuard.satisfied(json)) {
+		return json.content
+	}
+
+	throw new Error('getFeed: Invalid feed JSON')
 }

@@ -6,9 +6,12 @@ import { EMPTY_ARRAY, mapToMap, wrapEmpty } from '../../utils/collections'
 import { Feed } from './models'
 import { fetchFeed } from './thunks'
 
+export type RssPullMode = 'auto' | 'manual'
+
 export type RssPullBase = {
 	url: string
 	status: string
+	mode: RssPullMode
 	feed?: Feed
 }
 
