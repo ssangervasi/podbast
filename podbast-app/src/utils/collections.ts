@@ -37,6 +37,14 @@ export const mapToIndexed = <IIn, IOut>(
 	return indexed
 }
 
+export const indexedToRecord = <T>(ind: Indexed<T>): Record<string, T> => {
+	const record: Record<string, T> = {}
+	entries(ind).forEach(([k, i]) => {
+		record[k] = i
+	})
+	return record
+}
+
 export const values = <T>(ind: Indexed<T>): T[] => compact(Object.values(ind))
 export const entries = <T>(ind: Indexed<T>): Array<[string, T]> =>
 	compact(Object.entries(ind).map(([k, v]) => (v ? [k, v] : undefined)))

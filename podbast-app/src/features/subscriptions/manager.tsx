@@ -14,7 +14,7 @@ export const useSubscriptionManager = () => {
 
 	const refreshAll = useCallback(() => {
 		subscriptions.forEach(sub => {
-			dispatch(fetchFeed({ feedUrl: sub.feedUrl }))
+			dispatch(fetchFeed({ url: sub.feedUrl }))
 		})
 	}, [dispatch, subscriptions])
 
@@ -23,7 +23,7 @@ export const useSubscriptionManager = () => {
 		subscriptions.forEach(sub => {
 			const diff = now.diff(fromIso(sub.pulledIsoDate))
 			if (diff.hours > 1) {
-				dispatch(fetchFeed({ feedUrl: sub.feedUrl }))
+				dispatch(fetchFeed({ url: sub.feedUrl }))
 			}
 		})
 	}, [dispatch, subscriptions])

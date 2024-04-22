@@ -11,6 +11,7 @@ export const FeedResponseGuard = Guard.narrow({
 		link: 'string',
 		description: 'string',
 		feedUrl: 'string',
+		url: optional('string'),
 
 		items: [
 			{

@@ -1,31 +1,29 @@
 import { apiFetch } from '/src/features/rss/apiClient'
-import { log } from '/src/utils'
+import { buildUrl, UrlIsh } from '/src/utils'
 
 import { FeedResponseGuard } from './models'
 
-export type FeedUrlParts = {
-	feedUrl: string | URL
-	params: URLSearchParams | Record<string, string>
-}
-
-export const formatFeedUrl = (feedUrlParts: FeedUrlParts): string => {}
-
-export const getFeed = async (feedUrlParts: FeedUrlParts) => {
-	const feedUrl = formatFeedUrl(feedUrlParts)
-	if (!feedUrl) {
+export const getFeed = async (urlish: UrlIsh) => {
+	const url = buildUrl(urlish).toString()
+	if (!url) {
 		throw new Error('getFeed: Invalid feed url')
 	}
 
 	const { json } = await apiFetch({
 		route: 'rss',
 		params: {
-			url: feedUrl,
+			url: url,
 		},
 	})
 
-	if (FeedResponseGuard.satisfied(json)) {
-		return json.content
+	if (!FeedResponseGuard.satisfied(json)) {
+		throw new Error('getFeed: Invalid feed JSON')
 	}
 
-	throw new Error('getFeed: Invalid feed JSON')
+	// Inject URL used for actual request
+	const feed = json.content
+	if (!feed.url) {
+		feed.url = url
+	}
+	return feed
 }

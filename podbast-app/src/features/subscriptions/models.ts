@@ -14,6 +14,10 @@ import {
 export type Subscription = {
 	// Unique ID
 	feedUrl: string
+
+	// URL provided by the user, which may include auth params
+	url: string
+
 	// Canonical website for the podcast
 	link: string
 	title: string
@@ -113,13 +117,14 @@ export const transformFeedToSubscriptionItems = (
 }
 
 export const transformFeedToSubscription = (feed: Feed): Subscription => {
-	const { feedUrl, link, title, description, image, pubDate } = feed
+	const { feedUrl, url, link, title, description, image, pubDate } = feed
 
 	const isoDate = parseDate(pubDate).toISO()
 	const pulledIsoDate = getNow().toISO()
 
 	return {
 		feedUrl,
+		url: url ?? feedUrl,
 		link,
 		title,
 		description,
@@ -174,6 +179,7 @@ export const ExportableGuard = Guard.narrow({
 				},
 			],
 			feedUrl: 'string',
+			url: 'string',
 			link: 'string',
 			title: 'string',
 			description: 'string',

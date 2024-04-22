@@ -1,4 +1,4 @@
-import { log } from '/src/utils'
+import { buildRelativeUrl, log } from '/src/utils'
 
 const logger = log.with({ prefix: 'apiClient' })
 
@@ -14,16 +14,6 @@ export type RoutePath = RouteMap[keyof RouteMap]
 export type ApiFetchArgs = {
 	route: RouteName
 	params?: URLSearchParams | Record<string, string>
-}
-
-export const mergeUrlParams = (
-	target: URLSearchParams,
-	source: URLSearchParams | Record<string, string>,
-) => {
-	for (const [key, value] of new URLSearchParams(source).entries()) {
-		target.append(key, value)
-	}
-	return target
 }
 
 export type ApiFetchResult =
@@ -44,8 +34,7 @@ export const apiFetch = async (
 ): Promise<ApiFetchResult> => {
 	try {
 		const path = ROUTE_MAP[route]
-		const url = new URL(path, window.location.origin)
-		mergeUrlParams(url.searchParams, params ?? {})
+		const url = buildRelativeUrl(path, params)
 
 		const response = await fetch(url, init)
 		if (400 <= response.status) {

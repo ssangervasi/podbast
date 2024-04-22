@@ -1,6 +1,6 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 
-import { log } from '/src/utils'
+import { buildUrl, log } from '/src/utils'
 
 import { EMPTY_ARRAY, mapToMap, wrapEmpty } from '../../utils/collections'
 import { Feed } from './models'
@@ -54,26 +54,30 @@ export const slice = createSlice({
 	extraReducers: builder => {
 		builder
 			.addCase(fetchFeed.pending, (state, action) => {
-				const { feedUrl } = action.meta.arg
-				log.info('fetchFeed.pending', { feedUrl })
+				const { url: urlParts, mode = 'auto' } = action.meta.arg
+				log.debug('fetchFeed.pending', { urlParts })
 
-				const existing = state.pulls.find(ru => ru.url === feedUrl)
+				const url = buildUrl(urlParts).toString()
+
+				const existing = state.pulls.find(ru => ru.url === url)
 				if (existing) {
 					existing.status = 'requested'
 					return
 				}
 
 				state.pulls.push({
-					url: feedUrl,
+					url,
+					mode,
 					status: 'requested',
 				})
 			})
 			.addCase(fetchFeed.fulfilled, (state, action) => {
-				const { feedUrl } = action.meta.arg
-				log.info('fetchFeed.fulfilled', { feedUrl })
+				const { url: urlParts } = action.meta.arg
+				log.debug('fetchFeed.fulfilled', { urlParts })
 
-				const pull = state.pulls.find(ruc => ruc.url === feedUrl)
+				const url = buildUrl(urlParts).toString()
 
+				const pull = state.pulls.find(ruc => ruc.url === url)
 				if (!pull) {
 					log.error('Fulfilled missing feed pull')
 					return
@@ -83,14 +87,17 @@ export const slice = createSlice({
 				pull.feed = action.payload
 			})
 			.addCase(fetchFeed.rejected, (state, action) => {
-				const { feedUrl } = action.meta.arg
-				log.error('fetchFeed.rejected', { feedUrl })
+				const { url: urlParts } = action.meta.arg
+				log.error('fetchFeed.rejected', { urlParts })
 
-				const pull = state.pulls.find(ruc => ruc.url === feedUrl)
+				const url = buildUrl(urlParts).toString()
+
+				const pull = state.pulls.find(ruc => ruc.url === url)
 				if (!pull) {
 					log.error('Rejected missing feed pull')
 					return
 				}
+
 				pull.status = 'notFound'
 			})
 	},

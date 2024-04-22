@@ -71,6 +71,7 @@ export const slice = createSlice({
 				if (!existingSub) {
 					const sub: Subscription = {
 						feedUrl: expSub.feedUrl,
+						url: expSub.url,
 						link: expSub.link,
 						title: expSub.title,
 						description: expSub.description,

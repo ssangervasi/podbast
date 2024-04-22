@@ -41,7 +41,7 @@ export const AddFeedPage = () => {
 			return
 		}
 		const url = urlEl.value
-		dispatch(fetchFeed({ feedUrl: url }))
+		dispatch(fetchFeed({ url }))
 	}, [])
 
 	return (
@@ -108,7 +108,7 @@ const ImportForm = () => {
 	}, [])
 
 	const handleLoad = useCallback(async (outlineFeed: OutlineFeed) => {
-		dispatch(fetchFeed({ feedUrl: outlineFeed.url }))
+		dispatch(fetchFeed({ url: outlineFeed.url, mode: 'manual' }))
 	}, [])
 
 	return (
