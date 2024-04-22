@@ -2,7 +2,7 @@ import { createSelector, createSlice } from '@reduxjs/toolkit'
 
 import type { MediaUpdate } from '/src/features/player/slice'
 import { Feed } from '/src/features/rss/models'
-import { compact, log, values } from '/src/utils'
+import { compact, log, sorted, values } from '/src/utils'
 import { getNow } from '/src/utils/datetime'
 
 import {
@@ -124,38 +124,32 @@ export const selectSubscriptions = createSelector(
 /**
  * Latest to oldest, in-place
  */
-const sortEpisodes = (episodes: Episode[]): void => {
-	episodes.sort((a, b) => -cmpDate(a.item.isoDate, b.item.isoDate))
-}
+const sortEpisodes = (episodes: Episode[]) =>
+	sorted(episodes, (a, b) => -cmpDate(a.item.isoDate, b.item.isoDate))
 
 export const selectRecentEpisodes = createSelector(
 	[selectState],
-	(state): Episode[] => {
-		const eps = values(state.feedUrlToItemIdToItem).flatMap(items => {
-			const subEps = values(items).flatMap(item => {
-				const { feedUrl } = item
-				const subscription = state.feedUrlToSubscription[feedUrl]!
-				return {
-					subscription,
-					item,
-				}
-			})
-			sortEpisodes(subEps)
-			subEps.splice(2, Infinity)
-			return subEps
-		})
-		sortEpisodes(eps)
-		return eps
-	},
+	(state): Episode[] =>
+		sortEpisodes(
+			values(state.feedUrlToItemIdToItem).flatMap(items => {
+				const subEps = sortEpisodes(
+					values(items).flatMap(item => {
+						const { feedUrl } = item
+						const subscription = state.feedUrlToSubscription[feedUrl]!
+						return {
+							subscription,
+							item,
+						}
+					}),
+				)
+				subEps.splice(2, Infinity)
+				return subEps
+			}),
+		),
 )
 
 export const selectSubSummaries = createSelector([selectSubscriptions], subs =>
-	compact(
-		subs.map(sub => ({
-			title: sub.title,
-			link: sub.link,
-		})),
-	),
+	sorted(subs, (sl, sr) => (sl.title < sr.title ? -1 : 1)),
 )
 
 export const selectExportableSubscriptions = createSelector(

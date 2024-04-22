@@ -38,8 +38,16 @@ const FeedRequested = ({ pull }: { pull: RssPullRequested }) => {
 		</>
 	)
 }
-const FeedNotFound = ({ pull: _pull }: { pull: RssPullNotFound }) => {
-	return <>'FeedNotFound'</>
+const FeedNotFound = ({ pull }: { pull: RssPullNotFound }) => {
+	return (
+		<>
+			<GridItem colSpan={2}>Feed not found 😒</GridItem>
+
+			<GridItem colSpan={10}>
+				<chakra.span fontFamily="monospace">{pull.url}</chakra.span>
+			</GridItem>
+		</>
+	)
 }
 
 const FeedViewer = ({ pull }: { pull: RssPullReady }) => {
@@ -72,7 +80,7 @@ const FeedViewer = ({ pull }: { pull: RssPullReady }) => {
 				</GridItem>
 
 				<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
-					<Button size="sm" onClick={handleSubscribe} isDisabled={isSubscribed}>
+					<Button size="sm" onClick={handleSubscribe}>
 						{isSubscribed ? 'Subscribed' : 'Subscribe'}
 					</Button>
 				</GridItem>

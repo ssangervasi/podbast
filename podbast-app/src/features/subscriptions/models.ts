@@ -153,6 +153,12 @@ export const mergeFeedIntoState = (
 	}
 
 	const subscription = transformFeedToSubscription(feed)
+
+	// Filling in missing auth urls
+	if (!existing.url) {
+		existing.url = subscription.url
+	}
+
 	existing.isoDate = subscription.isoDate
 	existing.pulledIsoDate = subscription.pulledIsoDate
 

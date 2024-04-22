@@ -1,12 +1,14 @@
-import { GridItem, Heading, SimpleGrid, Text } from '@chakra-ui/react'
+import { GridItem, Heading, Text, chakra } from '@chakra-ui/react'
 
+import { Subscription } from '/src/features/subscriptions/models'
 import { useAppSelector } from '/src/store'
-import { PageStack, RowWrapper } from '/src/ui'
+import { PageGrid, PageStack, RowWrapper } from '/src/ui'
 
 import { selectSubSummaries } from './slice'
+import { SubscriptionTitle } from '/src/features/subscriptions/SubscriptionTitle'
 
 export const SubscriptionsPage = () => {
-	const summaries = useAppSelector(selectSubSummaries)
+	const subscriptions = useAppSelector(selectSubSummaries)
 
 	return (
 		<>
@@ -15,40 +17,55 @@ export const SubscriptionsPage = () => {
 					Podcast subscriptions
 				</Heading>
 
-				{summaries.length === 0 ? (
+				{subscriptions.length === 0 ? (
 					<Text>
 						Looks like you haven't subscribed to any podcast feeds yet. Go add
 						an RSS feed!
 					</Text>
 				) : null}
 
-				<SimpleGrid columns={12} spacing={2} w="full">
-					{summaries.map(summary => (
-						<SummaryView summary={summary} key={summary.link} />
+				<PageGrid>
+					{subscriptions.map(subscription => (
+						<SubscriptionView
+							key={subscription.link}
+							subscription={subscription}
+						/>
 					))}
-				</SimpleGrid>
+				</PageGrid>
 			</PageStack>
 		</>
 	)
 }
 
-export const SummaryView = ({
-	summary,
+export const SubscriptionView = ({
+	subscription,
 }: {
-	summary: {
-		title: string
-		link: string
-	}
+	subscription: Subscription
 }) => {
 	return (
 		<>
 			<RowWrapper>
 				<GridItem colSpan={4}>
-					<Text>{summary.title}</Text>
+					<SubscriptionTitle subscription={subscription} />
 				</GridItem>
 
 				<GridItem colSpan={8}>
-					<Text>{summary.link}</Text>
+					<Text>
+						Homepage:{' '}
+						<chakra.span fontFamily="monospace">
+							{subscription.link}
+						</chakra.span>
+					</Text>
+					<Text>
+						Feed URL:{' '}
+						<chakra.span fontFamily="monospace">
+							{subscription.feedUrl}
+						</chakra.span>
+					</Text>
+					<Text>
+						Subscription URL:{' '}
+						<chakra.span fontFamily="monospace">{subscription.url}</chakra.span>
+					</Text>
 				</GridItem>
 			</RowWrapper>
 		</>

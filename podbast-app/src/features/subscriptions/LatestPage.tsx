@@ -1,22 +1,14 @@
 import { CheckCircleIcon, TimeIcon } from '@chakra-ui/icons'
-import {
-	Box,
-	Button,
-	chakra,
-	GridItem,
-	Heading,
-	Image,
-	SimpleGrid,
-	Text,
-} from '@chakra-ui/react'
+import { Box, Button, chakra, GridItem, Heading, Text } from '@chakra-ui/react'
 
 import { useSubscriptionManager } from '/src/features/subscriptions/manager'
 import {
 	Episode,
 	SubscriptionItemActivity,
 } from '/src/features/subscriptions/models'
+import { SubscriptionTitle } from '/src/features/subscriptions/SubscriptionTitle'
 import { useAppSelector } from '/src/store'
-import { HCenter, HStack, PageStack, RowWrapper } from '/src/ui'
+import { HCenter, HStack, PageGrid, PageStack, RowWrapper } from '/src/ui'
 import { ExpandableLines } from '/src/ui/ExpandableLines'
 import { isoToShortDate, secondsToTimeString } from '/src/utils/datetime'
 
@@ -27,24 +19,8 @@ export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 	<>
 		<RowWrapper>
 			<GridItem colSpan={2}>
-				<HStack alignItems="center">
-					<Box>
-						<Image
-							src={episode.subscription.image?.url}
-							objectFit="cover"
-							maxW="30px"
-						/>
-					</Box>
+				<SubscriptionTitle subscription={episode.subscription} />
 
-					<Text
-						noOfLines={3}
-						fontSize="sm"
-						fontWeight="bold"
-						data-testid="EpisodeRow-subscription-title"
-					>
-						{episode.subscription.title}
-					</Text>
-				</HStack>
 				<Date isoDate={episode.item.isoDate} />
 			</GridItem>
 
@@ -131,11 +107,11 @@ export const LatestPage = () => {
 				<Button onClick={refreshAll}>Refresh all</Button>
 			</HStack>
 
-			<SimpleGrid columns={12} spacing={2} w="full">
+			<PageGrid>
 				{episodes.map(episode => (
 					<EpisodeRow key={episode.item.id} episode={episode} />
 				))}
-			</SimpleGrid>
+			</PageGrid>
 		</PageStack>
 	)
 }
