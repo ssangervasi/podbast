@@ -4,34 +4,21 @@ import {
 	FLUSH,
 	PAUSE,
 	PERSIST,
-	PersistConfig,
 	persistReducer,
 	persistStore,
 	PURGE,
 	REGISTER,
 	REHYDRATE,
 } from 'redux-persist'
-import storage from 'redux-persist/lib/storage'
 
 import { wrapTestableReducer } from '/src/devtools/wrapReducer'
-import { persistanceMigrate } from '/src/store/persistance'
 
-import {
-	rootReducer,
-	type RootReducerKey,
-	type RootReducerReturn,
-} from './reducers'
+import { persistConfig } from './persistance'
+import { rootReducer } from './reducers'
 
 // Immer plugin
 enableMapSet()
 
-// Persistence
-const persistConfig: PersistConfig<RootReducerReturn> = {
-	key: 'root',
-	storage,
-	migrate: persistanceMigrate,
-	whitelist: ['layout', 'player', 'subscriptions'] satisfies RootReducerKey[],
-}
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 const testableReducer = wrapTestableReducer(persistedReducer)
 const reducer = testableReducer

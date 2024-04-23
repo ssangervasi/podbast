@@ -1,9 +1,11 @@
 import { produce } from 'immer'
 import type { PersistedState } from 'redux-persist'
+import { PersistConfig } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
 
 import { entries, log, values } from '/src/utils'
 
-import type { RootReducerReturn } from './reducers'
+import { type RootReducerKey, type RootReducerReturn } from './reducers'
 
 const logger = log.with({ prefix: 'Persist migrate' })
 
@@ -42,6 +44,18 @@ export const persistanceMigrate = async (
 			}
 		},
 	)
+}
+
+// Persistence
+export const persistConfig: PersistConfig<RootReducerReturn> = {
+	key: 'root',
+	storage,
+	throttle: 2_000,
+	migrate: persistanceMigrate,
+	whitelist: ['layout', 'player', 'subscriptions'] satisfies RootReducerKey[],
+	writeFailHandler: err => {
+		logger.error('Error writing localStorage', err)
+	},
 }
 
 // Considering this instead of top-level white/blacklist
