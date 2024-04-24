@@ -1,5 +1,5 @@
 import preact from '@preact/preset-vite'
-import path from 'node:path'
+// import path from 'node:path'
 import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
@@ -17,7 +17,9 @@ export default defineConfig({
 	},
 	plugins: [preact()],
 	build: {
-		sourcemap: 'inline',
+		sourcemap: true,
+		// Firefox wasn't liking inline maps
+		// sourcemap: 'inline',
 	},
 	resolve: {
 		alias: [
