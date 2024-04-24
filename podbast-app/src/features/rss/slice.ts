@@ -108,6 +108,10 @@ export const slice = createSlice({
 
 export const { selectPulls } = slice.selectors
 
+export const selectManualPulls = createSelector([selectPulls], pulls =>
+	pulls.filter(pull => pull.mode === 'manual'),
+)
+
 export const selectFeedUrlToPull = createSelector([selectPulls], pulls =>
 	mapToMap(pulls, pull => [pull.url, pull]),
 )

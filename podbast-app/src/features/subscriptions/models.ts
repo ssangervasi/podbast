@@ -159,6 +159,10 @@ export const mergeFeedIntoState = (
 		existing.url = subscription.url
 	}
 
+	// Use truncated
+	existing.description = subscription.description
+
+	// Sync dates
 	existing.isoDate = subscription.isoDate
 	existing.pulledIsoDate = subscription.pulledIsoDate
 

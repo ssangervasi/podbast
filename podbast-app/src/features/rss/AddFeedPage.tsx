@@ -12,20 +12,20 @@ import { useCallback, useEffect, useState } from 'preact/hooks'
 import { Fragment } from 'preact/jsx-runtime'
 
 import { Outline, OutlineFeed } from '/src/features/rss'
-import { PullViewer } from '/src/features/rss/feedViewer'
 import { postOpml } from '/src/features/rss/opmlClient'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { HStack, PageStack } from '/src/ui'
 import { PageGrid } from '/src/ui/grids'
 
+import { PullViewer } from './FeedViewer'
 import { LocalUrlForm } from './LocalUrlForm'
-import { clearPending, selectPulls } from './slice'
+import { clearPending, selectManualPulls } from './slice'
 
 export const AddFeedPage = () => {
 	const dispatch = useAppDispatch()
 
-	const pulls = useAppSelector(selectPulls)
+	const pulls = useAppSelector(selectManualPulls)
 
 	useEffect(() => {
 		dispatch(clearPending())
@@ -41,7 +41,7 @@ export const AddFeedPage = () => {
 			return
 		}
 		const url = urlEl.value
-		dispatch(fetchFeed({ url }))
+		dispatch(fetchFeed({ url, mode: 'manual' }))
 	}, [])
 
 	return (
@@ -104,6 +104,7 @@ const ImportForm = () => {
 		}
 		const opmlForm = new FormData(evt.currentTarget)
 		const resOutline = await postOpml(opmlForm)
+		resOutline.feeds.sort((fl, fr) => (fl.title < fr.title ? -1 : 1))
 		setOutline(resOutline)
 	}, [])
 

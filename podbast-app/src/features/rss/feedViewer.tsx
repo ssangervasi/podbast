@@ -67,14 +67,7 @@ const FeedViewer = ({ pull }: { pull: RssPullReady }) => {
 
 	return (
 		<>
-			<chakra.div
-				display="contents"
-				// sx={{
-				// 	'&:hover > div': {
-				// 		borderBottom: '2px dotted black',
-				// 	},
-				// }}
-			>
+			<RowWrapper>
 				<GridItem colSpan={2}>
 					<chakra.b fontSize="lg">{feed.title}</chakra.b>
 				</GridItem>
@@ -92,9 +85,9 @@ const FeedViewer = ({ pull }: { pull: RssPullReady }) => {
 				<GridItem colSpan={2}>
 					<chakra.span fontFamily="monospace">{feed.feedUrl}</chakra.span>
 				</GridItem>
-			</chakra.div>
+			</RowWrapper>
 
-			<chakra.div display="contents">
+			<RowWrapper>
 				<GridItem colSpan={12}>
 					<chakra.b>Episodes</chakra.b>
 				</GridItem>
@@ -106,7 +99,7 @@ const FeedViewer = ({ pull }: { pull: RssPullReady }) => {
 				{chunker.itemsAfter > 0 ? (
 					<GridItem colSpan={12}>... and {chunker.itemsAfter} more</GridItem>
 				) : null}
-			</chakra.div>
+			</RowWrapper>
 		</>
 	)
 }

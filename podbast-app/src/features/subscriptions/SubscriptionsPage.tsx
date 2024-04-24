@@ -1,11 +1,11 @@
-import { GridItem, Heading, Text, chakra } from '@chakra-ui/react'
+import { chakra, GridItem, Heading, Text } from '@chakra-ui/react'
 
 import { Subscription } from '/src/features/subscriptions/models'
+import { SubscriptionTitle } from '/src/features/subscriptions/SubscriptionTitle'
 import { useAppSelector } from '/src/store'
 import { PageGrid, PageStack, RowWrapper } from '/src/ui'
 
 import { selectSubSummaries } from './slice'
-import { SubscriptionTitle } from '/src/features/subscriptions/SubscriptionTitle'
 
 export const SubscriptionsPage = () => {
 	const subscriptions = useAppSelector(selectSubSummaries)
