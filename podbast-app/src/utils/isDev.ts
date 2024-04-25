@@ -1,12 +1,12 @@
 export const isDev = () => {
+	if (isWindowDev()) {
+		return true
+	}
 	if (!import.meta.env.DEV) {
 		return false
 	}
 	if (isTest()) {
 		return false
-	}
-	if (isWindowDev()) {
-		return true
 	}
 	return true
 }
