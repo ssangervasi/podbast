@@ -1,8 +1,9 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
+import { narrow } from 'narrow-minded'
 
 import type { MediaUpdate } from '/src/features/player/slice'
 import { Feed } from '/src/features/rss/models'
-import { compact, log, sorted, values } from '/src/utils'
+import { compact, isAround, log, sorted, values } from '/src/utils'
 import { getNow } from '/src/utils/datetime'
 
 import {
@@ -62,8 +63,25 @@ export const slice = createSlice({
 				return
 			}
 
-			item.activity.progressTime = currentTime
-			item.activity.playedIsoDate = getNow().toISO()
+			const prevTime = item.activity.progressTime
+
+			// Store first progress
+			if (narrow('undefined', prevTime) && narrow('number', currentTime)) {
+				item.activity.progressTime = currentTime
+				item.activity.playedIsoDate = getNow().toISO()
+				return
+			}
+
+			// Store subsequent process
+			if (narrow('number', prevTime) && narrow('number', currentTime)) {
+				// Only store 30 second fidelity
+				if (isAround(prevTime, 30_000, currentTime)) {
+					return
+				}
+
+				item.activity.progressTime = currentTime
+				item.activity.playedIsoDate = getNow().toISO()
+			}
 		}),
 		receiveImport: create.reducer<Exportable>((draft, action) => {
 			action.payload.subscriptions.forEach(expSub => {

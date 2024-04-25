@@ -10,14 +10,14 @@ import { _receiveMediaUpdate as subscriptions_receiveMediaUpdate } from '/src/fe
 
 const throttledWrapper = throttle((f: () => void) => {
 	f()
-}, 1_000)
+}, 5_000)
 
 export const updateMedia = createAsyncThunk(
 	'player/updateMedia',
 	async (mediaUpdate: MediaUpdate, thunkAPI) => {
-		// Maybe status changes shouldn't be throttled
+		thunkAPI.dispatch(player_receiveMediaUpdate(mediaUpdate))
+
 		throttledWrapper(() => {
-			thunkAPI.dispatch(player_receiveMediaUpdate(mediaUpdate))
 			thunkAPI.dispatch(subscriptions_receiveMediaUpdate(mediaUpdate))
 		})
 	},
