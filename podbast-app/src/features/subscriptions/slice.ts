@@ -1,7 +1,7 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import { narrow } from 'narrow-minded'
 
-import type { MediaUpdate } from '/src/features/player/slice'
+import { _receiveMediaUpdate as player_receiveMediaUpdate } from '/src/features/player/slice'
 import { Feed } from '/src/features/rss/models'
 import { compact, isAround, log, sorted, values } from '/src/utils'
 import { getNow } from '/src/utils/datetime'
@@ -47,42 +47,6 @@ export const slice = createSlice({
 			const feed = action.payload
 			mergeFeedIntoState(draft, feed)
 		}),
-		_receiveMediaUpdate: create.reducer<MediaUpdate>((draft, action) => {
-			const {
-				//
-				media: { item: itemUpdate, currentTime } = {},
-			} = action.payload
-			if (!itemUpdate) {
-				return
-			}
-
-			const item =
-				draft.feedUrlToItemIdToItem[itemUpdate.feedUrl]?.[itemUpdate.id]
-			if (!item) {
-				log.error("Couldn't find subscription item from update")
-				return
-			}
-
-			const prevTime = item.activity.progressTime
-
-			// Store first progress
-			if (narrow('undefined', prevTime) && narrow('number', currentTime)) {
-				item.activity.progressTime = currentTime
-				item.activity.playedIsoDate = getNow().toISO()
-				return
-			}
-
-			// Store subsequent process
-			if (narrow('number', prevTime) && narrow('number', currentTime)) {
-				// Only store 30 second fidelity
-				if (isAround(prevTime, 30_000, currentTime)) {
-					return
-				}
-
-				item.activity.progressTime = currentTime
-				item.activity.playedIsoDate = getNow().toISO()
-			}
-		}),
 		receiveImport: create.reducer<Exportable>((draft, action) => {
 			action.payload.subscriptions.forEach(expSub => {
 				const existingSub = draft.feedUrlToSubscription[expSub.feedUrl]
@@ -113,6 +77,45 @@ export const slice = createSlice({
 			})
 		}),
 	}),
+
+	extraReducers: builder => {
+		builder.addCase(player_receiveMediaUpdate, (draft, action) => {
+			const {
+				//
+				media: { item: itemUpdate, currentTime } = {},
+			} = action.payload
+			if (!itemUpdate) {
+				return
+			}
+
+			const item =
+				draft.feedUrlToItemIdToItem[itemUpdate.feedUrl]?.[itemUpdate.id]
+			if (!item) {
+				log.error("Couldn't find subscription item from update")
+				return
+			}
+
+			const prevTime = item.activity.progressTime
+
+			// Store first progress
+			if (narrow('undefined', prevTime) && narrow('number', currentTime)) {
+				item.activity.progressTime = currentTime
+				item.activity.playedIsoDate = getNow().toISO()
+				return
+			}
+
+			// Store subsequent process
+			if (narrow('number', prevTime) && narrow('number', currentTime)) {
+				// Only store 10 second fidelity
+				if (isAround(prevTime, 10, currentTime)) {
+					return
+				}
+
+				item.activity.progressTime = currentTime
+				item.activity.playedIsoDate = getNow().toISO()
+			}
+		})
+	},
 	selectors: {
 		selectState: state => state,
 		selectFeedSubscription: (state, feedUrl: string) =>
@@ -122,12 +125,7 @@ export const slice = createSlice({
 })
 
 export const { actions, reducer, selectors } = slice
-export const {
-	subscribe,
-	updateSubscriptionFeed,
-	_receiveMediaUpdate,
-	receiveImport,
-} = actions
+export const { subscribe, updateSubscriptionFeed, receiveImport } = actions
 export const {
 	selectState,
 	selectFeedSubscription,

@@ -1,28 +1,18 @@
-import { createAsyncThunk } from '@reduxjs/toolkit'
-
 import { RssPullMode } from '/src/features/rss/slice'
+import { createAppAsyncThunk } from '/src/store'
 import { buildUrl } from '/src/utils'
 
 import { getFeed } from './rssClient'
 
 type FFArg = { url: string; mode?: RssPullMode }
 
-export const fetchFeed = createAsyncThunk(
+export const fetchFeed = createAppAsyncThunk(
 	'rss/fetchFeed',
 	async ({ url }: FFArg, _thunkAPI) => {
 		const response = await getFeed(buildUrl(url))
 		return response
 	},
 )
-
-// import { RootState } from '/src/store/store'
-// Kinda works
-// const cat = createAsyncThunk.withTypes<{
-// 	state: RootState
-// 	pendingMeta: {
-// 		urlParts: UrlParts
-// 	}
-// }>()
 
 // export const fetchFeed = cat(
 // 	'rss/fetchFeed',

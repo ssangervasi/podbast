@@ -47,6 +47,7 @@ export const slice = createSlice({
 			state.pendingRequest = action.payload
 		},
 		_clearRequest(state) {
+			log.debug('_clearRequest')
 			if (!state.pendingRequest) {
 				log.warn('Clearing no pending request')
 				return

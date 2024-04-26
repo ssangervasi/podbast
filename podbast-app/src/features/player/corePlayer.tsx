@@ -18,9 +18,11 @@ import { Ref, useCallback, useEffect, useMemo, useRef } from 'preact/hooks'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { AppDispatch } from '/src/store/store'
 import { isAround, log, useUpdatingRef } from '/src/utils'
+import { createThrottler } from '/src/utils/throttler'
 
 import {
 	_clearRequest,
+	_receiveMediaUpdate,
 	makeRequest,
 	Media,
 	MediaUpdate,
@@ -28,7 +30,8 @@ import {
 	selectPendingRequest,
 	Status,
 } from './slice'
-import { updateMedia } from './thunks'
+
+const logger = log.with({ prefix: 'corePlayer' })
 
 const stateToStatus = (mediaPlayerState: MediaPlayerState): Status => {
 	const { paused, playing } = mediaPlayerState
@@ -41,54 +44,6 @@ const stateToStatus = (mediaPlayerState: MediaPlayerState): Status => {
 	return 'stopped'
 }
 
-const needsPlay = ({
-	scope: { pendingRequest },
-	mediaPlayerState,
-}: SubscriberHandlerContext): boolean => {
-	if (pendingRequest?.status !== 'playing') {
-		return false
-	}
-	return stateToStatus(mediaPlayerState) !== 'playing'
-}
-
-const needsPause = ({
-	scope: { pendingRequest },
-	mediaPlayerState,
-}: SubscriberHandlerContext): boolean => {
-	if (pendingRequest?.status !== 'paused') {
-		return false
-	}
-	return stateToStatus(mediaPlayerState) !== 'paused'
-}
-
-const needsStop = ({
-	scope: { pendingRequest },
-	mediaPlayerState,
-}: SubscriberHandlerContext): boolean => {
-	if (pendingRequest?.status !== 'stopped') {
-		return false
-	}
-	return stateToStatus(mediaPlayerState) === 'playing'
-}
-
-const checkSeek = ({
-	scope: { pendingRequest },
-	mediaPlayerState,
-}: SubscriberHandlerContext): undefined | { seekTime: number } => {
-	const seekTime = pendingRequest?.media?.currentTime
-	if (seekTime === undefined) {
-		return undefined
-	}
-
-	const mediaTime = mediaPlayerState.currentTime
-	if (isAround(seekTime, 1, mediaTime)) {
-		return undefined
-	}
-
-	return { seekTime }
-}
-
-// Should probably just put stuff in a thunk
 type Scope = {
 	media: Media | undefined
 	pendingRequest: MediaUpdate | undefined
@@ -100,64 +55,30 @@ type SubscriberContext = {
 	mediaPlayerRef: Ref<MediaPlayerInstance>
 }
 
-type SubscriberHandlerContext = {
-	dispatch: AppDispatch
-	scope: Scope
-	mediaPlayer: MediaPlayerInstance
-	mediaPlayerState: MediaPlayerState
-}
-
-const handleUpdateMedia = ({
-	dispatch,
-	scope,
+const buildStateAsUpdate = ({
 	mediaPlayerState,
-}: SubscriberHandlerContext) => {
+	media,
+}: {
+	mediaPlayerState: MediaPlayerState
+	media: Media | undefined
+}): MediaUpdate => {
 	const status = stateToStatus(mediaPlayerState)
-	const { currentTime } = mediaPlayerState
-	const media = scope.media
-		? {
-				...scope.media,
-				currentTime,
-			}
-		: undefined
+	const {
+		currentTime,
+		source: { src },
+	} = mediaPlayerState
 
-	log.debug('handleUpdateMedia', { status, currentTime })
-	dispatch(
-		updateMedia({
-			status,
-			media,
-		}),
-	)
-}
+	const updatedMedia =
+		media && media.src === src
+			? {
+					...media,
+					currentTime,
+				}
+			: undefined
 
-const handlePendingRequest = (context: SubscriberHandlerContext) => {
-	if (needsPlay(context)) {
-		log.debug('needsPlay')
-		context.mediaPlayer.paused = false
-		return
-	}
-
-	if (needsPause(context)) {
-		log.debug('needsPause')
-		context.mediaPlayer.paused = true
-		return
-	}
-
-	if (needsStop(context)) {
-		log.debug('needsStop')
-		context.mediaPlayer.paused = true
-		return
-	}
-
-	const seekResult = checkSeek(context)
-	if (seekResult) {
-		log.debug('seekResult', seekResult)
-		context.mediaPlayer.currentTime = seekResult.seekTime
-		return
-	}
-
-	if (context.scope.pendingRequest) {
-		context.dispatch(_clearRequest())
+	return {
+		status,
+		media: updatedMedia,
 	}
 }
 
@@ -170,16 +91,96 @@ const createMediaPlayerSubscriber =
 			return
 		}
 
-		const handlerContext: SubscriberHandlerContext = {
-			scope,
-			mediaPlayer,
+		const { media, pendingRequest } = scope
+
+		const mediaStateAsUpdate = buildStateAsUpdate({
 			mediaPlayerState,
-			dispatch,
+			media,
+		})
+
+		if (!pendingRequest) {
+			dispatchUpdate({ dispatch, mediaStateAsUpdate })
+			return
 		}
 
-		handlePendingRequest(handlerContext)
-		handleUpdateMedia(handlerContext)
+		if (
+			needsSync({
+				pendingRequest,
+				mediaStateAsUpdate,
+			})
+		) {
+			syncMediaPlayer({
+				pendingRequest,
+				mediaPlayer,
+			})
+			return
+		}
+
+		dispatch(_clearRequest())
 	}
+
+// I bet there's a nicer way to wrap dispatch...
+const dispatchUpdate = ({
+	dispatch,
+	mediaStateAsUpdate,
+}: {
+	dispatch: AppDispatch
+	mediaStateAsUpdate: MediaUpdate
+}) => {
+	if (mediaStateAsUpdate.status === 'playing') {
+		progressThrottler(() => {
+			dispatch(_receiveMediaUpdate(mediaStateAsUpdate))
+		})
+		return
+	}
+
+	dispatch(_receiveMediaUpdate(mediaStateAsUpdate))
+}
+
+const progressThrottler = createThrottler(5_000)
+
+const needsSync = ({
+	pendingRequest,
+	mediaStateAsUpdate,
+}: {
+	pendingRequest: MediaUpdate
+	mediaStateAsUpdate: MediaUpdate
+}): boolean => {
+	// Sync needed for status
+	if (pendingRequest.status !== mediaStateAsUpdate.status) {
+		return true
+	}
+
+	// Sync needed to seek time only if the player's time is more than 1 second off.
+	const seekTime = pendingRequest.media?.currentTime
+	const mediaTime = mediaStateAsUpdate.media?.currentTime
+	if (seekTime !== undefined && mediaTime !== undefined) {
+		if (!isAround(seekTime, 1, mediaTime)) {
+			return true
+		}
+	}
+
+	return false
+}
+
+const syncMediaPlayer = ({
+	pendingRequest,
+	mediaPlayer,
+}: {
+	pendingRequest: MediaUpdate
+	mediaPlayer: MediaPlayerInstance
+}) => {
+	if (pendingRequest.status === 'playing') {
+		mediaPlayer.paused = false
+	} else {
+		mediaPlayer.paused = true
+	}
+
+	const seekTime = pendingRequest.media?.currentTime
+	if (seekTime !== undefined) {
+		mediaPlayer.currentTime = seekTime
+	}
+}
 
 export const CorePlayer = () => {
 	const dispatch = useAppDispatch()
@@ -214,14 +215,30 @@ export const CorePlayer = () => {
 	}, [])
 
 	useEffect(() => {
+		// On first load, push a request to sync the player with the last stored state.
+		dispatch(
+			makeRequest({
+				status: 'paused',
+				media,
+			}),
+		)
+	}, [])
+
+	useEffect(() => {
+		// Fire the subscriber whenever the pendingRequest changes. The MediaPlayer's
+		// events may not be firing (paused or stopped).
+
 		const mediaPlayer = mediaPlayerRef.current
 		if (!mediaPlayer) {
 			return
 		}
+
+		logger.debug('manual call to subscriber')
 		subscriber(mediaPlayer.state)
-	}, [subscriber, pendingRequest, mediaPlayerRef.current])
+	}, [pendingRequest, subscriber, mediaPlayerRef.current])
 
 	useEffect(() => {
+		// Subscribe to every event from the MediaPlayer
 		const mediaPlayer = mediaPlayerRef.current
 		if (!mediaPlayer) {
 			return () => {}
@@ -237,10 +254,6 @@ export const CorePlayer = () => {
 			}),
 		)
 	}, [])
-
-	useEffect(() => {
-		log.debug('mediaForPlayer', mediaForPlayer)
-	}, [mediaForPlayer])
 
 	return (
 		<Box
