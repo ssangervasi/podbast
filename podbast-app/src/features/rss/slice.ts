@@ -1,7 +1,7 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 
 import { buildUrl, log } from '/src/utils'
-import { mapToMap, wrapEmpty } from '/src/utils/collections'
+import { entries, Indexed, values, wrapEmpty } from '/src/utils/collections'
 
 import { Feed } from './models'
 import { fetchFeed } from './thunks'
@@ -31,95 +31,105 @@ export type RssPullNotFound = RssPullBase & {
 export type RssPull = RssPullRequested | RssPullReady | RssPullNotFound
 
 export interface RssState {
-	pulls: RssPull[]
+	urlToPull: Indexed<RssPull>
 }
 
 export const initialState: RssState = {
-	pulls: [],
+	urlToPull: {},
 }
 
 export const slice = createSlice({
 	name: 'rss',
 	initialState,
-	reducers: {
-		clearPending: state => {
-			state.pulls = state.pulls.filter(p => {
-				if (p.status !== 'ready') {
-					return false
+	reducers: create => ({
+		clearPending: create.reducer(draft => {
+			entries(draft.urlToPull).forEach(([url, pull]) => {
+				if (pull.status !== 'ready') {
+					delete draft.urlToPull[url]
 				}
-				return true
 			})
-		},
-	},
+		}),
+		clearPull: create.reducer<string>((draft, action) => {
+			const url = action.payload
+			delete draft.urlToPull[url]
+		}),
+	}),
 	extraReducers: builder => {
 		builder
-			.addCase(fetchFeed.pending, (state, action) => {
+			.addCase(fetchFeed.pending, (draft, action) => {
 				const { url: urlParts, mode = 'auto' } = action.meta.arg
 				log.debug('fetchFeed.pending', { urlParts })
 
 				const url = buildUrl(urlParts).toString()
 
-				const existing = state.pulls.find(ru => ru.url === url)
+				const existing = draft.urlToPull[url]
 				if (existing) {
 					existing.status = 'requested'
 					return
 				}
 
-				state.pulls.push({
+				draft.urlToPull[url] = {
 					url,
 					mode,
 					status: 'requested',
-				})
+				}
 			})
-			.addCase(fetchFeed.fulfilled, (state, action) => {
+			.addCase(fetchFeed.fulfilled, (draft, action) => {
 				const { url: urlParts } = action.meta.arg
 				log.debug('fetchFeed.fulfilled', { urlParts })
 
 				const url = buildUrl(urlParts).toString()
 
-				const pull = state.pulls.find(ruc => ruc.url === url)
-				if (!pull) {
+				const existing = draft.urlToPull[url]
+				if (!existing) {
 					log.error('Fulfilled missing feed pull')
 					return
 				}
 
-				pull.status = 'ready'
-				pull.feed = action.payload
+				existing.status = 'ready'
+				existing.feed = action.payload
 			})
-			.addCase(fetchFeed.rejected, (state, action) => {
+			.addCase(fetchFeed.rejected, (draft, action) => {
 				const { url: urlParts } = action.meta.arg
 				log.error('fetchFeed.rejected', { urlParts })
 
 				const url = buildUrl(urlParts).toString()
 
-				const pull = state.pulls.find(ruc => ruc.url === url)
-				if (!pull) {
+				const existing = draft.urlToPull[url]
+				if (!existing) {
 					log.error('Rejected missing feed pull')
 					return
 				}
 
-				pull.status = 'notFound'
+				existing.status = 'notFound'
 			})
 	},
 	selectors: {
-		selectPulls: (state): RssPull[] => state.pulls,
+		selectState: state => state,
 	},
 })
 
-export const { selectPulls } = slice.selectors
+const { selectState } = slice.selectors
 
-export const selectManualPulls = createSelector([selectPulls], pulls =>
-	pulls.filter(pull => pull.mode === 'manual'),
+export const selectUrlToPull = createSelector(
+	[selectState],
+	({ urlToPull }) => urlToPull,
 )
 
-export const selectFeedUrlToPull = createSelector([selectPulls], pulls =>
-	mapToMap(pulls, pull => [pull.url, pull]),
+export const selectManualPulls = createSelector([selectUrlToPull], urlToPull =>
+	wrapEmpty(values(urlToPull).filter(pull => pull.mode === 'manual')),
 )
 
 export const selectPullsByStatus = createSelector(
-	[selectPulls, (_, status: RssPull['status']) => status],
-	(pulls, status) => wrapEmpty(pulls.filter(ru => ru.status === status)),
+	[selectUrlToPull, (_, status: RssPull['status']) => status],
+	(urlToPull, status) =>
+		wrapEmpty(values(urlToPull).filter(ru => ru.status === status)),
+)
+
+export const selectPullStatus = createSelector(
+	[selectUrlToPull, (_, url: string) => url],
+	(urlToPull, url) => urlToPull[url]?.status,
 )
 
 export const { actions, reducer } = slice
-export const { clearPending } = actions
+export const { clearPending, clearPull } = actions

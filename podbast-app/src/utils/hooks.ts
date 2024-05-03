@@ -32,7 +32,7 @@ export const useInterval = (
 	} = {},
 ): void => {
 	const cbRef = useUpdatingRef(cb)
-	const { immediate = true } = options
+	const { immediate = false } = options
 
 	useEffect(() => {
 		const caller = () => {

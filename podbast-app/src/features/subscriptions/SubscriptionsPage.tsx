@@ -4,6 +4,7 @@ import { Subscription } from '/src/features/subscriptions/models'
 import { SubscriptionTitle } from '/src/features/subscriptions/SubscriptionTitle'
 import { useAppSelector } from '/src/store'
 import { PageGrid, PageStack, RowWrapper } from '/src/ui'
+import { DateView } from '/src/ui/units'
 
 import { selectSubSummaries } from './slice'
 
@@ -45,6 +46,10 @@ export const SubscriptionView = ({
 			<RowWrapper>
 				<GridItem colSpan={4}>
 					<SubscriptionTitle subscription={subscription} />
+
+					<Text fontSize="x-small">
+						Last fetched: <DateView isoDate={subscription.pulledIsoDate} />
+					</Text>
 				</GridItem>
 
 				<GridItem colSpan={8}>

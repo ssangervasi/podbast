@@ -1,6 +1,16 @@
 import { CheckCircleIcon, TimeIcon } from '@chakra-ui/icons'
-import { Box, Button, chakra, GridItem, Heading, Text } from '@chakra-ui/react'
+import {
+	Alert,
+	AlertIcon,
+	Box,
+	Button,
+	chakra,
+	GridItem,
+	Heading,
+	Text,
+} from '@chakra-ui/react'
 
+import { selectPullsByStatus } from '/src/features/rss/slice'
 import { useSubscriptionManager } from '/src/features/subscriptions/manager'
 import {
 	Episode,
@@ -10,7 +20,7 @@ import { SubscriptionTitle } from '/src/features/subscriptions/SubscriptionTitle
 import { useAppSelector } from '/src/store'
 import { HCenter, HStack, PageGrid, PageStack, RowWrapper } from '/src/ui'
 import { ExpandableLines } from '/src/ui/ExpandableLines'
-import { isoToShortDate, secondsToTimeString } from '/src/utils/datetime'
+import { DateView, TimeView } from '/src/ui/units'
 
 import { EpisodeControls } from './EpisodeControls'
 import { selectRecentEpisodes } from './slice'
@@ -21,7 +31,7 @@ export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 			<GridItem colSpan={2}>
 				<SubscriptionTitle subscription={episode.subscription} />
 
-				<Date isoDate={episode.item.isoDate} />
+				<DateView isoDate={episode.item.isoDate} />
 			</GridItem>
 
 			<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
@@ -49,18 +59,6 @@ export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 	</>
 )
 
-const Time = ({ seconds }: { seconds: number }) => (
-	<chakra.span fontFamily="monospace" fontSize="x-small">
-		{secondsToTimeString(seconds)}
-	</chakra.span>
-)
-
-const Date = ({ isoDate }: { isoDate: string }) => (
-	<chakra.span fontFamily="monospace" fontSize="x-small">
-		{isoToShortDate(isoDate)}
-	</chakra.span>
-)
-
 const EpisodeActivity = ({
 	activity,
 }: {
@@ -72,12 +70,12 @@ const EpisodeActivity = ({
 		<>
 			{progressTime !== undefined ? (
 				<>
-					<Time seconds={progressTime} />
+					<TimeView seconds={progressTime} />
 					<chakra.span>{' /\n'}</chakra.span>
 				</>
 			) : null}
 			{durationTime !== undefined ? (
-				<Time seconds={durationTime} />
+				<TimeView seconds={durationTime} />
 			) : (
 				<chakra.span>...</chakra.span>
 			)}
@@ -87,7 +85,7 @@ const EpisodeActivity = ({
 			) : playedIsoDate !== undefined ? (
 				<Box data-testid="EpisodeRow-item-playedDate">
 					<TimeIcon boxSize={30} />
-					<Date isoDate={playedIsoDate} />
+					<DateView isoDate={playedIsoDate} />
 				</Box>
 			) : null}
 		</>
@@ -97,13 +95,33 @@ const EpisodeActivity = ({
 export const LatestPage = () => {
 	const { refreshAll } = useSubscriptionManager()
 	const episodes = useAppSelector(selectRecentEpisodes)
+	const requestedPulls = useAppSelector(state =>
+		selectPullsByStatus(state, 'requested'),
+	)
+	const notFoundPulls = useAppSelector(state =>
+		selectPullsByStatus(state, 'notFound'),
+	)
+
+	const anyLoading = requestedPulls.length > 0
 
 	return (
 		<PageStack>
 			<Heading as="h1">Latest episodes</Heading>
 			<HStack>
-				<Button onClick={refreshAll}>Refresh all</Button>
+				<Button onClick={refreshAll} isLoading={anyLoading}>
+					Refresh all
+				</Button>
 			</HStack>
+
+			{notFoundPulls.length > 0 ? (
+				<Box>
+					<Alert status="error">
+						<AlertIcon />
+						Some feeds could not be pulled:{' '}
+						{notFoundPulls.map(pull => JSON.stringify(pull.url)).join(', ')}
+					</Alert>
+				</Box>
+			) : null}
 
 			<PageGrid>
 				{episodes.map(episode => (
