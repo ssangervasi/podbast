@@ -11,6 +11,10 @@
 		"lint": "lint-staged",
 		"lint:branch": "lint-staged --diff origin/main"
 	},
+	"engines": {
+		"node": "~20.10.0",
+		"npm": "~10.2.3"
+	},
 	"dependencies": {
 		"@chakra-ui/icons": "^2.1.1",
 		"@chakra-ui/react": "^2.8.2",
