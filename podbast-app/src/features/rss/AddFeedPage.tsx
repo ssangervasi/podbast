@@ -15,7 +15,7 @@ import { Outline, OutlineFeed } from '/src/features/rss'
 import { postOpml } from '/src/features/rss/opmlClient'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
-import { HStack, PageStack } from '/src/ui'
+import { PageStack, TinyForm } from '/src/ui'
 import { PageGrid } from '/src/ui/grids'
 
 import { PullViewer } from './FeedViewer'
@@ -46,16 +46,18 @@ export const AddFeedPage = () => {
 
 	return (
 		<PageStack>
-			<Heading as="h1" size="lg">
-				Load RSS feed
-			</Heading>
+			<Heading as="h1">Load RSS feed</Heading>
 
 			<LocalUrlForm />
 
-			<form name="inputRssUrl" onSubmit={handleSubmitRssUrl}>
+			<chakra.form
+				name="inputRssUrl"
+				onSubmit={handleSubmitRssUrl}
+				width="full"
+			>
 				<chakra.p>Load a podcast by RSS feed</chakra.p>
 
-				<HStack alignItems="end">
+				<TinyForm>
 					<FormControl>
 						<FormLabel>RSS URL</FormLabel>
 						<Input
@@ -67,14 +69,12 @@ export const AddFeedPage = () => {
 					</FormControl>
 
 					<Button type="submit">Load</Button>
-				</HStack>
-			</form>
+				</TinyForm>
+			</chakra.form>
 
-			<ImportForm />
+			<UploadForm />
 
-			<Heading as="h2" size="lg">
-				Loaded feeds
-			</Heading>
+			<Heading>Loaded feeds</Heading>
 			<PageGrid>
 				{pulls.length === 0 ? (
 					<GridItem colSpan={12}>
@@ -90,9 +90,7 @@ export const AddFeedPage = () => {
 	)
 }
 
-// const
-
-const ImportForm = () => {
+const UploadForm = () => {
 	const dispatch = useAppDispatch()
 
 	const [outline, setOutline] = useState<Outline>()
@@ -114,25 +112,23 @@ const ImportForm = () => {
 
 	return (
 		<>
-			<form name="importFeedList" onSubmit={handleSubmit}>
-				<chakra.p>
-					Or import a list of RSS feeds. The supported file format is OPML,
-					which the format Google Podcasts (
-					<Link href="https://killedbygoogle.com/">RIP</Link>) used.
-				</chakra.p>
+			<chakra.p>
+				Or import a list of RSS feeds. The supported file format is OPML, which
+				the format Google Podcasts (
+				<Link href="https://killedbygoogle.com/">RIP</Link>) used.
+			</chakra.p>
 
-				<HStack alignItems="end">
-					<FormControl maxWidth="200px">
+			<chakra.form name="importFeedList" onSubmit={handleSubmit} width="full">
+				<TinyForm>
+					<FormControl>
 						<FormLabel>RSS feed list</FormLabel>
 						<Input type="file" name="content" padding={1} isRequired></Input>
 					</FormControl>
-					<Button type="submit">Import</Button>
-				</HStack>
-			</form>
+					<Button type="submit">Upload</Button>
+				</TinyForm>
+			</chakra.form>
 
-			<Heading as="h2" size="lg">
-				Importable feeds
-			</Heading>
+			<Heading>Importable feeds</Heading>
 			<PageGrid>
 				{outline
 					? outline.feeds.map(f => (

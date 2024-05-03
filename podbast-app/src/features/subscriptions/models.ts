@@ -1,31 +1,44 @@
 import { type Draft } from 'immer'
 import { Guard, Payload } from 'narrow-minded'
+import { ReadonlyDeep } from 'type-fest'
 
 import { Feed, FeedItem } from '/src/features/rss'
 import { entries, log } from '/src/utils'
-import { Indexed, mapToIndexed } from '/src/utils/collections'
+import { compact, Indexed, mapToIndexed, sorted } from '/src/utils/collections'
 import {
-	DateTime,
+	cmpIsoDate,
+	fromIso,
+	getEpoch,
 	getNow,
 	parseDate,
 	parseDurationToSeconds,
 } from '/src/utils/datetime'
 
 export type Subscription = {
-	// Unique ID
+	/**
+	 * Unique ID
+	 */
 	feedUrl: string
 
-	// URL provided by the user, which may include auth params
+	/**
+	 * URL provided by the user, which may include auth params
+	 */
 	url: string
 
-	// Canonical website for the podcast
+	/**
+	 * Canonical website for the podcast
+	 */
 	link: string
 	title: string
 	description: string
 
-	// Pub date
+	/**
+	 * Published date
+	 */
 	isoDate: string
-	// Pulled date
+	/**
+	 * Pulled date
+	 */
 	pulledIsoDate: string
 
 	image?: {
@@ -36,9 +49,20 @@ export type Subscription = {
 }
 
 export type SubscriptionItem = {
+	/**
+	 * Parent's ID.
+	 */
 	feedUrl: string
-	// Unique ID
+	/**
+	 * Unique ID.
+	 * Set to the `guid` if present, otherwise uses `enclosure.url`.
+	 */
 	id: string
+	/**
+	 * Usually this is present and can be used as the `id`.
+	 */
+	guid?: string
+
 	title: string
 	link: string
 	enclosure: {
@@ -46,9 +70,10 @@ export type SubscriptionItem = {
 		length: string
 		type: string
 	}
-	guid?: string
 	contentSnippet?: string
-	// Pub date
+	/**
+	 * Published date.
+	 */
 	isoDate: string
 	activity: SubscriptionItemActivity
 }
@@ -134,12 +159,6 @@ export const transformFeedToSubscription = (feed: Feed): Subscription => {
 	}
 }
 
-export const cmpDate = (a: string, b: string): number => {
-	const da = DateTime.fromISO(a)
-	const db = DateTime.fromISO(b)
-	return da.toMillis() - db.toMillis()
-}
-
 export const mergeFeedIntoState = (
 	draft: Draft<SubscriptionsState>,
 	feed: Feed,
@@ -199,4 +218,32 @@ export const ExportableGuard = Guard.narrow({
 	],
 })
 
-export type Exportable = Payload<typeof ExportableGuard>
+export type Exportable = ReadonlyDeep<Payload<typeof ExportableGuard>>
+
+export const getActiveDate = (s: SubscriptionItem) => {
+	return (
+		sorted(
+			compact([
+				s.activity.completedIsoDate,
+				s.activity.playedIsoDate,
+				s.isoDate,
+			]).map(ds => fromIso(ds)),
+			cmpIsoDate.desc,
+		)[0] ?? getEpoch()
+	)
+}
+
+/**
+ * An item is active if:
+ *  - It was published in the last 4 weeks
+ *  - OR it has EVER been listened to (or completed)
+ */
+export const hasActivity = (s: SubscriptionItem): boolean => {
+	const age = getNow().diff(getActiveDate(s))
+	if (age.as('weeks') < 4) {
+		return true
+	}
+	return (
+		compact([s.activity.completedIsoDate, s.activity.playedIsoDate]).length > 0
+	)
+}

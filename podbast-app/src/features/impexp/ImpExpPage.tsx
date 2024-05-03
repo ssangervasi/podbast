@@ -1,6 +1,7 @@
 import { DownloadIcon } from '@chakra-ui/icons'
 import {
-	Box,
+	Alert,
+	AlertIcon,
 	Button,
 	FormControl,
 	FormLabel,
@@ -18,8 +19,8 @@ import {
 } from '/src/features/subscriptions'
 import { Exportable, ExportableGuard } from '/src/features/subscriptions/models'
 import { useAppSelector } from '/src/store'
-import { HStack, PageStack } from '/src/ui'
-import { ExpandableHeight } from '/src/ui/ExpandablHeight'
+import { HStack, PageStack, TinyForm } from '/src/ui'
+import { CodeBlock } from '/src/ui/CodeBlock'
 import { getNow } from '/src/utils/datetime'
 import { DevOnly } from '/src/utils/DevOnly'
 
@@ -42,53 +43,56 @@ export const ImpExpPage = () => {
 	const expDataUrl = useMemo(() => encodeJsonDataUrl(expData), [expData])
 
 	const expFilename = useMemo(() => {
-		const fileSafeDate = getNow().toFormat('yyyy-mm-dd')
+		const fileSafeDate = getNow().toFormat('yyyy-MM-dd')
 		return `${fileSafeDate}.podbast.json`
 	}, [expSubs])
 
-	// const export = useAppDispatch()
-
-	// const [expDataUrl, setExpDataUrl] = useState<string>()
-
 	return (
 		<PageStack>
-			<Heading as="h2">Export your podbast data</Heading>
+			<Heading as="h1">Export your podbast data</Heading>
 			<Text>
 				Save your data from this browser as a backup or to import it in another
 				browser. Includes your subscriptions and play history.
 			</Text>
-			<HStack placeItems="center">
-				<Link
-					href={expDataUrl}
-					download={expFilename}
-					aria-labelledby="text-download"
-				>
-					<DownloadIcon boxSize={16} />
-				</Link>
-				<Text fontSize="large" id="text-download">
-					Download <Text as="i">{expFilename}</Text>
-				</Text>
-			</HStack>
-
-			<Heading as="h2">Import your podbast data</Heading>
-			<Text>Restore your data from a file.</Text>
-			<ImpForm />
+			<Link
+				href={expDataUrl}
+				download={expFilename}
+				aria-labelledby="text-download"
+			>
+				<HStack placeItems="center">
+					<DownloadIcon boxSize={8} />
+					<Text fontSize="larger" id="text-download">
+						Download <Text as="i">{expFilename}</Text>
+					</Text>
+				</HStack>
+			</Link>
 
 			<DevOnly>
-				<ExpandableHeight>
-					<Box as="pre" maxWidth="80ch" overflowX="auto">
-						{JSON.stringify(expData, null, 2)}
-					</Box>
-				</ExpandableHeight>
+				<CodeBlock>{expData}</CodeBlock>
 			</DevOnly>
+
+			<Heading>Import your podbast data</Heading>
+			<Text>Restore your data from a file.</Text>
+			<ImpForm />
 		</PageStack>
 	)
 }
 
+type ImpResult =
+	| {
+			status: 'success'
+			json: Exportable
+	  }
+	| {
+			status: 'error'
+			reason: string
+			json?: unknown
+	  }
+
 const ImpForm = () => {
 	const dispatch = useDispatch()
 
-	const [res, setRes] = useState<string>()
+	const [result, setResult] = useState<ImpResult>()
 
 	const handleSubmit = useCallback(async (evt: SubmitEvent) => {
 		evt.preventDefault()
@@ -104,25 +108,39 @@ const ImpForm = () => {
 		if (!file) {
 			return
 		}
+
 		const text = await file.text()
-		let json
+		let json: unknown
 		try {
 			json = JSON.parse(text)
-			setRes(text)
 		} catch {
-			setRes('invalid file')
+			setResult({
+				status: 'error',
+				reason: 'File is not valid JSON',
+			})
 			return
 		}
 
-		if (ExportableGuard.satisfied(json)) {
-			dispatch(receiveImport(json))
+		if (!ExportableGuard.satisfied(json)) {
+			setResult({
+				status: 'error',
+				reason: 'File invalid (does match export format)',
+				json,
+			})
+			return
 		}
+
+		setResult({
+			status: 'success',
+			json,
+		})
+		dispatch(receiveImport(json))
 	}, [])
 
 	return (
 		<>
 			<form name="importPodbastJson" onSubmit={handleSubmit}>
-				<HStack alignItems="end">
+				<TinyForm>
 					<FormControl maxWidth="200px">
 						<FormLabel>podbast.json file</FormLabel>
 						<Input
@@ -131,13 +149,36 @@ const ImpForm = () => {
 							padding={1}
 							isRequired
 							accept=".json"
+							onChange={() => {
+								setResult(undefined)
+							}}
 						></Input>
 					</FormControl>
-					<Button type="submit">Import</Button>
-				</HStack>
+					<Button type="submit">Upload</Button>
+				</TinyForm>
 			</form>
 
-			{res ? <pre>{res}</pre> : null}
+			<ImpSummary result={result} />
+		</>
+	)
+}
+
+const ImpSummary = ({ result }: { result: ImpResult | undefined }) => {
+	return (
+		<>
+			{result?.status === 'error' ? (
+				<Alert status="error">
+					<AlertIcon />
+					{result.reason}
+				</Alert>
+			) : null}
+			{result?.status === 'success' ? (
+				<Alert status="success">
+					<AlertIcon />
+					Importing {result.json.subscriptions.length} subscriptions
+				</Alert>
+			) : null}
+			<DevOnly>{result ? <CodeBlock>{result}</CodeBlock> : null}</DevOnly>
 		</>
 	)
 }

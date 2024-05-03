@@ -100,9 +100,7 @@ export const LatestPage = () => {
 
 	return (
 		<PageStack>
-			<Heading as="h1" size="lg">
-				Latest episodes
-			</Heading>
+			<Heading as="h1">Latest episodes</Heading>
 			<HStack>
 				<Button onClick={refreshAll}>Refresh all</Button>
 			</HStack>

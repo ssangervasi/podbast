@@ -1,11 +1,12 @@
-import { produce } from 'immer'
+/* eslint-disable @typescript-eslint/array-type */
+import { freeze } from 'immer'
 
-export const EMPTY_ARRAY: never[] = produce([], () => [])
+export const EMPTY_ARRAY: ReadonlyArray<never> = freeze([])
 
 export type Nullish<I = unknown> = I | null | undefined
 export type Emptyish<I = unknown> = I[] | null | undefined
 
-const _wrapEmpty = <I>(a: Emptyish<I>): I[] =>
+const _wrapEmpty = <I>(a: Emptyish<I>): ReadonlyArray<I> =>
 	a !== undefined && a !== null && a.length > 0 ? a : EMPTY_ARRAY
 
 export const wrapEmpty = Object.assign(_wrapEmpty, {
@@ -13,16 +14,22 @@ export const wrapEmpty = Object.assign(_wrapEmpty, {
 })
 
 // export const EMPTY_RECORD: Record<string, any> = produce({}, () => ({}));
-// export const emptyRecord = <R extends >(a: I[] | null | undefined): I[] =>
+// export const emptyRecord = <R extends >(a: ReadonlyArray<I> | null | undefined): ReadonlyArray<I> =>
 //   a !== undefined && a !== null && a.length > 0 ? a : EMPTY_ARRAY;
 
-export const compact = <I>(a: Emptyish<Nullish<I>>): I[] =>
-	wrapEmpty(wrapEmpty(a).filter((i): i is I => i !== null && i !== undefined))
+export const compact = <I>(a: Emptyish<Nullish<I>>): ReadonlyArray<I> =>
+	wrapEmpty(
+		//
+		wrapEmpty(a).filter((i): i is I => i !== null && i !== undefined),
+	)
 
-export const sorted = <I>(a: I[], compareFn?: (il: I, ir: I) => number) => {
-	const ac = wrapEmpty([...a])
+export const sorted = <I>(
+	a: ReadonlyArray<I>,
+	compareFn?: (il: I, ir: I) => number,
+) => {
+	const ac = [...a]
 	ac.sort(compareFn)
-	return ac
+	return wrapEmpty(ac)
 }
 
 export const mapToMap = <IIn, KOut, IOut>(
@@ -51,8 +58,9 @@ export const indexedToRecord = <T>(ind: Indexed<T>): Record<string, T> => {
 	return record
 }
 
-export const values = <T>(ind: Indexed<T>): T[] => compact(Object.values(ind))
-export const entries = <T>(ind: Indexed<T>): Array<[string, T]> =>
+export const values = <T>(ind: Indexed<T>): ReadonlyArray<T> =>
+	compact(Object.values(ind))
+export const entries = <T>(ind: Indexed<T>): ReadonlyArray<[string, T]> =>
 	compact(Object.entries(ind).map(([k, v]) => (v ? [k, v] : undefined)))
 
 export const mapValues = <

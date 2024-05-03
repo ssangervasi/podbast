@@ -7,6 +7,23 @@ import { Main } from './main'
 import { Side } from './side'
 import { Top } from './top'
 
+export const Layout = () => (
+	<Flex
+		direction="column"
+		minH="100vh"
+		// Scrollbar trickery
+		width="calc(100vw - (100vw - 100%))"
+		overflowX="hidden"
+	>
+		<Top />
+		<Flex flexGrow="1" width="full">
+			<SideWrapper />
+			<MainWrapper />
+		</Flex>
+		<Bottom />
+	</Flex>
+)
+
 export const SideWrapper = () => (
 	<Box
 		bg="gray.700"
@@ -29,15 +46,4 @@ export const Bottom = () => (
 	<Box>
 		<Player />
 	</Box>
-)
-
-export const Layout = () => (
-	<Flex direction="column" minH="100vh" width="100vw" overflowX="hidden">
-		<Top />
-		<Flex flexGrow="1" width="full">
-			<SideWrapper />
-			<MainWrapper />
-		</Flex>
-		<Bottom />
-	</Flex>
 )

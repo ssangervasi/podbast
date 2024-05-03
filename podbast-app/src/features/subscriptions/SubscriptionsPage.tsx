@@ -13,9 +13,7 @@ export const SubscriptionsPage = () => {
 	return (
 		<>
 			<PageStack>
-				<Heading as="h1" size="lg">
-					Podcast subscriptions
-				</Heading>
+				<Heading as="h1">Podcast subscriptions</Heading>
 
 				{subscriptions.length === 0 ? (
 					<Text>

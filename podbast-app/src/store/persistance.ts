@@ -1,9 +1,11 @@
 import { produce } from 'immer'
 import type { PersistedState } from 'redux-persist'
-import { PersistConfig } from 'redux-persist'
+import { createTransform, PersistConfig } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 
+import { getActiveDate } from '/src/features/subscriptions/models'
 import { entries, log, values } from '/src/utils'
+import { getNow } from '/src/utils/datetime'
 
 import { type RootReducerKey, type RootReducerReturn } from './reducers'
 
@@ -16,8 +18,6 @@ export const persistanceMigrate = async (
 	return produce(
 		state as PersistedState & Partial<RootReducerReturn>,
 		draft => {
-			// log.with({ prefix: 'Persist migrate' }).debug(Object.keys(draft))
-			// if  "layout", "player", "subscriptions", "_persist" ]
 			if ('rss' in draft) {
 				logger.info('Removing stored RSS state')
 				delete draft['rss']
@@ -46,6 +46,40 @@ export const persistanceMigrate = async (
 	)
 }
 
+const transformDiscardItems = createTransform<
+	RootReducerReturn['subscriptions'],
+	RootReducerReturn['subscriptions']
+>(
+	(subState, key) => {
+		if (key !== 'subscriptions') {
+			logger.error('WTF transform key', key)
+			return subState
+		}
+
+		return produce(subState, draft => {
+			const deleted: string[] = []
+
+			const now = getNow()
+			values(draft.feedUrlToItemIdToItem).forEach(itemIdToItem => {
+				entries(itemIdToItem).forEach(([id, item]) => {
+					const activeDate = getActiveDate(item)
+					const age = now.diff(activeDate)
+					if (age.as('weeks') < 4) {
+						return
+					}
+
+					deleted.push(id)
+					delete itemIdToItem[id]
+				})
+			})
+
+			logger.debug(`Deleted ${deleted.length} inactive items`, deleted)
+		})
+	},
+	null,
+	{ whitelist: ['subscriptions'] },
+)
+
 // Persistence
 export const persistConfig: PersistConfig<RootReducerReturn> = {
 	key: 'root',
@@ -54,15 +88,7 @@ export const persistConfig: PersistConfig<RootReducerReturn> = {
 	throttle: 1_000,
 	whitelist: ['layout', 'player', 'subscriptions'] satisfies RootReducerKey[],
 	migrate: persistanceMigrate,
-	// transforms: [
-	// 	{
-	// 		in: (s, k) => {
-	// 			logger.debug('transform', k)
-	// 			return s
-	// 		},
-	// 		out: (s, k) => s,
-	// 	},
-	// ],
+	transforms: [transformDiscardItems],
 	writeFailHandler: err => {
 		logger.error('Error writing localStorage', err)
 	},

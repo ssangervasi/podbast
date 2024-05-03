@@ -4,12 +4,12 @@ import { narrow } from 'narrow-minded'
 import { _receiveMediaUpdate as player_receiveMediaUpdate } from '/src/features/player/slice'
 import { Feed } from '/src/features/rss/models'
 import { compact, isAround, log, sorted, values } from '/src/utils'
-import { getNow } from '/src/utils/datetime'
+import { cmpIsoDate, getNow } from '/src/utils/datetime'
 
 import {
-	cmpDate,
 	Episode,
 	Exportable,
+	getActiveDate,
 	mergeFeedIntoState,
 	Subscription,
 	SubscriptionItem,
@@ -134,18 +134,20 @@ export const {
 
 export const selectSubscriptions = createSelector(
 	[selectState],
-	(state): Subscription[] => values(state.feedUrlToSubscription),
+	(state): readonly Subscription[] => values(state.feedUrlToSubscription),
 )
 
 /**
  * Latest to oldest, in-place
  */
 const sortEpisodes = (episodes: Episode[]) =>
-	sorted(episodes, (a, b) => -cmpDate(a.item.isoDate, b.item.isoDate))
+	sorted(episodes, (a, b) =>
+		cmpIsoDate.desc(getActiveDate(a.item), getActiveDate(b.item)),
+	)
 
 export const selectRecentEpisodes = createSelector(
 	[selectState],
-	(state): Episode[] =>
+	(state): readonly Episode[] =>
 		sortEpisodes(
 			values(state.feedUrlToItemIdToItem).flatMap(items => {
 				const subEps = sortEpisodes(
@@ -158,8 +160,8 @@ export const selectRecentEpisodes = createSelector(
 						}
 					}),
 				)
-				subEps.splice(2, Infinity)
-				return subEps
+
+				return subEps.slice(0, 2)
 			}),
 		),
 )

@@ -1,7 +1,7 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 
 import { buildUrl, log } from '/src/utils'
-import { EMPTY_ARRAY, mapToMap, wrapEmpty } from '/src/utils/collections'
+import { mapToMap, wrapEmpty } from '/src/utils/collections'
 
 import { Feed } from './models'
 import { fetchFeed } from './thunks'
@@ -35,7 +35,7 @@ export interface RssState {
 }
 
 export const initialState: RssState = {
-	pulls: EMPTY_ARRAY,
+	pulls: [],
 }
 
 export const slice = createSlice({

@@ -2,8 +2,10 @@ import { DateTime, Duration } from 'luxon'
 
 export { DateTime, Duration } from 'luxon'
 
-export const fromIso = (isoDate: string): DateTime<true> => {
-	return ensureValid(DateTime.fromISO(isoDate))
+export const fromIso = (isoDate: string | DateTime): DateTime<true> => {
+	return ensureValid(
+		isoDate instanceof DateTime ? isoDate : DateTime.fromISO(isoDate),
+	)
 }
 
 export const parseDate = (du: unknown): DateTime<true> => {
@@ -18,6 +20,16 @@ export const parseDate = (du: unknown): DateTime<true> => {
 
 	return ensureValid(dt)
 }
+
+const _cmpIsoDate = (a: string | DateTime, b: string | DateTime): number => {
+	const da = fromIso(a)
+	const db = fromIso(b)
+	return da.toMillis() - db.toMillis()
+}
+
+export const cmpIsoDate = Object.assign(_cmpIsoDate, {
+	desc: ((a, b) => -_cmpIsoDate(a, b)) satisfies typeof _cmpIsoDate,
+})
 
 export const isoToShortDate = (isoDate: string) =>
 	fromIso(isoDate).toLocaleString(DateTime.DATE_SHORT)

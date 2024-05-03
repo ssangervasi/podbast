@@ -224,5 +224,10 @@ export const theme = extendTheme({
 				}),
 			},
 		},
+		Heading: {
+			defaultProps: {
+				size: 'lg',
+			},
+		},
 	},
 } satisfies Partial<ChakraTheme>) as ChakraTheme
