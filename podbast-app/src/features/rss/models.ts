@@ -8,10 +8,8 @@ export const FeedResponseGuard = Guard.narrow({
 	content: {
 		// Required
 		title: 'string',
-		link: 'string',
 		description: 'string',
 		feedUrl: 'string',
-		url: optional('string'),
 
 		items: [
 			{
@@ -44,6 +42,8 @@ export const FeedResponseGuard = Guard.narrow({
 		],
 
 		// Optional
+		link: optional('string'),
+		url: optional('string'),
 		image: optional({
 			link: 'string',
 			url: 'string',

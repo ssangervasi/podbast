@@ -9,7 +9,7 @@ import { cmpIsoDate, getNow } from '/src/utils/datetime'
 import {
 	Episode,
 	Exportable,
-	getActiveDate,
+	getPubDate,
 	mergeFeedIntoState,
 	Subscription,
 	SubscriptionItem,
@@ -138,11 +138,11 @@ export const selectSubscriptions = createSelector(
 )
 
 /**
- * Latest to oldest, in-place
+ * Latest to oldest
  */
 const sortEpisodes = (episodes: Episode[]) =>
 	sorted(episodes, (a, b) =>
-		cmpIsoDate.desc(getActiveDate(a.item), getActiveDate(b.item)),
+		cmpIsoDate.desc(getPubDate(a.item), getPubDate(b.item)),
 	)
 
 export const selectRecentEpisodes = createSelector(

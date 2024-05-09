@@ -87,19 +87,17 @@ const FeedViewer = ({ pull }: { pull: RssPullReady }) => {
 				</GridItem>
 			</RowWrapper>
 
-			<RowWrapper>
-				<GridItem colSpan={12}>
-					<chakra.b>Episodes</chakra.b>
-				</GridItem>
+			<GridItem colSpan={12}>
+				<chakra.b>Episodes</chakra.b>
+			</GridItem>
 
-				{chunker.chunk.map(item => (
-					<FeedItemViewer item={item} key={item.guid} />
-				))}
+			{chunker.chunk.map(item => (
+				<FeedItemViewer item={item} key={item.guid} />
+			))}
 
-				{chunker.itemsAfter > 0 ? (
-					<GridItem colSpan={12}>... and {chunker.itemsAfter} more</GridItem>
-				) : null}
-			</RowWrapper>
+			{chunker.itemsAfter > 0 ? (
+				<GridItem colSpan={12}>... and {chunker.itemsAfter} more</GridItem>
+			) : null}
 		</>
 	)
 }

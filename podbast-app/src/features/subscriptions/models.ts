@@ -233,6 +233,10 @@ export const getActiveDate = (s: SubscriptionItem) => {
 	)
 }
 
+export const getPubDate = (s: SubscriptionItem) => {
+	return fromIso(s.isoDate)
+}
+
 /**
  * An item is active if:
  *  - It was published in the last 4 weeks
