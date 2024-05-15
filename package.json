@@ -6,8 +6,8 @@
 	"author": "ssangervasi",
 	"license": "ISC",
 	"engines": {
-		"node": "~20.10.0",
-		"npm": "~10.2.3"
+		"node": "^20.10.0",
+		"npm": "^10.2.3"
 	},
 	"devDependencies": {
 		"narrow-minded": "^1.2.1",
