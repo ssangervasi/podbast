@@ -28,7 +28,7 @@ export type Subscription = {
 	/**
 	 * Canonical website for the podcast
 	 */
-	link: string
+	link?: string
 	title: string
 	description: string
 
@@ -191,10 +191,16 @@ export const mergeFeedIntoState = (
 	const items = transformFeedToSubscriptionItems(feed)
 	entries(items).forEach(([id, item]) => {
 		const existingItem = existingItems[id]
-		existingItems[id] = {
+		const mergedItem = {
 			...existingItem,
 			...item,
 			activity: { ...item.activity, ...existingItem?.activity },
+		}
+
+		if (hasActivity(mergedItem)) {
+			existingItems[id] = mergedItem
+		} else {
+			delete existingItems[id]
 		}
 	})
 }
@@ -209,7 +215,6 @@ export const ExportableGuard = Guard.narrow({
 			],
 			feedUrl: 'string',
 			url: 'string',
-			link: 'string',
 			title: 'string',
 			description: 'string',
 			isoDate: 'string',

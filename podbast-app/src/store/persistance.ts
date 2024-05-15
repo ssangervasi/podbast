@@ -3,9 +3,8 @@ import type { PersistedState } from 'redux-persist'
 import { createTransform, PersistConfig } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 
-import { getActiveDate } from '/src/features/subscriptions/models'
+import { hasActivity } from '/src/features/subscriptions/models'
 import { entries, log, values } from '/src/utils'
-import { getNow } from '/src/utils/datetime'
 
 import { type RootReducerKey, type RootReducerReturn } from './reducers'
 
@@ -59,12 +58,9 @@ const transformDiscardItems = createTransform<
 		return produce(subState, draft => {
 			const deleted: string[] = []
 
-			const now = getNow()
 			values(draft.feedUrlToItemIdToItem).forEach(itemIdToItem => {
 				entries(itemIdToItem).forEach(([id, item]) => {
-					const activeDate = getActiveDate(item)
-					const age = now.diff(activeDate)
-					if (age.as('weeks') < 4) {
+					if (hasActivity(item)) {
 						return
 					}
 
