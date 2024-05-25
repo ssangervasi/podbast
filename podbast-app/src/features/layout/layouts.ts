@@ -1,6 +1,8 @@
 import { ImpExpPage } from '/src/features/impexp/ImpExpPage'
+import { QueuePage } from '/src/features/player/queue'
 import { AddFeedPage } from '/src/features/rss'
 import { LatestPage, SubscriptionsPage } from '/src/features/subscriptions'
+import { isDev } from '/src/utils'
 
 export const LAYOUTS = {
 	subscriptions: {
@@ -23,6 +25,15 @@ export const LAYOUTS = {
 		sideTitle: 'Import/Export',
 		sideTiny: 'I/E',
 	},
+	...(isDev()
+		? {
+				queue: {
+					main: QueuePage,
+					sideTitle: 'Queue',
+					sideTiny: 'Q',
+				},
+			}
+		: {}),
 } satisfies {
 	[k: string]: {
 		main: () => JSX.Element | null
