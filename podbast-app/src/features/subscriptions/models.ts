@@ -13,6 +13,7 @@ import {
 	parseDate,
 	parseDurationToSeconds,
 } from '/src/utils/datetime'
+import { optional } from '/src/utils/narrows'
 
 export type Subscription = {
 	/**
@@ -185,6 +186,15 @@ export const mergeFeedIntoState = (
 	existing.isoDate = subscription.isoDate
 	existing.pulledIsoDate = subscription.pulledIsoDate
 
+	// Sync stuff that might be omitted from Exportable
+	if (subscription.image) {
+		existing.image = subscription.image
+	}
+	if (subscription.link) {
+		existing.link = subscription.link
+	}
+
+	// Sync items
 	const existingItems = draft.feedUrlToItemIdToItem[feedUrl] ?? {}
 	draft.feedUrlToItemIdToItem[feedUrl] = existingItems
 
@@ -214,11 +224,13 @@ export const ExportableGuard = Guard.narrow({
 				},
 			],
 			feedUrl: 'string',
-			url: 'string',
+			url: optional('string'),
 			title: 'string',
 			description: 'string',
 			isoDate: 'string',
 			pulledIsoDate: 'string',
+			link: optional('string'),
+			image: optional('object'),
 		},
 	],
 })

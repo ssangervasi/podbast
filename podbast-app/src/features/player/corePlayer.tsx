@@ -65,15 +65,17 @@ const buildStateAsUpdate = ({
 	const status = stateToStatus(mediaPlayerState)
 	const {
 		currentTime,
+		duration,
 		source: { src },
 	} = mediaPlayerState
 
 	const updatedMedia =
 		media && media.src === src
-			? {
+			? ({
 					...media,
 					currentTime,
-				}
+					durationTime: duration,
+				} satisfies Media)
 			: undefined
 
 	return {

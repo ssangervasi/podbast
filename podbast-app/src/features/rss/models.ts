@@ -1,7 +1,6 @@
-import { Guard, type Narrower, Payload, some } from 'narrow-minded'
+import { Guard, Payload } from 'narrow-minded'
 
-// Should have put this in narrow-minded to begin with
-const optional = <N extends Narrower>(n: N) => some('undefined', n)
+import { optional } from '/src/utils/narrows'
 
 export const FeedResponseGuard = Guard.narrow({
 	// More: https://www.rssboard.org/rss-specification#hrelementsOfLtitemgt

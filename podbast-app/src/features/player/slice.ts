@@ -16,6 +16,7 @@ export type Media = {
 	title?: string
 	item?: MediaItem
 	currentTime?: number
+	durationTime?: number
 }
 
 export type MediaUpdate = {

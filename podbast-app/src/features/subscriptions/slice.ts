@@ -49,6 +49,10 @@ export const slice = createSlice({
 		}),
 		receiveImport: create.reducer<Exportable>((draft, action) => {
 			action.payload.subscriptions.forEach(expSub => {
+				if (!expSub.url) {
+					return
+				}
+
 				const existingSub = draft.feedUrlToSubscription[expSub.feedUrl]
 				if (!existingSub) {
 					const sub: Subscription = {
@@ -59,7 +63,7 @@ export const slice = createSlice({
 						description: expSub.description,
 						isoDate: expSub.isoDate,
 						pulledIsoDate: expSub.pulledIsoDate,
-						image: (expSub as any)?.image,
+						image: expSub.image as any,
 					}
 					draft.feedUrlToSubscription[expSub.feedUrl] = sub
 				}
@@ -82,7 +86,7 @@ export const slice = createSlice({
 		builder.addCase(player_receiveMediaUpdate, (draft, action) => {
 			const {
 				//
-				media: { item: itemUpdate, currentTime } = {},
+				media: { item: itemUpdate, currentTime, durationTime } = {},
 			} = action.payload
 			if (!itemUpdate) {
 				return
@@ -93,6 +97,10 @@ export const slice = createSlice({
 			if (!item) {
 				log.error("Couldn't find subscription item from update")
 				return
+			}
+
+			if (durationTime) {
+				item.activity.durationTime = durationTime
 			}
 
 			const prevTime = item.activity.progressTime
@@ -172,7 +180,7 @@ export const selectSubSummaries = createSelector([selectSubscriptions], subs =>
 
 export const selectExportableSubscriptions = createSelector(
 	[selectState],
-	state => {
+	(state): Exportable['subscriptions'] => {
 		return compact(
 			values(state.feedUrlToSubscription).map(sub => {
 				const items = compact(
@@ -186,6 +194,8 @@ export const selectExportableSubscriptions = createSelector(
 				)
 
 				return {
+					link: undefined,
+					image: undefined,
 					...sub,
 					items,
 				}
