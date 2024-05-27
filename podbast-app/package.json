@@ -5,8 +5,9 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build",
+		"build": "vite build",
 		"preview": "vite preview",
+		"check": "tsc",
 		"cypress:open": "cypress open",
 		"lint": "lint-staged",
 		"lint:branch": "lint-staged --diff origin/main"

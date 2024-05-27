@@ -26,8 +26,8 @@ import {
 	makeRequest,
 	Media,
 	MediaUpdate,
-	selectMedia,
-	selectPendingRequest,
+	PlayerState,
+	selectState,
 	Status,
 } from './slice'
 
@@ -44,14 +44,9 @@ const stateToStatus = (mediaPlayerState: MediaPlayerState): Status => {
 	return 'stopped'
 }
 
-type Scope = {
-	media: Media | undefined
-	pendingRequest: MediaUpdate | undefined
-}
-
 type SubscriberContext = {
 	dispatch: AppDispatch
-	scopeRef: Ref<Scope>
+	scopeRef: Ref<PlayerState>
 	mediaPlayerRef: Ref<MediaPlayerInstance>
 }
 
@@ -66,6 +61,7 @@ const buildStateAsUpdate = ({
 	const {
 		currentTime,
 		duration,
+		volume,
 		source: { src },
 	} = mediaPlayerState
 
@@ -80,20 +76,36 @@ const buildStateAsUpdate = ({
 
 	return {
 		status,
+		volume,
 		media: updatedMedia,
 	}
 }
 
-const createMediaPlayerSubscriber =
-	({ scopeRef, mediaPlayerRef, dispatch }: SubscriberContext) =>
-	(mediaPlayerState: MediaPlayerState) => {
-		const mediaPlayer = mediaPlayerRef.current
-		const scope = scopeRef.current
-		if (!(mediaPlayer && scope)) {
+class MediaPlayerSubscriber {
+	context: SubscriberContext
+
+	constructor(context: SubscriberContext) {
+		this.context = context
+	}
+
+	get dispatch() {
+		return this.context.dispatch
+	}
+
+	get scope() {
+		return this.context.scopeRef.current
+	}
+
+	get mediaPlayer() {
+		return this.context.mediaPlayerRef.current
+	}
+
+	handleSubscribe = (mediaPlayerState: MediaPlayerState) => {
+		if (!(this.mediaPlayer && this.scope)) {
 			return
 		}
 
-		const { media, pendingRequest } = scope
+		const { media, pendingRequest } = this.scope
 
 		const mediaStateAsUpdate = buildStateAsUpdate({
 			mediaPlayerState,
@@ -101,7 +113,7 @@ const createMediaPlayerSubscriber =
 		})
 
 		if (!pendingRequest) {
-			dispatchUpdate({ dispatch, mediaStateAsUpdate })
+			this.dispatchUpdate(mediaStateAsUpdate)
 			return
 		}
 
@@ -113,30 +125,24 @@ const createMediaPlayerSubscriber =
 		) {
 			syncMediaPlayer({
 				pendingRequest,
-				mediaPlayer,
+				mediaPlayer: this.mediaPlayer,
 			})
 			return
 		}
 
-		dispatch(_clearRequest())
+		this.dispatch(_clearRequest())
 	}
 
-// I bet there's a nicer way to wrap dispatch...
-const dispatchUpdate = ({
-	dispatch,
-	mediaStateAsUpdate,
-}: {
-	dispatch: AppDispatch
-	mediaStateAsUpdate: MediaUpdate
-}) => {
-	if (mediaStateAsUpdate.status === 'playing') {
-		progressThrottler(() => {
-			dispatch(_receiveMediaUpdate(mediaStateAsUpdate))
-		})
-		return
-	}
+	dispatchUpdate(mediaStateAsUpdate: MediaUpdate) {
+		if (mediaStateAsUpdate.status === 'playing') {
+			progressThrottler(() => {
+				this.dispatch(_receiveMediaUpdate(mediaStateAsUpdate))
+			})
+			return
+		}
 
-	dispatch(_receiveMediaUpdate(mediaStateAsUpdate))
+		this.dispatch(_receiveMediaUpdate(mediaStateAsUpdate))
+	}
 }
 
 const progressThrottler = createThrottler(5_000)
@@ -162,6 +168,14 @@ const needsSync = ({
 		}
 	}
 
+	// Sync needed for volume only if the player's volume is more than 1% off.
+	const reqVolume = pendingRequest.volume
+	const mediaVolume = mediaStateAsUpdate.volume
+	if (reqVolume !== undefined && mediaVolume !== undefined) {
+		if (!isAround(reqVolume, 0.01, mediaVolume)) {
+			return true
+		}
+	}
 	return false
 }
 
@@ -182,15 +196,20 @@ const syncMediaPlayer = ({
 	if (seekTime !== undefined) {
 		mediaPlayer.currentTime = seekTime
 	}
+
+	const reqVolume = pendingRequest.volume
+	if (reqVolume !== undefined) {
+		mediaPlayer.volume = reqVolume
+	}
 }
 
 export const CorePlayer = () => {
 	const dispatch = useAppDispatch()
 
-	const media = useAppSelector(selectMedia)
-	const pendingRequest = useAppSelector(selectPendingRequest)
+	const playerState = useAppSelector(selectState)
 
 	const mediaForPlayer: Media | undefined = useMemo(() => {
+		const { pendingRequest, media } = playerState
 		if (pendingRequest?.status === 'stopped') {
 			return undefined
 		}
@@ -198,18 +217,14 @@ export const CorePlayer = () => {
 			return pendingRequest.media
 		}
 		return media
-	}, [media, pendingRequest])
+	}, [playerState])
 
-	const scopeRef = useUpdatingRef({
-		media,
-		pendingRequest,
-		mediaForPlayer,
-	})
+	const scopeRef = useUpdatingRef(playerState)
 
 	const mediaPlayerRef = useRef<MediaPlayerInstance>(null)
 
 	const subscriber = useMemo(() => {
-		return createMediaPlayerSubscriber({
+		return new MediaPlayerSubscriber({
 			scopeRef,
 			mediaPlayerRef,
 			dispatch,
@@ -221,7 +236,8 @@ export const CorePlayer = () => {
 		dispatch(
 			makeRequest({
 				status: 'paused',
-				media,
+				media: playerState.media,
+				volume: playerState.volume,
 			}),
 		)
 	}, [])
@@ -236,8 +252,8 @@ export const CorePlayer = () => {
 		}
 
 		logger.debug('manual call to subscriber')
-		subscriber(mediaPlayer.state)
-	}, [pendingRequest, subscriber, mediaPlayerRef.current])
+		subscriber.handleSubscribe(mediaPlayer.state)
+	}, [playerState.pendingRequest, subscriber, mediaPlayerRef.current])
 
 	useEffect(() => {
 		// Subscribe to every event from the MediaPlayer
@@ -246,7 +262,7 @@ export const CorePlayer = () => {
 			return () => {}
 		}
 
-		return mediaPlayer.subscribe(subscriber)
+		return mediaPlayer.subscribe(subscriber.handleSubscribe)
 	}, [mediaPlayerRef.current])
 
 	const handleClickStop = useCallback(() => {

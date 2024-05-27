@@ -1,6 +1,8 @@
 import { Button, chakra, useBreakpointValue } from '@chakra-ui/react'
 import { ReactNode } from 'preact/compat'
 
+import { isDev } from '/src/utils'
+
 import { LAYOUT_ENTRIES, LayoutName } from './layouts'
 import { useLayout } from './useLayout'
 
@@ -9,11 +11,13 @@ export const Side = () => {
 
 	return (
 		<chakra.nav paddingTop={2}>
-			{LAYOUT_ENTRIES.map(({ layoutName, sideTitle, sideTiny }) => (
-				<SideButton to={layoutName}>
-					{needsTiny ? sideTiny : sideTitle}
-				</SideButton>
-			))}
+			{LAYOUT_ENTRIES.map(({ layoutName, sideTitle, sideTiny, devOnly }) =>
+				devOnly && !isDev() ? null : (
+					<SideButton to={layoutName}>
+						{needsTiny ? sideTiny : sideTitle}
+					</SideButton>
+				),
+			)}
 		</chakra.nav>
 	)
 }

@@ -2,7 +2,13 @@ import { ImpExpPage } from '/src/features/impexp/ImpExpPage'
 import { QueuePage } from '/src/features/player/queue'
 import { AddFeedPage } from '/src/features/rss'
 import { LatestPage, SubscriptionsPage } from '/src/features/subscriptions'
-import { isDev } from '/src/utils'
+
+export type Layout = {
+	main: () => JSX.Element | null
+	sideTitle: string
+	sideTiny: string
+	devOnly?: boolean
+}
 
 export const LAYOUTS = {
 	subscriptions: {
@@ -25,30 +31,24 @@ export const LAYOUTS = {
 		sideTitle: 'Import/Export',
 		sideTiny: 'I/E',
 	},
-	...(isDev()
-		? {
-				queue: {
-					main: QueuePage,
-					sideTitle: 'Queue',
-					sideTiny: 'Q',
-				},
-			}
-		: {}),
+	queue: {
+		main: QueuePage,
+		sideTitle: 'Queue',
+		sideTiny: 'Q',
+		devOnly: true,
+	},
 } satisfies {
-	[k: string]: {
-		main: () => JSX.Element | null
-		sideTitle: string
-		sideTiny: string
-	}
+	[k: string]: Layout
 }
 
 export type LayoutName = keyof typeof LAYOUTS
 
 export const LAYOUT_NAMES = Object.keys(LAYOUTS) as LayoutName[]
-export const LAYOUT_ENTRIES = LAYOUT_NAMES.map(layoutName => {
-	const layout = LAYOUTS[layoutName]
-	return {
-		layoutName,
-		...layout,
-	}
-})
+export const LAYOUT_ENTRIES: Array<Layout & { layoutName: LayoutName }> =
+	LAYOUT_NAMES.map(layoutName => {
+		const layout = LAYOUTS[layoutName]
+		return {
+			layoutName,
+			...layout,
+		}
+	})
