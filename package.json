@@ -7,7 +7,7 @@
 	"license": "ISC",
 	"engines": {
 		"node": "^20.10.0",
-		"npm": "^10.2.3"
+		"npm": "^10.8.0"
 	},
 	"devDependencies": {
 		"narrow-minded": "^1.2.1",
