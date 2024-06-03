@@ -36,7 +36,7 @@
 	},
 	"devDependencies": {
 		"@preact/preset-vite": "^2.7.0",
-		"@testing-library/cypress": "^10.0.1",
+		"@testing-library/cypress": "^10.0.2",
 		"@types/lodash.debounce": "^4.0.9",
 		"@types/lodash.throttle": "^4.1.9",
 		"@types/luxon": "^3.4.2",

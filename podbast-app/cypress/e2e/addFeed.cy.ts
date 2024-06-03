@@ -26,7 +26,21 @@ describe('add feed', () => {
 			{ pathname: '/api/opml', method: 'post' },
 			{ fixture: 'feedImportable/feeds.json' },
 		)
-		cy.findByRole('button', { name: 'Import' }).click()
-		cy.viewport(400, 600)
+		cy.findByRole('button', { name: 'Upload' }).click()
+
+		cy.findAllByTestId(/UploadForm-row/).should('have.length', 3)
+
+		cy.intercept(
+			{ pathname: '/api/rss' },
+			{ fixture: 'feedStubs/trashfuture.json' },
+		).as('getA')
+
+		cy.findByTestId('UploadForm-row:a')
+			.findByRole('button', { name: 'Load' })
+			.click()
+
+		cy.wait('@getA')
+			.its('request.query.url')
+			.should('eq', 'https://a.sangervasi.net/podcast.rss')
 	})
 })

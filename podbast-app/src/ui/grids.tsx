@@ -9,9 +9,9 @@ export const PageGrid = withDefaults(SimpleGrid, {
 	w: 'full',
 })
 
-export const RowWrapper = ({ children }: PropsWithChildren) => {
+export const RowWrapper = ({ children, ...rest }: PropsWithChildren) => {
 	return (
-		<chakra.div display="contents" role="group">
+		<chakra.div display="contents" role="group" {...rest}>
 			{children}
 
 			<GridItem

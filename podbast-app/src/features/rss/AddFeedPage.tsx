@@ -9,14 +9,13 @@ import {
 	Link,
 } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'preact/hooks'
-import { Fragment } from 'preact/jsx-runtime'
 
 import { Outline, OutlineFeed } from '/src/features/rss'
 import { postOpml } from '/src/features/rss/opmlClient'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { PageStack, TinyForm } from '/src/ui'
-import { PageGrid } from '/src/ui/grids'
+import { PageGrid, RowWrapper } from '/src/ui/grids'
 
 import { PullViewer } from './FeedViewer'
 import { LocalUrlForm } from './LocalUrlForm'
@@ -132,17 +131,17 @@ const UploadForm = () => {
 			<PageGrid>
 				{outline
 					? outline.feeds.map(f => (
-							<Fragment key={f.url}>
+							<RowWrapper key={f.url} data-testid={`UploadForm-row:${f.title}`}>
 								<GridItem colSpan={3}>
 									<chakra.b fontSize="lg">{f.title}</chakra.b>
 								</GridItem>
-								<GridItem colSpan={8}>
+								<GridItem colSpan={8} data-testid="UploadForm-url">
 									<chakra.span fontFamily="monospace">{f.url}</chakra.span>
 								</GridItem>
 								<GridItem colSpan={1}>
 									<Button onClick={() => handleLoad(f)}>Load</Button>
 								</GridItem>
-							</Fragment>
+							</RowWrapper>
 						))
 					: null}
 			</PageGrid>
