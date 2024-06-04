@@ -3,10 +3,12 @@ import { useCallback } from 'preact/hooks'
 import { clearPull, selectUrlToPull } from '/src/features/rss/slice'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
-import { useInterval } from '/src/utils'
+import { log, useInterval } from '/src/utils'
 import { Duration, fromIso, getNow } from '/src/utils/datetime'
 
 import { selectSubscriptions, updateSubscriptionFeed } from './slice'
+
+const logger = log.with({ prefix: 'sub manager' })
 
 export const useSubscriptionManager = () => {
 	const dispatch = useAppDispatch()
@@ -20,6 +22,9 @@ export const useSubscriptionManager = () => {
 
 	const checkRefresh = useCallback(() => {
 		const now = getNow()
+
+		logger.debug('checkRefresh', now)
+
 		subscriptions.forEach(sub => {
 			const diff = now.diff(fromIso(sub.pulledIsoDate))
 			if (diff.hours > 1) {
@@ -48,8 +53,12 @@ export const Manager = () => {
 
 	useInterval(
 		() => {
+			logger.debug('useInterval')
+
 			subscriptions.forEach(sub => {
 				const pull = urlToPull[sub.url]
+				logger.debug('useInterval', pull?.status, pull?.mode)
+
 				if (!(pull && pull.status === 'ready' && pull.mode === 'auto')) {
 					return
 				}

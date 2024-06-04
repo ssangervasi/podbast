@@ -65,6 +65,7 @@ export const slice = createSlice({
 				const existing = draft.urlToPull[url]
 				if (existing) {
 					existing.status = 'requested'
+					existing.mode = mode
 					return
 				}
 
