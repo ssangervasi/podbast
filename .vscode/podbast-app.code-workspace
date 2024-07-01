@@ -19,6 +19,7 @@
 			"reprop",
 			"urlish",
 			"vidstack"
-		]
+		],
+		"cSpell.enabled": false
 	}
 }

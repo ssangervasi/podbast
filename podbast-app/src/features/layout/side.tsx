@@ -3,20 +3,25 @@ import { ReactNode } from 'preact/compat'
 
 import { isDev } from '/src/utils'
 
-import { LAYOUT_ENTRIES, LayoutName } from './layouts'
+import { LAYOUT_ENTRIES, LayoutNamesWithoutData } from './layouts'
 import { useLayout } from './useLayout'
+
+const SIDE_LAYOUT_ENTRIES = LAYOUT_ENTRIES.filter(
+	le => le.layoutName !== 'subscriptionDetails',
+)
 
 export const Side = () => {
 	const needsTiny = useBreakpointValue([true, false])
 
 	return (
 		<chakra.nav paddingTop={2}>
-			{LAYOUT_ENTRIES.map(({ layoutName, sideTitle, sideTiny, devOnly }) =>
-				devOnly && !isDev() ? null : (
-					<SideButton to={layoutName}>
-						{needsTiny ? sideTiny : sideTitle}
-					</SideButton>
-				),
+			{SIDE_LAYOUT_ENTRIES.map(
+				({ layoutName, sideTitle, sideTiny, devOnly }) =>
+					devOnly && !isDev() ? null : (
+						<SideButton to={layoutName as LayoutNamesWithoutData}>
+							{needsTiny ? sideTiny : sideTitle}
+						</SideButton>
+					),
 			)}
 		</chakra.nav>
 	)
@@ -26,7 +31,7 @@ const SideButton = ({
 	to,
 	children,
 }: {
-	to: LayoutName
+	to: LayoutNamesWithoutData
 	children: ReactNode
 }) => {
 	const { layoutName, show } = useLayout()

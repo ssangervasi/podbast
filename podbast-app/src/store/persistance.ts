@@ -22,6 +22,10 @@ export const persistanceMigrate = async (
 				delete draft['rss']
 			}
 
+			if (draft.layout && !draft.layout.data) {
+				draft.layout.data = {}
+			}
+
 			let delLen = 0
 
 			values(draft.subscriptions?.feedUrlToItemIdToItem ?? {}).forEach(
