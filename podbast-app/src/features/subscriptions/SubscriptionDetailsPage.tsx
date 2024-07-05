@@ -1,76 +1,39 @@
-import { chakra, GridItem, Heading, Text } from '@chakra-ui/react'
+import { Box, chakra, GridItem, Heading, Text } from '@chakra-ui/react'
 
-import { Subscription } from '/src/features/subscriptions/models'
+import { useLayout } from '/src/features/layout/useLayout'
+import { EpisodeRow } from '/src/features/subscriptions/EpisodeView'
 import { SubscriptionTitle } from '/src/features/subscriptions/SubscriptionTitle'
 import { useAppSelector } from '/src/store'
-import { PageGrid, PageStack, RowWrapper } from '/src/ui'
-import { DateView } from '/src/ui/units'
+import { PageGrid, PageStack } from '/src/ui'
+import { log } from '/src/utils'
 
-import { selectSubSummaries } from './slice'
+import { selectSubscriptionWithItems } from './slice'
 
 export const SubscriptionDetailsPage = () => {
-	const subscriptions = useAppSelector(selectSubSummaries)
+	const { ensureData } = useLayout()
+
+	const { feedUrl } = ensureData('subscriptionDetails')
+	const subscription = useAppSelector(state => {
+		log('SubscriptionDetailsPage useAppSelector')
+		return selectSubscriptionWithItems(state, feedUrl)
+	})
 
 	return (
 		<>
 			<PageStack>
-				<Heading as="h1">Podcast subscriptions</Heading>
+				<SubscriptionTitle subscription={subscription} />
+				{/* <Heading as="h1">Podcast subscriptions</Heading> */}
 
-				{subscriptions.length === 0 ? (
-					<Text>
-						Looks like you haven't subscribed to any podcast feeds yet. Go add
-						an RSS feed!
-					</Text>
-				) : null}
+				<PageGrid>{subscription.title}</PageGrid>
+				<Box>{subscription.items.length}</Box>
+				<Box>{JSON.stringify(subscription.activity)}</Box>
 
 				<PageGrid>
-					{subscriptions.map(subscription => (
-						<SubscriptionView
-							key={subscription.link}
-							subscription={subscription}
-						/>
+					{subscription.items.map(item => (
+						<EpisodeRow key={item.id} episode={{ subscription, item }} />
 					))}
 				</PageGrid>
 			</PageStack>
-		</>
-	)
-}
-
-export const SubscriptionView = ({
-	subscription,
-}: {
-	subscription: Subscription
-}) => {
-	return (
-		<>
-			<RowWrapper>
-				<GridItem colSpan={4}>
-					<SubscriptionTitle subscription={subscription} />
-
-					<Text fontSize="x-small">
-						Last fetched: <DateView isoDate={subscription.pulledIsoDate} />
-					</Text>
-				</GridItem>
-
-				<GridItem colSpan={8}>
-					<Text>
-						Homepage:{' '}
-						<chakra.span fontFamily="monospace">
-							{subscription.link}
-						</chakra.span>
-					</Text>
-					<Text>
-						Feed URL:{' '}
-						<chakra.span fontFamily="monospace">
-							{subscription.feedUrl}
-						</chakra.span>
-					</Text>
-					<Text>
-						Subscription URL:{' '}
-						<chakra.span fontFamily="monospace">{subscription.url}</chakra.span>
-					</Text>
-				</GridItem>
-			</RowWrapper>
 		</>
 	)
 }

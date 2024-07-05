@@ -1,18 +1,33 @@
 import { useCallback } from 'preact/hooks'
 
+import { useLayout } from '/src/features/layout/useLayout'
 import { clearPull, selectUrlToPull } from '/src/features/rss/slice'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { log, useInterval } from '/src/utils'
-import { Duration, fromIso, getNow } from '/src/utils/datetime'
+import { Duration, fromIso, getEpoch, getNow } from '/src/utils/datetime'
 
-import { selectSubscriptions, updateSubscriptionFeed } from './slice'
+import {
+	selectFeedUrlToSubscription,
+	selectSubscriptions,
+	updateActivity,
+	updateSubscriptionFeed,
+} from './slice'
 
 const logger = log.with({ prefix: 'sub manager' })
 
 export const useSubscriptionManager = () => {
 	const dispatch = useAppDispatch()
+	const feedUrlToSubscription = useAppSelector(selectFeedUrlToSubscription)
 	const subscriptions = useAppSelector(selectSubscriptions)
+
+	const refreshOne = useCallback(
+		({ feedUrl }: { feedUrl: string }) => {
+			const sub = feedUrlToSubscription[feedUrl]!
+			dispatch(fetchFeed({ url: sub.url }))
+		},
+		[dispatch, feedUrlToSubscription],
+	)
 
 	const refreshAll = useCallback(() => {
 		subscriptions.forEach(sub => {
@@ -33,13 +48,14 @@ export const useSubscriptionManager = () => {
 		})
 	}, [dispatch, subscriptions])
 
-	return { refreshAll, checkRefresh, subscriptions }
+	return { refreshAll, refreshOne, checkRefresh, subscriptions }
 }
 
 export const Manager = () => {
 	const dispatch = useAppDispatch()
+	const { onLayout } = useLayout()
 
-	const { subscriptions, checkRefresh } = useSubscriptionManager()
+	const { subscriptions, checkRefresh, refreshOne } = useSubscriptionManager()
 
 	const urlToPull = useAppSelector(selectUrlToPull)
 
@@ -53,13 +69,15 @@ export const Manager = () => {
 
 	useInterval(
 		() => {
-			logger.debug('useInterval')
-
 			subscriptions.forEach(sub => {
 				const pull = urlToPull[sub.url]
-				logger.debug('useInterval', pull?.status, pull?.mode)
 
-				if (!(pull && pull.status === 'ready' && pull.mode === 'auto')) {
+				if (
+					!(
+						(pull && pull.status === 'ready')
+						// && pull.mode === 'auto'
+					)
+				) {
 					return
 				}
 
@@ -67,7 +85,22 @@ export const Manager = () => {
 				dispatch(clearPull(pull.url))
 			})
 		},
-		Duration.fromObject({ seconds: 5 }).toMillis(),
+		Duration.fromObject({ seconds: 10 }).toMillis(),
 	)
+
+	onLayout('subscriptionDetails', layoutData => {
+		const { feedUrl } = layoutData
+		dispatch(
+			updateActivity({
+				feedUrl,
+				activity: {
+					catalogueIsoDate: getEpoch().toISODate(),
+				},
+			}),
+		)
+
+		refreshOne({ feedUrl })
+	})
+
 	return <></>
 }

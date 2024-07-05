@@ -1,9 +1,9 @@
-import { produce } from 'immer'
+import { Draft, produce } from 'immer'
 import type { PersistedState } from 'redux-persist'
 import { createTransform, PersistConfig } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 
-import { hasActivity } from '/src/features/subscriptions/models'
+import { isItemFresh } from '/src/features/subscriptions/models'
 import { entries, log, values } from '/src/utils'
 
 import { type RootReducerKey, type RootReducerReturn } from './reducers'
@@ -17,36 +17,59 @@ export const persistanceMigrate = async (
 	return produce(
 		state as PersistedState & Partial<RootReducerReturn>,
 		draft => {
-			if ('rss' in draft) {
-				logger.info('Removing stored RSS state')
-				delete draft['rss']
-			}
+			migrateRssCleanup(draft)
+			migrateLayoutDefaults(draft)
+			migrateSubscriptionDefaults(draft)
+			migrateSubscriptionItemCleanup(draft)
+		},
+	)
+}
 
-			if (draft.layout && !draft.layout.data) {
-				draft.layout.data = {}
-			}
+type Migrator = (draft: Draft<Partial<RootReducerReturn>>) => void
 
-			let delLen = 0
+const migrateRssCleanup: Migrator = draft => {
+	if ('rss' in draft) {
+		logger.info('Removing stored RSS state')
+		delete draft['rss']
+	}
+}
 
-			values(draft.subscriptions?.feedUrlToItemIdToItem ?? {}).forEach(
-				itemIdToItem => {
-					entries(itemIdToItem).forEach(([_k, v]) => {
-						if ('content' in v) {
-							const content = v['content']
-							if (typeof content === 'string') {
-								delLen += content.length
-								delete v['content']
-							}
-						}
-					})
-				},
-			)
+const migrateLayoutDefaults: Migrator = draft => {
+	if (draft.layout && !draft.layout.data) {
+		draft.layout.data = {}
+	}
+}
 
-			if (delLen > 0) {
-				logger.info(`Deleted ${delLen} characters of sub content`)
+const migrateSubscriptionDefaults: Migrator = draft => {
+	values(draft.subscriptions?.feedUrlToSubscription ?? {}).forEach(
+		subscription => {
+			if (!subscription.activity) {
+				subscription.activity = {}
 			}
 		},
 	)
+}
+
+const migrateSubscriptionItemCleanup: Migrator = draft => {
+	let delLen = 0
+
+	values(draft.subscriptions?.feedUrlToItemIdToItem ?? {}).forEach(
+		itemIdToItem => {
+			entries(itemIdToItem).forEach(([_k, v]) => {
+				if ('content' in v) {
+					const content = v['content']
+					if (typeof content === 'string') {
+						delLen += content.length
+						delete v['content']
+					}
+				}
+			})
+		},
+	)
+
+	if (delLen > 0) {
+		logger.info(`Deleted ${delLen} characters of sub content`)
+	}
 }
 
 const transformDiscardItems = createTransform<
@@ -64,7 +87,7 @@ const transformDiscardItems = createTransform<
 
 			values(draft.feedUrlToItemIdToItem).forEach(itemIdToItem => {
 				entries(itemIdToItem).forEach(([id, item]) => {
-					if (hasActivity(item)) {
+					if (isItemFresh(item)) {
 						return
 					}
 

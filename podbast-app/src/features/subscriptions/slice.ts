@@ -11,7 +11,9 @@ import {
 	Exportable,
 	getPubDate,
 	mergeFeedIntoState,
+	mergeSubscriptionActivityIntoState,
 	Subscription,
+	SubscriptionActivity,
 	SubscriptionItem,
 	SubscriptionsState,
 	transformFeedToSubscription,
@@ -43,10 +45,19 @@ export const slice = createSlice({
 			draft.feedUrlToSubscription[feedUrl] = subscription
 			draft.feedUrlToItemIdToItem[feedUrl] = items
 		}),
+
 		updateSubscriptionFeed: create.reducer<Feed>((draft, action) => {
 			const feed = action.payload
 			mergeFeedIntoState(draft, feed)
 		}),
+
+		updateActivity: create.reducer<{
+			feedUrl: string
+			activity: SubscriptionActivity
+		}>((draft, action) => {
+			mergeSubscriptionActivityIntoState(draft, action.payload)
+		}),
+
 		receiveImport: create.reducer<Exportable>((draft, action) => {
 			action.payload.subscriptions.forEach(expSub => {
 				if (!expSub.url) {
@@ -64,6 +75,7 @@ export const slice = createSlice({
 						isoDate: expSub.isoDate,
 						pulledIsoDate: expSub.pulledIsoDate,
 						image: expSub.image as any,
+						activity: (expSub as any)?.activity ?? {},
 					}
 					draft.feedUrlToSubscription[expSub.feedUrl] = sub
 				}
@@ -112,7 +124,7 @@ export const slice = createSlice({
 				return
 			}
 
-			// Store subsequent process
+			// Store subsequent progress
 			if (narrow('number', prevTime) && narrow('number', currentTime)) {
 				// Only store 10 second fidelity
 				if (isAround(prevTime, 10, currentTime)) {
@@ -133,7 +145,12 @@ export const slice = createSlice({
 })
 
 export const { actions, reducer, selectors } = slice
-export const { subscribe, updateSubscriptionFeed, receiveImport } = actions
+export const {
+	subscribe,
+	updateSubscriptionFeed,
+	receiveImport,
+	updateActivity,
+} = actions
 export const {
 	selectState,
 	selectFeedSubscription,
@@ -176,6 +193,23 @@ export const selectRecentEpisodes = createSelector(
 
 export const selectSubSummaries = createSelector([selectSubscriptions], subs =>
 	sorted(subs, (sl, sr) => (sl.title < sr.title ? -1 : 1)),
+)
+
+export const selectSubscriptionWithItems = createSelector(
+	[selectState, (_, feedUrl: string) => feedUrl],
+	(state, feedUrl) => {
+		const sub = state.feedUrlToSubscription[feedUrl]
+		if (!sub) {
+			throw new Error('Not found')
+		}
+
+		const items = values(state.feedUrlToItemIdToItem[sub.feedUrl] ?? {})
+
+		return {
+			...sub,
+			items,
+		}
+	},
 )
 
 export const selectExportableSubscriptions = createSelector(

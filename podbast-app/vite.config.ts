@@ -17,9 +17,9 @@ export default defineConfig({
 	},
 	plugins: [preact()],
 	build: {
-		sourcemap: true,
+		// sourcemap: true,
 		// Firefox wasn't liking inline maps
-		// sourcemap: 'inline',
+		sourcemap: 'inline',
 	},
 	resolve: {
 		alias: [

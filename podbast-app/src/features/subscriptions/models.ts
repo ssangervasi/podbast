@@ -47,6 +47,16 @@ export type Subscription = {
 		title: string
 		link: string
 	}
+
+	activity: SubscriptionActivity
+}
+
+export type SubscriptionActivity = {
+	/**
+	 * When viewing the back catalogue for a subscription, go back this far. Sort of a time-based
+	 * pagination. If blank, hasActivity defaults to 4 weeks ago.
+	 */
+	catalogueIsoDate?: string
 }
 
 export type SubscriptionItem = {
@@ -157,6 +167,7 @@ export const transformFeedToSubscription = (feed: Feed): Subscription => {
 		image,
 		isoDate,
 		pulledIsoDate,
+		activity: {},
 	}
 }
 
@@ -199,6 +210,7 @@ export const mergeFeedIntoState = (
 	draft.feedUrlToItemIdToItem[feedUrl] = existingItems
 
 	const items = transformFeedToSubscriptionItems(feed)
+	const stales: any[] = []
 	entries(items).forEach(([id, item]) => {
 		const existingItem = existingItems[id]
 		const mergedItem = {
@@ -207,12 +219,19 @@ export const mergeFeedIntoState = (
 			activity: { ...item.activity, ...existingItem?.activity },
 		}
 
-		if (hasActivity(mergedItem)) {
+		if (isItemFresh(mergedItem, existing.activity.catalogueIsoDate)) {
 			existingItems[id] = mergedItem
 		} else {
+			stales.push([
+				mergedItem.title,
+				getActiveDate(mergedItem).toISODate(),
+				subscription.activity,
+			])
 			delete existingItems[id]
 		}
 	})
+
+	log.debug('Stales', subscription.title, stales)
 }
 
 export const ExportableGuard = Guard.narrow({
@@ -235,8 +254,37 @@ export const ExportableGuard = Guard.narrow({
 	],
 })
 
+export const mergeSubscriptionActivityIntoState = (
+	draft: Draft<SubscriptionsState>,
+	{
+		feedUrl,
+		activity,
+	}: {
+		feedUrl: string
+		activity: SubscriptionActivity
+	},
+): void => {
+	const existing = draft.feedUrlToSubscription[feedUrl]
+	if (!existing) {
+		log.error('Subscription does not exist for activity', feedUrl)
+		return
+	}
+
+	existing.activity = {
+		...existing.activity,
+		...activity,
+	}
+	log('Merged', JSON.stringify(existing.activity))
+}
+
 export type Exportable = ReadonlyDeep<Payload<typeof ExportableGuard>>
 
+/**
+ * An item's active date is latest of:
+ * 	- Completion date
+ * 	- Played date
+ * 	- Published date
+ */
 export const getActiveDate = (s: SubscriptionItem) => {
 	return (
 		sorted(
@@ -255,13 +303,21 @@ export const getPubDate = (s: SubscriptionItem) => {
 }
 
 /**
- * An item is active if:
- *  - It was published in the last 4 weeks
+ * An item is fresh if:
+ *  - Was active since relativeTo
  *  - OR it has EVER been listened to (or completed)
  */
-export const hasActivity = (s: SubscriptionItem): boolean => {
-	const age = getNow().diff(getActiveDate(s))
-	if (age.as('weeks') < 4) {
+export const isItemFresh = (
+	s: SubscriptionItem,
+	relativeToIsoDate?: string,
+): boolean => {
+	const activeDate = getActiveDate(s)
+	const relativeTo = relativeToIsoDate
+		? fromIso(relativeToIsoDate)
+		: getNow().minus({ weeks: 4 })
+
+	// log.debug('Stale? ', activeDate.toISODate(), relativeTo.toISODate())
+	if (relativeTo <= activeDate) {
 		return true
 	}
 	return (

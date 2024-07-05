@@ -1,6 +1,8 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 
+import { identity } from '/src/utils/typemagic'
+
 import {
 	AnyLayoutData,
 	LayoutName,
@@ -32,19 +34,18 @@ export const slice = createSlice({
 		},
 	},
 	selectors: {
-		selectLayout: state => ({
+		selectLayout: createSelector([identity], (state: LayoutState) => ({
 			layout: state.layout,
 			data:
 				state.layout in state.data
 					? state.data[state.layout as LayoutNamesWithData]
 					: undefined,
-		}),
-		selectAllData: state => state.data,
+		})),
 	},
 })
 
 export const { actions, reducer, selectors } = slice
-export const { selectLayout, selectAllData } = selectors
+export const { selectLayout } = selectors
 
 // export const grabThatThing()
 

@@ -2,6 +2,7 @@ import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import { Provider as ReduxProvider } from 'react-redux'
 import { PersistGate } from 'redux-persist/es/integration/react'
 
+import { ErrorBoundary } from '/src/devtools/ErrorBoundary'
 import { Common } from '/src/features/common'
 import { Layout } from '/src/features/layout'
 // import { Common } from "/src/features/common/component";
@@ -10,16 +11,18 @@ import { theme } from '/src/ui/theme'
 
 export const App = () => (
 	<>
-		{/* https://chakra-ui.com/docs/styled-system/color-mode */}
-		<ColorModeScript initialColorMode={theme.config.initialColorMode} />
-		{/*  */}
-		<ChakraProvider theme={theme}>
-			<ReduxProvider store={store}>
-				<PersistGate loading={null} persistor={persistor}>
-					<Common />
-					<Layout />
-				</PersistGate>
-			</ReduxProvider>
-		</ChakraProvider>
+		<ErrorBoundary>
+			{/* https://chakra-ui.com/docs/styled-system/color-mode */}
+			<ColorModeScript initialColorMode={theme.config.initialColorMode} />
+			{/*  */}
+			<ChakraProvider theme={theme}>
+				<ReduxProvider store={store}>
+					<PersistGate loading={null} persistor={persistor}>
+						<Common />
+						<Layout />
+					</PersistGate>
+				</ReduxProvider>
+			</ChakraProvider>
+		</ErrorBoundary>
 	</>
 )
