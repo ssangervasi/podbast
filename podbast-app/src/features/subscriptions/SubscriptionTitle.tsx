@@ -15,12 +15,17 @@ export const SubscriptionTitle = ({
 	return (
 		<HStack alignItems="center" data-testid="SubscriptionTitle">
 			<Box>
-				<Image
-					src={image?.url}
-					objectFit="cover"
-					maxW="30px"
-					data-testid="SubscriptionTitle-image"
-				/>
+				<Button
+					variant="none"
+					onClick={() => show('subscriptionDetails', { feedUrl })}
+				>
+					<Image
+						src={image?.url}
+						objectFit="cover"
+						maxW="30px"
+						data-testid="SubscriptionTitle-image"
+					/>
+				</Button>
 			</Box>
 
 			<Text
@@ -31,13 +36,6 @@ export const SubscriptionTitle = ({
 			>
 				{title}
 			</Text>
-
-			<Button
-				variant="link"
-				onClick={() => show('subscriptionDetails', { feedUrl })}
-			>
-				Details
-			</Button>
 		</HStack>
 	)
 }

@@ -5,7 +5,7 @@ import { useSubscriptionManager } from '/src/features/subscriptions/manager'
 import { useAppSelector } from '/src/store'
 import { HStack, PageGrid, PageStack } from '/src/ui'
 
-import { EpisodeRow } from './EpisodeView'
+import { EpisodeRow } from './EpisodeRow'
 import { selectRecentEpisodes } from './slice'
 
 export const LatestPage = () => {

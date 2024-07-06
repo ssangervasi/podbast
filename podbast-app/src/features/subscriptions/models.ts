@@ -210,7 +210,6 @@ export const mergeFeedIntoState = (
 	draft.feedUrlToItemIdToItem[feedUrl] = existingItems
 
 	const items = transformFeedToSubscriptionItems(feed)
-	const stales: any[] = []
 	entries(items).forEach(([id, item]) => {
 		const existingItem = existingItems[id]
 		const mergedItem = {
@@ -222,16 +221,9 @@ export const mergeFeedIntoState = (
 		if (isItemFresh(mergedItem, existing.activity.catalogueIsoDate)) {
 			existingItems[id] = mergedItem
 		} else {
-			stales.push([
-				mergedItem.title,
-				getActiveDate(mergedItem).toISODate(),
-				subscription.activity,
-			])
 			delete existingItems[id]
 		}
 	})
-
-	log.debug('Stales', subscription.title, stales)
 }
 
 export const ExportableGuard = Guard.narrow({

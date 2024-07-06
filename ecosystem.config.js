@@ -23,6 +23,7 @@ module.exports = {
 			script: 'bin/runner',
 			args: 'dev',
 			shutdown_with_message: true,
+			watch: false,
 		},
 		{
 			name: 'server-build',
@@ -30,6 +31,7 @@ module.exports = {
 			interpreter: 'bash',
 			script: 'bin/runner',
 			args: 'build:watch',
+			watch: false,
 			shutdown_with_message: true,
 		},
 		{

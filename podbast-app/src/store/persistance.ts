@@ -92,7 +92,7 @@ const transformDiscardItems = createTransform<
 					}
 
 					deleted.push(id)
-					delete itemIdToItem[id]
+					// delete itemIdToItem[id]
 				})
 			})
 
