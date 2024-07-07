@@ -18,6 +18,7 @@ import { PageGrid, PageStack } from '/src/ui'
 import { log, useChunker } from '/src/utils'
 
 import { selectSubscriptionWithItems } from './slice'
+import { dl } from '@vidstack/react/dist/types/vidstack.js'
 
 export const SubscriptionDetailsPage = () => {
 	const { ensureData } = useLayout()

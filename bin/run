@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
-npx pm2 start --no-daemon
-winkill.mjs
+
+node "$PB_BIN"/run.mjs
+
+# PM2 mainly just causes shit to hang. Not actually good for a dev setup.
+# npx pm2 start --no-daemon
+# winkill.mjs

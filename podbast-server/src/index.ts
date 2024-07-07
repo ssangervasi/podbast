@@ -41,6 +41,10 @@ apiApp.get('/debug', async (req, res) => {
 
 	const { url } = req.query
 
+	if (url.includes('/api/debug')) {
+		return res.status(403).send('Nice try')
+	}
+
 	const fres = await fetch(url, {
 		method: 'GET',
 		headers: {},
