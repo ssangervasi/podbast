@@ -59,12 +59,14 @@ export const SubscriptionView = ({
 							{subscription.link}
 						</chakra.span>
 					</Text>
+
 					<Text>
 						Feed URL:{' '}
 						<chakra.span fontFamily="monospace">
 							{subscription.feedUrl}
 						</chakra.span>
 					</Text>
+
 					<Text>
 						Subscription URL:{' '}
 						<chakra.span fontFamily="monospace">{subscription.url}</chakra.span>

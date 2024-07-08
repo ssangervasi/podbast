@@ -1,9 +1,9 @@
 import {
 	Box,
+	Button,
 	chakra,
 	GridItem,
 	Heading,
-	HStack,
 	Image,
 	Spinner,
 	Text,
@@ -14,11 +14,10 @@ import { selectPullStatus } from '/src/features/rss/slice'
 import { EpisodeRow } from '/src/features/subscriptions/EpisodeRow'
 import { Subscription } from '/src/features/subscriptions/models'
 import { useAppSelector } from '/src/store'
-import { PageGrid, PageStack } from '/src/ui'
+import { HStack, PageGrid, PageStack, VStack } from '/src/ui'
 import { log, useChunker } from '/src/utils'
 
 import { selectSubscriptionWithItems } from './slice'
-import { dl } from '@vidstack/react/dist/types/vidstack.js'
 
 export const SubscriptionDetailsPage = () => {
 	const { ensureData } = useLayout()
@@ -28,7 +27,7 @@ export const SubscriptionDetailsPage = () => {
 		selectSubscriptionWithItems(state, feedUrl),
 	)
 
-	const chunker = useChunker({ items: subscription.items })
+	const chunker = useChunker({ items: subscription.items, size: 15 })
 
 	return (
 		<>
@@ -42,9 +41,28 @@ export const SubscriptionDetailsPage = () => {
 					/>
 					<Heading as="h1">{subscription.title}</Heading>
 				</HStack>
+				<VStack>
+					<Text>
+						Homepage:{' '}
+						<chakra.span fontFamily="monospace">
+							{subscription.link}
+						</chakra.span>
+					</Text>
+					<Text>
+						Feed URL:{' '}
+						<chakra.span fontFamily="monospace">
+							{subscription.feedUrl}
+						</chakra.span>
+					</Text>
+					<Text>
+						Subscription URL:{' '}
+						<chakra.span fontFamily="monospace">{subscription.url}</chakra.span>
+						<br />
+						(Includes authentication parameters, if any)
+					</Text>
+				</VStack>
 
-				<Box>{subscription.items.length}</Box>
-				<Box>{JSON.stringify(subscription.activity)}</Box>
+				<Heading as="h2">Episodes</Heading>
 
 				<PageGrid>
 					{chunker.chunk.map(item => (
@@ -56,6 +74,10 @@ export const SubscriptionDetailsPage = () => {
 					) : null}
 
 					<SubscriptionLoadingRow subscription={subscription} />
+
+					<GridItem colSpan={12}>
+						<Button onClick={chunker.nextChunk}>Next page</Button>
+					</GridItem>
 				</PageGrid>
 			</PageStack>
 		</>

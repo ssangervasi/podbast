@@ -3,6 +3,7 @@ import {
 	extendTheme,
 	StyleFunctionProps,
 	theme as defaultTheme,
+	defineStyleConfig,
 } from '@chakra-ui/react'
 
 import { mapValues } from '/src/utils'
@@ -224,10 +225,24 @@ export const theme = extendTheme({
 				}),
 			},
 		},
-		Heading: {
-			defaultProps: {
-				size: 'lg',
+		Heading: defineStyleConfig({
+			baseStyle: props =>
+				({
+					h1: {
+						fontSize: '3xl',
+					},
+					h2: {
+						fontSize: '2xl',
+					},
+				})[props.as as string] ?? {
+					fontSize: 'xl',
+				},
+			sizes: {
+				byAs: {},
 			},
-		},
+			defaultProps: {
+				size: 'byAs',
+			},
+		}),
 	},
 } satisfies Partial<ChakraTheme>) as ChakraTheme

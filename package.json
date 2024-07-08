@@ -13,7 +13,6 @@
 		"narrow-minded": "^1.2.1",
 		"node-netstat": "^1.9.0",
 		"nodemon": "^3.1.4",
-		"pm2": "^5.3.0",
 		"ps-node": "^0.1.6"
 	},
 	"dependencies": {

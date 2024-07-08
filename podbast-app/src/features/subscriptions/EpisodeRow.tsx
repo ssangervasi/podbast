@@ -1,12 +1,13 @@
 import { CheckCircleIcon, TimeIcon } from '@chakra-ui/icons'
-import { Box, chakra, GridItem, Text } from '@chakra-ui/react'
+import { Box, chakra, GridItem, Text, Tooltip } from '@chakra-ui/react'
+import { ComponentChild } from 'preact'
 
 import {
 	Episode,
 	SubscriptionItemActivity,
 } from '/src/features/subscriptions/models'
 import { SubscriptionTitle } from '/src/features/subscriptions/SubscriptionTitle'
-import { HCenter, RowWrapper } from '/src/ui'
+import { HCenter, HStack, RowWrapper, VStack } from '/src/ui'
 import { ExpandableLines } from '/src/ui/ExpandableLines'
 import { DateView, TimeView } from '/src/ui/units'
 
@@ -27,10 +28,6 @@ export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 				</Text>
 			</GridItem>
 
-			<GridItem colSpan={1}>
-				<EpisodeActivity activity={episode.item.activity} />
-			</GridItem>
-
 			<GridItem colSpan={5}>
 				<HCenter>
 					<ExpandableLines maxW="40ch" noOfLines={2}>
@@ -40,6 +37,10 @@ export const EpisodeRow = ({ episode }: { episode: Episode }) => (
 			</GridItem>
 
 			<GridItem colSpan={2}>
+				<EpisodeActivity activity={episode.item.activity} />
+			</GridItem>
+
+			<GridItem colSpan={1}>
 				<EpisodeControls episode={episode} />
 			</GridItem>
 		</RowWrapper>
@@ -53,28 +54,47 @@ const EpisodeActivity = ({
 }) => {
 	const { durationTime, progressTime, completedIsoDate, playedIsoDate } =
 		activity
+
 	return (
-		<>
-			{progressTime !== undefined ? (
-				<>
-					<TimeView seconds={progressTime} />
-					<chakra.span>{' /\n'}</chakra.span>
-				</>
-			) : null}
-			{durationTime !== undefined ? (
-				<TimeView seconds={durationTime} />
-			) : (
-				<chakra.span>...</chakra.span>
-			)}
-			{completedIsoDate !== undefined ? (
-				//
-				<CheckCircleIcon boxSize={30} />
-			) : playedIsoDate !== undefined ? (
-				<Box data-testid="EpisodeRow-item-playedDate">
-					<TimeIcon boxSize={30} />
-					<DateView isoDate={playedIsoDate} />
-				</Box>
-			) : null}
-		</>
+		<HStack gap={4} flexWrap="wrap">
+			<VStack>
+				{progressTime !== undefined ? (
+					<Tooltip label="Progress">
+						<Box>
+							<TimeView seconds={progressTime} />
+							<chakra.span>{' / '}</chakra.span>
+						</Box>
+					</Tooltip>
+				) : null}
+
+				{durationTime !== undefined ? (
+					<Tooltip label="Duration">
+						<Box>
+							<TimeView seconds={durationTime} />
+						</Box>
+					</Tooltip>
+				) : (
+					<chakra.span>...</chakra.span>
+				)}
+			</VStack>
+
+			<VStack flexShrink={1}>
+				{completedIsoDate !== undefined ? (
+					<HStack data-testid="EpisodeRow-item-completedDate">
+						<CheckCircleIcon color="green.300" boxSize="14px" />
+						<DateView isoDate={completedIsoDate} />
+					</HStack>
+				) : null}
+
+				{playedIsoDate !== undefined ? (
+					<Tooltip label="Date listened">
+						<HStack data-testid="EpisodeRow-item-playedDate">
+							<TimeIcon color="yellow.300" boxSize="14px" />
+							<DateView isoDate={playedIsoDate} />
+						</HStack>
+					</Tooltip>
+				) : null}
+			</VStack>
+		</HStack>
 	)
 }

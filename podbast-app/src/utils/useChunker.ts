@@ -3,8 +3,15 @@ import { useMemo, useReducer } from 'preact/hooks'
 const INIT_START = 0
 const INIT_SIZE = 10
 
-export const useChunker = <I>({ items }: { items: readonly I[] }) => {
-	const size = INIT_SIZE
+export const useChunker = <I>({
+	items,
+	size: sizeOption,
+}: {
+	items: readonly I[]
+
+	size?: number
+}) => {
+	const size = useMemo(() => sizeOption ?? INIT_SIZE, [sizeOption])
 
 	const [state, dispatch] = useReducer(
 		(prevState, _action: 'next') => {
@@ -25,13 +32,6 @@ export const useChunker = <I>({ items }: { items: readonly I[] }) => {
 		const end = start + size
 		const chunk = items.slice(start, end)
 		const itemsAfter = Math.max(0, items.length - (state.start + size))
-
-		console.debug(
-			'DEBUG(ssangervasi)',
-			'Chunk changed',
-			chunk.length,
-			itemsAfter,
-		)
 
 		return {
 			chunk,

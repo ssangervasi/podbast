@@ -165,10 +165,14 @@ export const selectSubscriptions = createSelector(
 /**
  * Latest to oldest
  */
+
+const cmpItems = (a: SubscriptionItem, b: SubscriptionItem) =>
+	cmpIsoDate.desc(getPubDate(a), getPubDate(b))
+
+const sortItems = (item: readonly SubscriptionItem[]) => sorted(item, cmpItems)
+
 const sortEpisodes = (episodes: Episode[]) =>
-	sorted(episodes, (a, b) =>
-		cmpIsoDate.desc(getPubDate(a.item), getPubDate(b.item)),
-	)
+	sorted(episodes, (a, b) => cmpItems(a.item, b.item))
 
 export const selectRecentEpisodes = createSelector(
 	[selectState],
@@ -203,7 +207,9 @@ export const selectSubscriptionWithItems = createSelector(
 			throw new Error('Not found')
 		}
 
-		const items = values(state.feedUrlToItemIdToItem[sub.feedUrl] ?? {})
+		const items = sortItems(
+			values(state.feedUrlToItemIdToItem[sub.feedUrl] ?? {}),
+		)
 
 		return {
 			...sub,
