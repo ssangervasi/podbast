@@ -89,6 +89,7 @@ export const Manager = () => {
 	)
 
 	onLayout('subscriptionDetails', layoutData => {
+		logger('>>>> onLayout')
 		const { feedUrl } = layoutData
 		dispatch(
 			updateActivity({

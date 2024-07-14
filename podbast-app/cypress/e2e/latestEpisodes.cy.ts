@@ -11,10 +11,6 @@ describe('latest episodes', () => {
 
 		cy.visit('/')
 
-		cy.window().then(w => {
-			console.log('window', new w.Date(w.Date.now()).toString())
-			console.log(NOW.toISO())
-		})
 		cy.appStateLoad('subscriber')
 		cy.findByRole('button', { name: 'Latest episodes' }).click()
 	})

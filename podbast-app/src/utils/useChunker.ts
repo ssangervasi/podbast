@@ -1,7 +1,12 @@
+import { produce } from 'immer'
 import { useMemo, useReducer } from 'preact/hooks'
 
 const INIT_START = 0
 const INIT_SIZE = 10
+
+type ChunkerState = {
+	start: number
+}
 
 export const useChunker = <I>({
 	items,
@@ -14,16 +19,21 @@ export const useChunker = <I>({
 	const size = useMemo(() => sizeOption ?? INIT_SIZE, [sizeOption])
 
 	const [state, dispatch] = useReducer(
-		(prevState, _action: 'next') => {
-			const start = prevState.start + size
-			return {
-				start,
-			}
+		(prevState: ChunkerState, action: 'next' | 'prev') => {
+			return produce(prevState, draft => {
+				if (action === 'next') {
+					draft.start = Math.min(prevState.start + size, items.length)
+				}
+				if (action === 'prev') {
+					draft.start = Math.max(0, prevState.start - size)
+				}
+			})
 		},
 		undefined,
-		() => ({
-			start: INIT_START,
-		}),
+		() =>
+			({
+				start: INIT_START,
+			}) satisfies ChunkerState,
 	)
 
 	return useMemo(() => {
@@ -35,9 +45,11 @@ export const useChunker = <I>({
 
 		return {
 			chunk,
-			start,
 			end,
 			itemsAfter,
+			size,
+			start,
+			prevChunk: () => dispatch('prev'),
 			nextChunk: () => dispatch('next'),
 		}
 	}, [state, items])

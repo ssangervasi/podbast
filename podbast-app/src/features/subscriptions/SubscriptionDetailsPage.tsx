@@ -2,12 +2,18 @@ import {
 	Box,
 	Button,
 	chakra,
+	FormControl,
+	FormLabel,
 	GridItem,
 	Heading,
 	Image,
+	Input,
+	InputGroup,
+	InputLeftAddon,
 	Spinner,
 	Text,
 } from '@chakra-ui/react'
+import { useMemo, useReducer, useState } from 'preact/hooks'
 
 import { useLayout } from '/src/features/layout/useLayout'
 import { selectPullStatus } from '/src/features/rss/slice'
@@ -19,6 +25,34 @@ import { log, useChunker } from '/src/utils'
 
 import { selectSubscriptionWithItems } from './slice'
 
+const useHack = (x: number) => {
+	const [s, inc] = useReducer(
+		(prev, _: undefined) => {
+			return { n: prev.n + x }
+		},
+		{ n: 0 },
+	)
+
+	return { s, inc: () => inc(undefined) }
+}
+
+const Hack = () => {
+	const x = Math.random() > 0.5 ? 10 : 5
+	const { s, inc } = useHack(x)
+
+	return (
+		<div>
+			<button
+				onClick={() => {
+					inc()
+				}}
+			>
+				{s.n}
+			</button>
+		</div>
+	)
+}
+
 export const SubscriptionDetailsPage = () => {
 	const { ensureData } = useLayout()
 
@@ -27,11 +61,14 @@ export const SubscriptionDetailsPage = () => {
 		selectSubscriptionWithItems(state, feedUrl),
 	)
 
+	// const filters = useState(()
+
 	const chunker = useChunker({ items: subscription.items, size: 15 })
 
 	return (
 		<>
 			<PageStack>
+				<Hack />
 				<HStack>
 					<Image
 						src={subscription.image?.url}
@@ -65,6 +102,23 @@ export const SubscriptionDetailsPage = () => {
 				<Heading as="h2">Episodes</Heading>
 
 				<PageGrid>
+					<GridItem colSpan={6}>Filter</GridItem>
+					<GridItem colSpan={6}>
+						<HStack placeItems="center">
+							<Button variant="link">clear</Button>
+							<InputGroup>
+								<FormControl>
+									<FormLabel>after</FormLabel>
+									<Input type="date" />
+								</FormControl>
+								<FormControl>
+									<FormLabel>before</FormLabel>
+									<Input type="date" />
+								</FormControl>
+							</InputGroup>
+						</HStack>
+					</GridItem>
+
 					{chunker.chunk.map(item => (
 						<EpisodeRow key={item.id} episode={{ subscription, item }} />
 					))}
@@ -93,7 +147,7 @@ const SubscriptionLoadingRow = ({
 		selectPullStatus(state, subscription.url),
 	)
 
-	if (status !== 'requested') {
+	if (status === undefined) {
 		return null
 	}
 

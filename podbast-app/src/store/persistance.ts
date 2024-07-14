@@ -19,7 +19,7 @@ export const persistanceMigrate = async (
 		draft => {
 			migrateRssCleanup(draft)
 			migrateLayoutDefaults(draft)
-			migrateSubscriptionDefaults(draft)
+			migrateSubscriptionActivity(draft)
 			migrateSubscriptionItemCleanup(draft)
 		},
 	)
@@ -29,7 +29,7 @@ type Migrator = (draft: Draft<Partial<RootReducerReturn>>) => void
 
 const migrateRssCleanup: Migrator = draft => {
 	if ('rss' in draft) {
-		logger.info('Removing stored RSS state')
+		logger.debug('Removing stored RSS state')
 		delete draft['rss']
 	}
 }
@@ -40,11 +40,16 @@ const migrateLayoutDefaults: Migrator = draft => {
 	}
 }
 
-const migrateSubscriptionDefaults: Migrator = draft => {
+const migrateSubscriptionActivity: Migrator = draft => {
 	values(draft.subscriptions?.feedUrlToSubscription ?? {}).forEach(
 		subscription => {
 			if (!subscription.activity) {
 				subscription.activity = {}
+			}
+
+			// Clear out catalogueIsoDate to stop storing old data.
+			if (subscription.activity.catalogueIsoDate) {
+				subscription.activity.catalogueIsoDate = undefined
 			}
 		},
 	)
@@ -68,7 +73,7 @@ const migrateSubscriptionItemCleanup: Migrator = draft => {
 	)
 
 	if (delLen > 0) {
-		logger.info(`Deleted ${delLen} characters of sub content`)
+		logger.debug(`Deleted ${delLen} characters of sub content`)
 	}
 }
 
@@ -92,7 +97,7 @@ const transformDiscardItems = createTransform<
 					}
 
 					deleted.push(id)
-					// delete itemIdToItem[id]
+					delete itemIdToItem[id]
 				})
 			})
 

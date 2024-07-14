@@ -35,7 +35,7 @@ export const slice = createSlice({
 			const existing = draft.feedUrlToSubscription[feedUrl]
 
 			if (existing) {
-				log.info('Subscribe to existing feed', feed.feedUrl)
+				log.debug('Subscribe to existing feed', feed.feedUrl)
 				mergeFeedIntoState(draft, feed)
 				return
 			}

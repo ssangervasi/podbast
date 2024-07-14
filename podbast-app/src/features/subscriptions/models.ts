@@ -266,7 +266,6 @@ export const mergeSubscriptionActivityIntoState = (
 		...existing.activity,
 		...activity,
 	}
-	log('Merged', JSON.stringify(existing.activity))
 }
 
 export type Exportable = ReadonlyDeep<Payload<typeof ExportableGuard>>
@@ -308,10 +307,10 @@ export const isItemFresh = (
 		? fromIso(relativeToIsoDate)
 		: getNow().minus({ weeks: 4 })
 
-	// log.debug('Stale? ', activeDate.toISODate(), relativeTo.toISODate())
 	if (relativeTo <= activeDate) {
 		return true
 	}
+
 	return (
 		compact([s.activity.completedIsoDate, s.activity.playedIsoDate]).length > 0
 	)
