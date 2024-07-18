@@ -1,6 +1,6 @@
 import { CheckCircleIcon, TimeIcon } from '@chakra-ui/icons'
 import { Box, chakra, GridItem, Text, Tooltip } from '@chakra-ui/react'
-import { ComponentChild } from 'preact'
+import { memo } from 'preact/compat'
 
 import {
 	Episode,
@@ -13,38 +13,42 @@ import { DateView, TimeView } from '/src/ui/units'
 
 import { EpisodeControls } from './EpisodeControls'
 
-export const EpisodeRow = ({ episode }: { episode: Episode }) => (
-	<>
-		<RowWrapper>
-			<GridItem colSpan={2}>
-				<SubscriptionTitle subscription={episode.subscription} />
+export const EpisodeRow = memo(
+	({ episode }: { episode: Episode }) => (
+		<>
+			<RowWrapper>
+				<GridItem colSpan={2}>
+					<SubscriptionTitle subscription={episode.subscription} />
 
-				<DateView isoDate={episode.item.isoDate} />
-			</GridItem>
+					<DateView isoDate={episode.item.isoDate} />
+				</GridItem>
 
-			<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
-				<Text maxW="40ch" noOfLines={3} fontStyle="italic">
-					{episode.item.title}
-				</Text>
-			</GridItem>
+				<GridItem colSpan={2} data-testid="EpisodeRow-item-title">
+					<Text maxW="40ch" noOfLines={3} fontStyle="italic">
+						{episode.item.title}
+					</Text>
+				</GridItem>
 
-			<GridItem colSpan={5}>
-				<HCenter>
-					<ExpandableLines maxW="40ch" noOfLines={2}>
-						{episode.item.contentSnippet}
-					</ExpandableLines>
-				</HCenter>
-			</GridItem>
+				<GridItem colSpan={5}>
+					<HCenter>
+						<ExpandableLines maxW="40ch" noOfLines={2}>
+							{episode.item.contentSnippet}
+						</ExpandableLines>
+					</HCenter>
+				</GridItem>
 
-			<GridItem colSpan={2}>
-				<EpisodeActivity activity={episode.item.activity} />
-			</GridItem>
+				<GridItem colSpan={2}>
+					<EpisodeActivity activity={episode.item.activity} />
+				</GridItem>
 
-			<GridItem colSpan={1}>
-				<EpisodeControls episode={episode} />
-			</GridItem>
-		</RowWrapper>
-	</>
+				<GridItem colSpan={1}>
+					<EpisodeControls episode={episode} />
+				</GridItem>
+			</RowWrapper>
+		</>
+	),
+	// The list is rebuilt whenever one of them changes. Annoying, but this helps.
+	(oldProps, newProps) => oldProps.episode.item !== newProps.episode.item,
 )
 
 const EpisodeActivity = ({

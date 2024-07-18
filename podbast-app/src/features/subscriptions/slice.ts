@@ -111,7 +111,7 @@ export const slice = createSlice({
 				return
 			}
 
-			if (durationTime) {
+			if (narrow('number', durationTime)) {
 				item.activity.durationTime = durationTime
 			}
 
@@ -121,18 +121,19 @@ export const slice = createSlice({
 			if (narrow('undefined', prevTime) && narrow('number', currentTime)) {
 				item.activity.progressTime = currentTime
 				item.activity.playedIsoDate = getNow().toISO()
-				return
 			}
 
 			// Store subsequent progress
 			if (narrow('number', prevTime) && narrow('number', currentTime)) {
-				// Only store 10 second fidelity
-				if (isAround(prevTime, 10, currentTime)) {
-					return
-				}
-
 				item.activity.progressTime = currentTime
 				item.activity.playedIsoDate = getNow().toISO()
+			}
+
+			// Store completion when the end is reached. (Within 5% of total duration).
+			if (narrow('number', currentTime) && narrow('number', durationTime)) {
+				if (isAround(currentTime, 0.05 * durationTime, durationTime)) {
+					item.activity.completedIsoDate = getNow().toISO()
+				}
 			}
 		})
 	},
