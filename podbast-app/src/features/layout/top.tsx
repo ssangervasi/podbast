@@ -21,6 +21,7 @@ export const Top = () => {
 						fontWeight="bold"
 						color="purple.100"
 						children="🜪"
+						// eslint-disable-next-line max-len
 						title="This is the alchemical symbol for lead, which is Pb, like the abbreviation for 'Podbast'. Good one, right?"
 					/>
 					<Text fontSize="xl" fontWeight="bold">

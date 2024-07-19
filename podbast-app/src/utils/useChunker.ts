@@ -1,5 +1,5 @@
 import { produce } from 'immer'
-import { useMemo, useReducer } from 'preact/hooks'
+import { useEffect, useMemo, useReducer } from 'preact/hooks'
 
 const INIT_START = 0
 const INIT_SIZE = 10
@@ -19,13 +19,17 @@ export const useChunker = <I>({
 	const size = useMemo(() => sizeOption ?? INIT_SIZE, [sizeOption])
 
 	const [state, dispatch] = useReducer(
-		(prevState: ChunkerState, action: 'next' | 'prev') => {
+		(prevState: ChunkerState, action: 'next' | 'prev' | 'first') => {
 			return produce(prevState, draft => {
 				if (action === 'next') {
+					// Scope question
 					draft.start = Math.min(prevState.start + size, items.length)
 				}
 				if (action === 'prev') {
 					draft.start = Math.max(0, prevState.start - size)
+				}
+				if (action === 'prev') {
+					draft.start = 0
 				}
 			})
 		},
@@ -36,6 +40,10 @@ export const useChunker = <I>({
 			}) satisfies ChunkerState,
 	)
 
+	useEffect(() => {
+		dispatch('first')
+	}, [items])
+
 	return useMemo(() => {
 		const { start } = state
 		// Exclusive index
@@ -43,12 +51,22 @@ export const useChunker = <I>({
 		const chunk = items.slice(start, end)
 		const itemsAfter = Math.max(0, items.length - (state.start + size))
 
+		/**
+		 * One-indexed, human-readable info.
+		 */
+		const chunkInfo = {
+			first: start + 1,
+			last: start + chunk.length,
+			total: items.length,
+		}
+
 		return {
 			chunk,
 			end,
 			itemsAfter,
 			size,
 			start,
+			chunkInfo,
 			prevChunk: () => dispatch('prev'),
 			nextChunk: () => dispatch('next'),
 		}

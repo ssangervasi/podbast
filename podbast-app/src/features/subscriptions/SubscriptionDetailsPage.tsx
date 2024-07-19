@@ -1,5 +1,4 @@
 import {
-	Box,
 	Button,
 	chakra,
 	FormControl,
@@ -8,50 +7,25 @@ import {
 	Heading,
 	Image,
 	Input,
-	InputGroup,
-	InputLeftAddon,
 	Spinner,
 	Text,
 } from '@chakra-ui/react'
-import { useMemo, useReducer, useState } from 'preact/hooks'
+import { narrow } from 'narrow-minded'
+import { ChangeEvent } from 'preact/compat'
+import { useMemo, useState } from 'preact/hooks'
 
 import { useLayout } from '/src/features/layout/useLayout'
 import { selectPullStatus } from '/src/features/rss/slice'
 import { EpisodeRow } from '/src/features/subscriptions/EpisodeRow'
-import { Subscription } from '/src/features/subscriptions/models'
+import { getPubDate, Subscription } from '/src/features/subscriptions/models'
 import { useAppSelector } from '/src/store'
 import { HStack, PageGrid, PageStack, VStack } from '/src/ui'
-import { log, useChunker } from '/src/utils'
+import { createThrottler, useChunker } from '/src/utils'
+import { fromIso } from '/src/utils/datetime'
 
 import { selectSubscriptionWithItems } from './slice'
 
-const useHack = (x: number) => {
-	const [s, inc] = useReducer(
-		(prev, _: undefined) => {
-			return { n: prev.n + x }
-		},
-		{ n: 0 },
-	)
-
-	return { s, inc: () => inc(undefined) }
-}
-
-const Hack = () => {
-	const x = Math.random() > 0.5 ? 10 : 5
-	const { s, inc } = useHack(x)
-
-	return (
-		<div>
-			<button
-				onClick={() => {
-					inc()
-				}}
-			>
-				{s.n}
-			</button>
-		</div>
-	)
-}
+const filtersThrottler = createThrottler(200)
 
 export const SubscriptionDetailsPage = () => {
 	const { ensureData } = useLayout()
@@ -61,14 +35,44 @@ export const SubscriptionDetailsPage = () => {
 		selectSubscriptionWithItems(state, feedUrl),
 	)
 
-	// const filters = useState(()
+	const isPulling = useIsPulling({ subscription })
 
-	const chunker = useChunker({ items: subscription.items, size: 15 })
+	const [filters, setFilters] = useState<{
+		after?: string
+		before?: string
+	}>({})
+
+	const filteredItems = useMemo(() => {
+		const items = subscription.items
+		if (!narrow({ after: 'string', before: 'string' }, filters)) {
+			return subscription.items
+		}
+
+		const earliestIndex = items.findIndex(
+			item => fromIso(filters.after) <= getPubDate(item),
+		)
+		const latestIndex = items.findIndex(
+			item => getPubDate(item) <= fromIso(filters.before),
+		)
+
+		return items.slice(earliestIndex, latestIndex + 1)
+	}, [filters, subscription.items])
+
+	const chunker = useChunker({ items: filteredItems, size: 15 })
+
+	const handleChange = (filterName: keyof typeof filters) => {
+		return (event: ChangeEvent<HTMLInputElement>) =>
+			filtersThrottler(() => {
+				setFilters(prev => ({
+					...prev,
+					[filterName]: event.currentTarget.value,
+				}))
+			})
+	}
 
 	return (
 		<>
 			<PageStack>
-				<Hack />
 				<HStack>
 					<Image
 						src={subscription.image?.url}
@@ -78,6 +82,7 @@ export const SubscriptionDetailsPage = () => {
 					/>
 					<Heading as="h1">{subscription.title}</Heading>
 				</HStack>
+
 				<VStack>
 					<Text>
 						Homepage:{' '}
@@ -102,58 +107,69 @@ export const SubscriptionDetailsPage = () => {
 				<Heading as="h2">Episodes</Heading>
 
 				<PageGrid>
-					<GridItem colSpan={6}>Filter</GridItem>
-					<GridItem colSpan={6}>
-						<HStack placeItems="center">
-							<Button variant="link">clear</Button>
-							<InputGroup>
-								<FormControl>
-									<FormLabel>after</FormLabel>
-									<Input type="date" />
-								</FormControl>
-								<FormControl>
-									<FormLabel>before</FormLabel>
-									<Input type="date" />
-								</FormControl>
-							</InputGroup>
+					<GridItem colSpan={4}>
+						<HStack placeItems="center" height="full" wrap="wrap">
+							{isPulling ? (
+								<Spinner />
+							) : (
+								<>
+									<Text>
+										{chunker.chunkInfo.first} - {chunker.chunkInfo.last} of{' '}
+										{chunker.chunkInfo.total}
+									</Text>
+									<Button
+										size="sm"
+										aria-label="previous page"
+										onClick={chunker.nextChunk}
+									>
+										{'<<'}
+									</Button>
+									<Button
+										size="sm"
+										aria-label="next page"
+										onClick={chunker.nextChunk}
+									>
+										{'>>'}
+									</Button>
+								</>
+							)}
+						</HStack>
+					</GridItem>
+					<GridItem colSpan={8}>
+						<HStack placeItems="center" width="full" wrap="wrap">
+							{/* <Button variant="link">Clear</Button> */}
+							<FormControl width="auto">
+								<FormLabel>after</FormLabel>
+								<Input
+									type="date"
+									value={filters.after ?? ''}
+									onChange={handleChange('after')}
+								/>
+							</FormControl>
+							<FormControl width="auto">
+								<FormLabel>before</FormLabel>
+								<Input
+									type="date"
+									value={filters.before ?? ''}
+									onChange={handleChange('before')}
+								/>
+							</FormControl>
 						</HStack>
 					</GridItem>
 
 					{chunker.chunk.map(item => (
 						<EpisodeRow key={item.id} episode={{ subscription, item }} />
 					))}
-
-					{chunker.itemsAfter > 0 ? (
-						<GridItem colSpan={12}>... and {chunker.itemsAfter} more</GridItem>
-					) : null}
-
-					<SubscriptionLoadingRow subscription={subscription} />
-
-					<GridItem colSpan={12}>
-						<Button onClick={chunker.nextChunk}>Next page</Button>
-					</GridItem>
 				</PageGrid>
 			</PageStack>
 		</>
 	)
 }
 
-const SubscriptionLoadingRow = ({
-	subscription,
-}: {
-	subscription: Subscription
-}) => {
+const useIsPulling = ({ subscription }: { subscription: Subscription }) => {
 	const status = useAppSelector(state =>
 		selectPullStatus(state, subscription.url),
 	)
 
-	if (status === undefined) {
-		return null
-	}
-
-	return (
-		<GridItem colSpan={12}>
-			<Spinner />
-		</GridItem>
-	)
+	return status !== undefined
 }

@@ -7,5 +7,5 @@ export function withDefaults<P>(
 ) {
 	return forwardRef((props: P, ref) => (
 		<Component ref={ref} {...defaults} {...props} />
-	))
+	)) as ComponentType<P>
 }
