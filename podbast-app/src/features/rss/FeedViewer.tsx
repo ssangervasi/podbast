@@ -41,7 +41,10 @@ const FeedRequested = ({ pull }: { pull: RssPullRequested }) => {
 const FeedNotFound = ({ pull }: { pull: RssPullNotFound }) => {
 	return (
 		<>
-			<GridItem colSpan={2}>Feed not found 😒</GridItem>
+			<GridItem colSpan={2}>
+				<p>Feed not found 😒</p>
+				<p>Link is busted, or the feed has a weird format, or I'm broken.</p>
+			</GridItem>
 
 			<GridItem colSpan={10}>
 				<chakra.span fontFamily="monospace">{pull.url}</chakra.span>

@@ -31,6 +31,8 @@ const parseRss = async ({ url }: { url: string }) => {
 }
 
 app.get('/rss', async (req, res) => {
+	res.set({ 'Cache-Control': `max-age=${1 * 60 * 10}` })
+
 	if (!narrow({ url: 'string' }, req.query)) {
 		console.log('/rss invalid query ')
 

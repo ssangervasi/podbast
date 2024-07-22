@@ -75,7 +75,7 @@ export type SubscriptionItem = {
 	guid?: string
 
 	title: string
-	link: string
+	link?: string
 	enclosure: {
 		url: string
 		length: string

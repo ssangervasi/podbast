@@ -14,7 +14,6 @@ export const FeedResponseGuard = Guard.narrow({
 			{
 				// Required
 				title: 'string',
-				link: 'string',
 				guid: 'string',
 				enclosure: {
 					url: 'string',
@@ -23,10 +22,11 @@ export const FeedResponseGuard = Guard.narrow({
 				},
 				pubDate: 'string',
 
+				// Optional
+				link: optional('string'),
 				content: optional('string'),
 				contentSnippet: optional('string'),
 				isoDate: optional('string'),
-
 				// More: https://help.apple.com/itc/podcasts_connect/#/itcb54353390
 				itunes: optional({
 					author: optional('string'),
