@@ -48,7 +48,9 @@ export const EpisodeRow = memo(
 		</>
 	),
 	// The list is rebuilt whenever one of them changes. Annoying, but this helps.
-	(oldProps, newProps) => oldProps.episode.item !== newProps.episode.item,
+	(oldProps, newProps) =>
+		oldProps.episode.item !== newProps.episode.item &&
+		oldProps.episode.item.activity !== newProps.episode.item.activity,
 )
 
 const EpisodeActivity = ({
