@@ -120,7 +120,7 @@ export const SubscriptionDetailsPage = () => {
 									<Button
 										size="sm"
 										aria-label="previous page"
-										onClick={chunker.nextChunk}
+										onClick={chunker.prevChunk}
 									>
 										{'<<'}
 									</Button>

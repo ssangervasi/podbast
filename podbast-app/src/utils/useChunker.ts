@@ -28,7 +28,7 @@ export const useChunker = <I>({
 				if (action === 'prev') {
 					draft.start = Math.max(0, prevState.start - size)
 				}
-				if (action === 'prev') {
+				if (action === 'first') {
 					draft.start = 0
 				}
 			})

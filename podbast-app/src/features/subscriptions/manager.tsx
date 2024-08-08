@@ -1,10 +1,11 @@
-import { useCallback } from 'preact/hooks'
+import { useCallback, useEffect } from 'preact/hooks'
 
 import { useLayout } from '/src/features/layout/useLayout'
-import { clearPull, selectUrlToPull } from '/src/features/rss/slice'
+import { clearPull } from '/src/features/rss/slice'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
-import { log, useInterval } from '/src/utils'
+import { addAppListener } from '/src/store/listener'
+import { useInterval } from '/src/utils'
 import { Duration, fromIso, getEpoch, getNow } from '/src/utils/datetime'
 
 import {
@@ -14,7 +15,7 @@ import {
 	updateSubscriptionFeed,
 } from './slice'
 
-const logger = log.with({ prefix: 'sub manager' })
+// const logger = log.with({ prefix: 'sub manager' })
 
 export const useSubscriptionManager = () => {
 	const dispatch = useAppDispatch()
@@ -38,11 +39,10 @@ export const useSubscriptionManager = () => {
 	const checkRefresh = useCallback(() => {
 		const now = getNow()
 
-		logger.debug('checkRefresh', now)
-
 		subscriptions.forEach(sub => {
 			const diff = now.diff(fromIso(sub.pulledIsoDate))
-			if (diff.hours > 1) {
+
+			if (diff.as('hours') > 1) {
 				dispatch(fetchFeed({ url: sub.url }))
 			}
 		})
@@ -55,9 +55,7 @@ export const Manager = () => {
 	const dispatch = useAppDispatch()
 	const { onLayout } = useLayout()
 
-	const { subscriptions, checkRefresh, refreshOne } = useSubscriptionManager()
-
-	const urlToPull = useAppSelector(selectUrlToPull)
+	const { checkRefresh, refreshOne } = useSubscriptionManager()
 
 	useInterval(
 		() => {
@@ -67,29 +65,24 @@ export const Manager = () => {
 		{ immediate: true },
 	)
 
-	useInterval(
-		() => {
-			subscriptions.forEach(sub => {
-				const pull = urlToPull[sub.url]
-
-				if (
-					!(
-						(pull && pull.status === 'ready')
-						// && pull.mode === 'auto'
-					)
-				) {
+	useEffect(() => {
+		// Listener middleware is cool - respond directly to the action. It's possible this could move
+		// into the subscriptions reducer and avoid the interaction between store and this component,
+		// but this works.
+		return dispatch(
+			addAppListener({
+				predicate: fetchFeed.fulfilled.match,
+				effect: action => {
+					const feed = action.payload
+					dispatch(updateSubscriptionFeed(feed))
+					dispatch(clearPull(feed.url!))
 					return
-				}
-
-				dispatch(updateSubscriptionFeed(pull.feed))
-				dispatch(clearPull(pull.url))
-			})
-		},
-		Duration.fromObject({ seconds: 10 }).toMillis(),
-	)
+				},
+			}),
+		)
+	}, [])
 
 	onLayout('subscriptionDetails', layoutData => {
-		logger('>>>> onLayout')
 		const { feedUrl } = layoutData
 		dispatch(
 			updateActivity({
