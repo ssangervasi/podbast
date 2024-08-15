@@ -41,7 +41,9 @@ export const useChunker = <I>({
 	)
 
 	useEffect(() => {
-		dispatch('first')
+		if (items.length <= state.start) {
+			dispatch('first')
+		}
 	}, [items])
 
 	return useMemo(() => {

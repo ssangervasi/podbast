@@ -1,8 +1,10 @@
-import { Box } from '@chakra-ui/react'
+import { Box, Text } from '@chakra-ui/react'
 
 import { CATJAM } from '/src/utils/images'
 
 import { CorePlayer } from './corePlayer'
+import { useAppSelector } from '/src/store'
+import { selectMedia } from '/src/features/player/slice'
 
 const PLAYER_HEIGHT = 100
 
@@ -33,9 +35,9 @@ export const Player = () => {
 					height: PLAYER_HEIGHT,
 					//
 					display: 'flex',
-					flexDirection: 'row',
-					placeContent: 'center',
-					placeItems: 'center',
+					flexDirection: 'column',
+					// placeContent: 'center',
+					// placeItems: 'center',
 					padding: 2,
 
 					// JAMJAMJAM
@@ -47,8 +49,19 @@ export const Player = () => {
 					},
 				}}
 			>
+				<MediaInfo />
 				<CorePlayer />
 			</Box>
 		</>
+	)
+}
+
+const MediaInfo = () => {
+	const media = useAppSelector(selectMedia)
+
+	return (
+		<Box>
+			<Text>{media?.title}</Text>
+		</Box>
 	)
 }

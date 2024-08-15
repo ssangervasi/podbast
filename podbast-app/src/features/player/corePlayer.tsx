@@ -1,7 +1,7 @@
 import '@vidstack/react/player/styles/default/theme.css'
 import '@vidstack/react/player/styles/default/layouts/audio.css'
 
-import { Box } from '@chakra-ui/react'
+import { Box, Text } from '@chakra-ui/react'
 import {
 	MediaPlayer,
 	MediaPlayerInstance,
