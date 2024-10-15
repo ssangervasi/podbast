@@ -46,10 +46,3 @@ export const slice = createSlice({
 
 export const { actions, reducer, selectors } = slice
 export const { selectLayout } = selectors
-
-// export const grabThatThing()
-
-// export const selectLayoutData = createSelector([
-// 	selectAllData,
-// 	(_, )
-// ], () => {})

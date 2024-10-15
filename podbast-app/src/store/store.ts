@@ -37,6 +37,10 @@ export const store = configureStore({
 			// NOTE: Since this can receive actions with functions inside,
 			// it should go before the serializability check middleware
 			.prepend(listenerMiddleware.middleware),
+	devTools: {
+		latency: 1_000,
+		maxAge: 20,
+	},
 })
 
 export const persistor = persistStore(store)
