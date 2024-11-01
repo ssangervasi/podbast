@@ -58,7 +58,7 @@ export const slice = createSlice({
 		builder
 			.addCase(fetchFeed.pending, (draft, action) => {
 				const { url: urlParts, mode = 'auto' } = action.meta.arg
-				log.debug('fetchFeed.pending', { urlParts })
+				log.debug('fetchFeed.pending', { urlParts, mode })
 
 				const url = buildUrl(urlParts).toString()
 

@@ -1,8 +1,8 @@
-import { Guard, Payload } from 'narrow-minded'
+import { Guard, Narrower, Payload } from 'narrow-minded'
 
 import { optional } from '/src/utils/narrows'
 
-export const FeedResponseGuard = Guard.narrow({
+export const FeedResponseNarrower = {
 	// More: https://www.rssboard.org/rss-specification#hrelementsOfLtitemgt
 	content: {
 		// Required
@@ -59,7 +59,9 @@ export const FeedResponseGuard = Guard.narrow({
 			self: 'string',
 		}),
 	},
-})
+} satisfies Narrower
+
+export const FeedResponseGuard = Guard.narrow(FeedResponseNarrower)
 
 export type FeedResponse = Payload<typeof FeedResponseGuard>
 export type Feed = FeedResponse['content']

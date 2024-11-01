@@ -73,7 +73,12 @@ export const Manager = () => {
 			addAppListener({
 				predicate: fetchFeed.fulfilled.match,
 				effect: action => {
+					const { mode = 'auto' } = action.meta.arg
 					const feed = action.payload
+					if (mode === 'manual') {
+						return
+					}
+
 					dispatch(updateSubscriptionFeed(feed))
 					dispatch(clearPull(feed.url!))
 					return

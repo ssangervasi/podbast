@@ -1,7 +1,9 @@
-import { apiFetch } from '/src/features/rss/apiClient'
-import { buildUrl, stall, UrlIsh } from '/src/utils'
+import { diffNarrow } from 'narrow-minded'
 
-import { FeedResponseGuard } from './models'
+import { apiFetch } from '/src/features/rss/apiClient'
+import { buildUrl, isDev, log, stall, UrlIsh } from '/src/utils'
+
+import { FeedResponseGuard, FeedResponseNarrower } from './models'
 
 // Yay single thread, can just do this.
 const counters = {
@@ -9,12 +11,13 @@ const counters = {
 	waiting: 0,
 }
 
+const logger = log.with({ prefix: 'rssClient' })
+
 export const getFeed = async (urlish: UrlIsh) => {
 	const url = buildUrl(urlish).toString()
 	if (!url) {
 		throw new Error('getFeed: Invalid feed url')
 	}
-	console.log(counters)
 
 	if (counters.fetching > 0) {
 		counters.waiting += 1
@@ -32,6 +35,9 @@ export const getFeed = async (urlish: UrlIsh) => {
 	counters.fetching -= 1
 
 	if (!FeedResponseGuard.satisfied(json)) {
+		if (isDev()) {
+			logger.debug(diffNarrow(FeedResponseNarrower, json))
+		}
 		throw new Error('getFeed: Invalid feed JSON')
 	}
 

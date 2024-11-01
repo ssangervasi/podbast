@@ -27,7 +27,7 @@
 		"lodash.debounce": "^4.0.8",
 		"luxon": "^3.4.4",
 		"media-icons": "^1.1.3",
-		"narrow-minded": "^1.2.1",
+		"narrow-minded": "^1.3.0-alpha",
 		"preact": "^10.19.3",
 		"react-redux": "^9.0.4",
 		"redux-persist": "^6.0.0",
