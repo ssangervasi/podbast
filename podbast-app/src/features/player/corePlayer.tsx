@@ -46,7 +46,7 @@ const stateToStatus = (mediaPlayerState: MediaPlayerState): Status => {
 
 type SubscriberContext = {
 	dispatch: AppDispatch
-	scopeRef: Ref<PlayerState>
+	playerStateRef: Ref<PlayerState>
 	mediaPlayerRef: Ref<MediaPlayerInstance>
 }
 
@@ -92,27 +92,35 @@ class MediaPlayerSubscriber {
 		return this.context.dispatch
 	}
 
-	get scope() {
-		return this.context.scopeRef.current
+	get playerState() {
+		const _playerState = this.context.playerStateRef.current
+		if (!_playerState) {
+			throw new Error('Access of unset playerState')
+		}
+		return _playerState
 	}
 
 	get mediaPlayer() {
-		return this.context.mediaPlayerRef.current
+		const _mediaPlayer = this.context.mediaPlayerRef.current
+		if (!_mediaPlayer) {
+			throw new Error('Access of unset mediaPlayer')
+		}
+
+		return _mediaPlayer
 	}
 
 	handleSubscribe = (mediaPlayerState: MediaPlayerState) => {
-		if (!(this.mediaPlayer && this.scope)) {
-			return
-		}
-
-		const { media, pendingRequest } = this.scope
+		const { media, pendingRequest } = this.playerState
 
 		const mediaStateAsUpdate = buildStateAsUpdate({
 			mediaPlayerState,
 			media,
 		})
 
+		// logger.debug('pending request?', Boolean(pendingRequest))
 		if (!pendingRequest) {
+			// logger.debug('dispatchUpdate')
+
 			this.dispatchUpdate(mediaStateAsUpdate)
 			return
 		}
@@ -123,12 +131,15 @@ class MediaPlayerSubscriber {
 				mediaStateAsUpdate,
 			})
 		) {
-			syncMediaPlayer({
+			logger.debug('syncMediaPlayer', pendingRequest)
+
+			this.syncMediaPlayer({
 				pendingRequest,
-				mediaPlayer: this.mediaPlayer,
 			})
 			return
 		}
+
+		logger.debug('clearing')
 
 		this.dispatch(_clearRequest())
 	}
@@ -143,6 +154,24 @@ class MediaPlayerSubscriber {
 
 		this.dispatch(_receiveMediaUpdate(mediaStateAsUpdate))
 	}
+
+	syncMediaPlayer({ pendingRequest }: { pendingRequest: MediaUpdate }) {
+		if (pendingRequest.status === 'playing') {
+			this.mediaPlayer.paused = false
+		} else {
+			this.mediaPlayer.paused = true
+		}
+
+		const seekTime = pendingRequest.media?.currentTime
+		if (seekTime !== undefined) {
+			this.mediaPlayer.currentTime = seekTime
+		}
+
+		const reqVolume = pendingRequest.volume
+		if (reqVolume !== undefined) {
+			this.mediaPlayer.volume = reqVolume
+		}
+	}
 }
 
 const progressThrottler = createThrottler(5_000)
@@ -156,6 +185,10 @@ const needsSync = ({
 }): boolean => {
 	// Sync needed for status
 	if (pendingRequest.status !== mediaStateAsUpdate.status) {
+		logger.debug(
+			'status',
+			`${pendingRequest.status} !== ${mediaStateAsUpdate.status}`,
+		)
 		return true
 	}
 
@@ -164,6 +197,8 @@ const needsSync = ({
 	const mediaTime = mediaStateAsUpdate.media?.currentTime
 	if (seekTime !== undefined && mediaTime !== undefined) {
 		if (!isAround(seekTime, 1, mediaTime)) {
+			logger.debug('time')
+
 			return true
 		}
 	}
@@ -173,34 +208,11 @@ const needsSync = ({
 	const mediaVolume = mediaStateAsUpdate.volume
 	if (reqVolume !== undefined && mediaVolume !== undefined) {
 		if (!isAround(reqVolume, 0.01, mediaVolume)) {
+			logger.debug('volume')
 			return true
 		}
 	}
 	return false
-}
-
-const syncMediaPlayer = ({
-	pendingRequest,
-	mediaPlayer,
-}: {
-	pendingRequest: MediaUpdate
-	mediaPlayer: MediaPlayerInstance
-}) => {
-	if (pendingRequest.status === 'playing') {
-		mediaPlayer.paused = false
-	} else {
-		mediaPlayer.paused = true
-	}
-
-	const seekTime = pendingRequest.media?.currentTime
-	if (seekTime !== undefined) {
-		mediaPlayer.currentTime = seekTime
-	}
-
-	const reqVolume = pendingRequest.volume
-	if (reqVolume !== undefined) {
-		mediaPlayer.volume = reqVolume
-	}
 }
 
 export const CorePlayer = () => {
@@ -219,13 +231,13 @@ export const CorePlayer = () => {
 		return media
 	}, [playerState])
 
-	const scopeRef = useUpdatingRef(playerState)
+	const playerStateRef = useUpdatingRef(playerState)
 
 	const mediaPlayerRef = useRef<MediaPlayerInstance>(null)
 
 	const subscriber = useMemo(() => {
 		return new MediaPlayerSubscriber({
-			scopeRef,
+			playerStateRef,
 			mediaPlayerRef,
 			dispatch,
 		})
@@ -289,6 +301,7 @@ export const CorePlayer = () => {
 				src={mediaForPlayer?.src ?? ''}
 				title={mediaForPlayer?.title ?? ''}
 				viewType="audio"
+				currentTime={mediaForPlayer?.currentTime}
 			>
 				<MediaProvider />
 				<DefaultAudioLayout

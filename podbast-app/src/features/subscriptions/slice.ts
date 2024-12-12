@@ -25,6 +25,8 @@ export const initialState: SubscriptionsState = {
 	feedUrlToItemIdToItem: {},
 }
 
+const logger = log.with({ prefix: 'sub slice' })
+
 export const slice = createSlice({
 	name: 'subscriptions',
 	initialState,
@@ -35,7 +37,7 @@ export const slice = createSlice({
 			const existing = draft.feedUrlToSubscription[feedUrl]
 
 			if (existing) {
-				log.debug('Subscribe to existing feed', feed.feedUrl)
+				logger.debug('Subscribe to existing feed', feed.feedUrl)
 				mergeFeedIntoState(draft, feed)
 				return
 			}
@@ -101,13 +103,15 @@ export const slice = createSlice({
 				media: { item: itemUpdate, currentTime, durationTime } = {},
 			} = action.payload
 			if (!itemUpdate) {
+				logger.error('Missig itemUpdate')
+
 				return
 			}
 
 			const item =
 				draft.feedUrlToItemIdToItem[itemUpdate.feedUrl]?.[itemUpdate.id]
 			if (!item) {
-				log.error("Couldn't find subscription item from update")
+				logger.error("Couldn't find subscription item from update")
 				return
 			}
 
@@ -117,14 +121,20 @@ export const slice = createSlice({
 
 			const prevTime = item.activity.progressTime
 
+			logger.debug('player_receiveMediaUpdate', { prevTime, currentTime })
+
 			// Store first progress
 			if (narrow('undefined', prevTime) && narrow('number', currentTime)) {
+				logger.debug('First prog')
+
 				item.activity.progressTime = currentTime
 				item.activity.playedIsoDate = getNow().toISO()
 			}
 
 			// Store subsequent progress
 			if (narrow('number', prevTime) && narrow('number', currentTime)) {
+				logger.debug('Subseq prog', prevTime)
+
 				item.activity.progressTime = currentTime
 				item.activity.playedIsoDate = getNow().toISO()
 			}
@@ -132,6 +142,8 @@ export const slice = createSlice({
 			// Store completion when the end is reached. (Within 5% of total duration).
 			if (narrow('number', currentTime) && narrow('number', durationTime)) {
 				if (isAround(currentTime, 0.05 * durationTime, durationTime)) {
+					logger.debug('Around end', prevTime)
+
 					item.activity.completedIsoDate = getNow().toISO()
 				}
 			}

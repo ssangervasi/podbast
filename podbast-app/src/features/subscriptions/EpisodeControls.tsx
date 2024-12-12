@@ -26,6 +26,7 @@ export const EpisodeControls = ({ episode }: { episode: Episode }) => {
 										id: item.id,
 										feedUrl: item.feedUrl,
 									},
+									currentTime: item.activity.progressTime,
 								},
 							}),
 						)

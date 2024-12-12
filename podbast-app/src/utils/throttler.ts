@@ -1,9 +1,16 @@
 import throttle from 'lodash.throttle'
 
-export const createThrottler = (ms: number) =>
-	throttle((f: () => void) => {
-		f()
-	}, ms)
+export const createThrottler = (
+	ms: number,
+	options: { trailing?: boolean } = { trailing: false },
+) =>
+	throttle(
+		(f: () => void) => {
+			f()
+		},
+		ms,
+		options,
+	)
 
 export const stall = async (ms: number) =>
 	new Promise<void>(resolve =>
