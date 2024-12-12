@@ -21,6 +21,7 @@ export const persistanceMigrate = async (
 			migrateLayoutDefaults(draft)
 			migrateSubscriptionActivity(draft)
 			migrateSubscriptionItemCleanup(draft)
+			migrateSubscriptionValid(draft)
 		},
 	)
 }
@@ -75,6 +76,16 @@ const migrateSubscriptionItemCleanup: Migrator = draft => {
 	if (delLen > 0) {
 		logger.debug(`Deleted ${delLen} characters of sub content`)
 	}
+}
+
+const migrateSubscriptionValid: Migrator = draft => {
+	values(draft.subscriptions?.feedUrlToSubscription ?? {}).forEach(
+		subscription => {
+			if (!subscription.url) {
+				subscription.url = subscription.feedUrl
+			}
+		},
+	)
 }
 
 const transformDiscardItems = createTransform<
