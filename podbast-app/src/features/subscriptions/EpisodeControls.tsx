@@ -4,6 +4,7 @@ import { makeRequest } from '/src/features/player'
 import { useAppDispatch } from '/src/store'
 
 import { Episode } from './models'
+import { markPlayed } from './slice'
 
 export const EpisodeControls = ({ episode }: { episode: Episode }) => {
 	const { item } = episode
@@ -33,6 +34,22 @@ export const EpisodeControls = ({ episode }: { episode: Episode }) => {
 					}}
 				>
 					▶
+				</Button>
+			</Box>
+			<Box>
+				<Button
+					aria-label="Mark played"
+					size="sm"
+					onClick={() => {
+						dispatch(
+							markPlayed({
+								feedUrl: item.feedUrl,
+								id: item.id,
+							}),
+						)
+					}}
+				>
+					✔
 				</Button>
 			</Box>
 		</HStack>

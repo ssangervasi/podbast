@@ -3,13 +3,12 @@ import { createSlice } from '@reduxjs/toolkit'
 
 import { log } from '/src/utils'
 
+import { SubscriptionItemIndex } from '../subscriptions/models'
+
 /**
  * Just the item stuff we need within the player
  */
-export type MediaItem = {
-	id: string
-	feedUrl: string
-}
+export type MediaItem = SubscriptionItemIndex & {}
 
 export type Media = {
 	src: string

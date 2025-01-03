@@ -89,6 +89,11 @@ export type SubscriptionItem = {
 	activity: SubscriptionItemActivity
 }
 
+/**
+ * Fields required to uniquely identify a SubscriptionItem
+ */
+export type SubscriptionItemIndex = Pick<SubscriptionItem, 'feedUrl' | 'id'>
+
 export type SubscriptionItemActivity = {
 	/**
 	 * Duration may be included in the feed's itunes data, but otherwise it has to be determined at

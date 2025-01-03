@@ -1,3 +1,5 @@
+import { unknown } from 'narrow-minded'
+
 import { isDev, isTest } from './isDev'
 
 type LoggerContext = {
@@ -28,6 +30,9 @@ export type Logger = {
 	debug: (...args: unknown[]) => void
 	error: (...args: unknown[]) => void
 
+	/** Log a value and return it. Handy for in-place logging.*/
+	spy: <V>(value: V, ...args: unknown[]) => V
+
 	with: (innerContext: Partial<LoggerContext>) => Logger
 }
 
@@ -43,6 +48,11 @@ const withLoggerContext = (context: Partial<LoggerContext>): Logger => {
 			endLog({ ...context, level: 'debug' }, ...args),
 		error: (...args: unknown[]) =>
 			endLog({ ...context, level: 'error' }, ...args),
+
+		spy: <V>(v: V, ...args: unknown[]) => {
+			endLog(context, v, ...args)
+			return v
+		},
 
 		with: (innerContext: Partial<LoggerContext>) =>
 			withLoggerContext({

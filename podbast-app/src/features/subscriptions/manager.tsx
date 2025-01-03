@@ -5,7 +5,7 @@ import { clearPull } from '/src/features/rss/slice'
 import { fetchFeed } from '/src/features/rss/thunks'
 import { useAppDispatch, useAppSelector } from '/src/store'
 import { addAppListener } from '/src/store/listener'
-import { useInterval } from '/src/utils'
+import { isDev, log, useInterval } from '/src/utils'
 import { Duration, fromIso, getEpoch, getNow } from '/src/utils/datetime'
 
 import {
@@ -15,7 +15,7 @@ import {
 	updateSubscriptionFeed,
 } from './slice'
 
-// const logger = log.with({ prefix: 'sub manager' })
+const logger = log.with({ prefix: 'SubscriptionManager' })
 
 export const useSubscriptionManager = () => {
 	const dispatch = useAppDispatch()
@@ -37,6 +37,11 @@ export const useSubscriptionManager = () => {
 	}, [dispatch, subscriptions])
 
 	const checkRefresh = useCallback(() => {
+		if (isDev()) {
+			logger.debug('skipping auto refresh in dev')
+			return
+		}
+
 		const now = getNow()
 
 		subscriptions.forEach(sub => {

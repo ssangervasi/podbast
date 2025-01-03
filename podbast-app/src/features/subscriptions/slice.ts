@@ -15,6 +15,7 @@ import {
 	Subscription,
 	SubscriptionActivity,
 	SubscriptionItem,
+	SubscriptionItemIndex,
 	SubscriptionsState,
 	transformFeedToSubscription,
 	transformFeedToSubscriptionItems,
@@ -58,6 +59,19 @@ export const slice = createSlice({
 			activity: SubscriptionActivity
 		}>((draft, action) => {
 			mergeSubscriptionActivityIntoState(draft, action.payload)
+		}),
+
+		markPlayed: create.reducer<SubscriptionItemIndex>((draft, action) => {
+			const itemIndex = action.payload
+
+			const item =
+				draft.feedUrlToItemIdToItem[itemIndex.feedUrl]?.[itemIndex.id]
+			if (!item) {
+				logger.error("Couldn't find subscription item from index")
+				return
+			}
+
+			item.activity.completedIsoDate = getNow().toISO()
 		}),
 
 		receiveImport: create.reducer<Exportable>((draft, action) => {
@@ -163,6 +177,7 @@ export const {
 	updateSubscriptionFeed,
 	receiveImport,
 	updateActivity,
+	markPlayed,
 } = actions
 export const {
 	selectState,

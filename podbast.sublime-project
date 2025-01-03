@@ -1,0 +1,12 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+			"folder_exclude_patterns": ["node_modules", "**/node_modules"],
+		}
+	],
+	"index_exclude_gitignore": true,
+	"binary_file_patterns": ["node_modules", "**/node_modules"],
+
+}
