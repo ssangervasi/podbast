@@ -6,12 +6,15 @@ import { entries, Indexed, values, wrapEmpty } from '/src/utils/collections'
 import { Feed } from './models'
 import { fetchFeed } from './thunks'
 
+const logger = log.with({ prefix: 'rss' })
+
 export type RssPullMode = 'auto' | 'manual'
 
 export type RssPullBase = {
 	url: string
 	status: string
 	mode: RssPullMode
+	requestedBy?: string
 	feed?: Feed
 }
 
@@ -57,48 +60,51 @@ export const slice = createSlice({
 	extraReducers: builder => {
 		builder
 			.addCase(fetchFeed.pending, (draft, action) => {
-				const { url: urlParts, mode = 'auto' } = action.meta.arg
-				log.debug('fetchFeed.pending', { urlParts, mode })
-
+				const { url: urlParts, mode = 'auto', requestedBy } = action.meta.arg
 				const url = buildUrl(urlParts).toString()
 
 				const existing = draft.urlToPull[url]
 				if (existing) {
 					existing.status = 'requested'
 					existing.mode = mode
+					existing.requestedBy = requestedBy
 					return
 				}
 
 				draft.urlToPull[url] = {
 					url,
 					mode,
+					requestedBy,
 					status: 'requested',
 				}
 			})
 			.addCase(fetchFeed.fulfilled, (draft, action) => {
-				const { url: urlParts } = action.meta.arg
-				log.debug('fetchFeed.fulfilled', { urlParts })
-
+				const feed = action.payload
+				const { url: urlParts, requestedBy } = action.meta.arg
 				const url = buildUrl(urlParts).toString()
 
 				const existing = draft.urlToPull[url]
 				if (!existing) {
-					log.error('Fulfilled missing feed pull')
+					logger.error('Fulfilled missing feed pull')
 					return
 				}
 
+				if (requestedBy && feed.feedUrl !== requestedBy) {
+					logger.error('Fulfilled feedUrl does not match requested feedUrl')
+				}
+
 				existing.status = 'ready'
-				existing.feed = action.payload
+				existing.feed = feed
 			})
 			.addCase(fetchFeed.rejected, (draft, action) => {
 				const { url: urlParts } = action.meta.arg
-				log.error('fetchFeed.rejected', { urlParts })
+				logger.error('fetchFeed.rejected', { urlParts })
 
 				const url = buildUrl(urlParts).toString()
 
 				const existing = draft.urlToPull[url]
 				if (!existing) {
-					log.error('Rejected missing feed pull')
+					logger.error('Rejected missing feed pull')
 					return
 				}
 
@@ -124,7 +130,11 @@ export const selectManualPulls = createSelector([selectUrlToPull], urlToPull =>
 export const selectPullsByStatus = createSelector(
 	[selectUrlToPull, (_, status: RssPull['status']) => status],
 	(urlToPull, status) =>
-		wrapEmpty(values(urlToPull).filter(ru => ru.status === status)),
+		wrapEmpty(
+			values(urlToPull).filter(
+				pull => pull.status === status && pull.mode === 'auto',
+			),
+		),
 )
 
 export const selectPullStatus = createSelector(

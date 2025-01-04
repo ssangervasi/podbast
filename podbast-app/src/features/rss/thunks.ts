@@ -4,12 +4,17 @@ import { buildUrl } from '/src/utils'
 
 import { getFeed } from './rssClient'
 
-type FFArg = { url: string; mode?: RssPullMode }
+type FFArg = {
+	url: string
+	mode?: RssPullMode
+	requestedBy?: string
+}
 
 export const fetchFeed = createAppAsyncThunk(
 	'rss/fetchFeed',
 	async ({ url }: FFArg, _thunkAPI) => {
 		const response = await getFeed(buildUrl(url))
+
 		return response
 	},
 )

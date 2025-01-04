@@ -8,5 +8,7 @@
 	],
 	"index_exclude_gitignore": true,
 	"binary_file_patterns": ["node_modules", "**/node_modules"],
-
+	"settings": {
+		  "lsp_format_on_save": true,
+	}
 }

@@ -1,5 +1,13 @@
-import { chakra, GridItem, Heading, Text } from '@chakra-ui/react'
+import {
+	Alert,
+	AlertIcon,
+	chakra,
+	GridItem,
+	Heading,
+	Text,
+} from '@chakra-ui/react'
 
+import { selectPullStatus } from '/src/features/rss/slice'
 import { Subscription } from '/src/features/subscriptions/models'
 import { SubscriptionTitle } from '/src/features/subscriptions/SubscriptionTitle'
 import { useAppSelector } from '/src/store'
@@ -41,6 +49,10 @@ export const SubscriptionView = ({
 }: {
 	subscription: Subscription
 }) => {
+	const pullStatus = useAppSelector(state =>
+		selectPullStatus(state, subscription.url),
+	)
+
 	return (
 		<>
 			<RowWrapper>
@@ -50,6 +62,14 @@ export const SubscriptionView = ({
 					<Text fontSize="x-small">
 						Last fetched: <DateView isoDate={subscription.pulledIsoDate} />
 					</Text>
+
+					{pullStatus === 'notFound' ? (
+						<Alert status="error">
+							<AlertIcon />
+							Feed not found
+							{/* TODO: Add this in the feed page with ability to fix URL. */}
+						</Alert>
+					) : null}
 				</GridItem>
 
 				<GridItem colSpan={8}>

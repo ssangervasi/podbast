@@ -1,5 +1,3 @@
-import { unknown } from 'narrow-minded'
-
 import { isDev, isTest } from './isDev'
 
 type LoggerContext = {

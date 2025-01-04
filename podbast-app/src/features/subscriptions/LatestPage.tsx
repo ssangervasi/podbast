@@ -27,17 +27,17 @@ export const LatestPage = () => {
 				<Button onClick={refreshAll} isLoading={anyLoading}>
 					Refresh all
 				</Button>
-			</HStack>
 
-			{notFoundPulls.length > 0 ? (
-				<Box>
-					<Alert status="error">
-						<AlertIcon />
-						Some feeds could not be pulled:{' '}
-						{notFoundPulls.map(pull => JSON.stringify(pull.url)).join(', ')}
-					</Alert>
-				</Box>
-			) : null}
+				{notFoundPulls.length > 0 ? (
+					<Box>
+						<Alert status="error">
+							<AlertIcon />
+							Some ({notFoundPulls.length}) subscriptions have issues with their
+							feed. Check the subscriptions tab for details.
+						</Alert>
+					</Box>
+				) : null}
+			</HStack>
 
 			<PageGrid>
 				{episodes.map(episode => (
