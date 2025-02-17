@@ -32,6 +32,64 @@ import { selectSubscriptionWithItems } from './slice'
 
 const filterCommitThrottler = createThrottler(400, { trailing: true })
 
+type Filters = {
+	text?: string
+	after?: string
+	before?: string
+}
+
+type FilterContext = {
+	items: readonly SubscriptionItem[]
+	filters: Filters
+}
+
+type FilterFunc = (input: FilterContext) => FilterContext
+
+const applyFilterDates: FilterFunc = input => {
+	const { items, filters } = input
+	if (!narrow({ after: 'string', before: 'string' }, filters)) {
+		return input
+	}
+
+	const earliestIndex = items.findIndex(
+		item => fromIso(filters.after) <= getPubDate(item),
+	)
+	const latestIndex = items.findIndex(
+		item => getPubDate(item) <= fromIso(filters.before),
+	)
+
+	const itemsOut = items.slice(earliestIndex, latestIndex + 1)
+
+	return { items: itemsOut, filters }
+}
+
+const makePattern = (
+	maybePattern: string,
+): { test: (s: string) => boolean } => {
+	try {
+		if (maybePattern.startsWith('/'))
+			return new RegExp(maybePattern.substring(1), 'iv')
+	} catch {
+		//
+	}
+	return {
+		test: (s: string) => s.toLowerCase().includes(maybePattern.toLowerCase()),
+	}
+}
+
+const applyFilterText: FilterFunc = input => {
+	const { items, filters } = input
+	if (!(narrow({ text: 'string' }, filters) && filters.text.length > 1)) {
+		return input
+	}
+	const pattern = makePattern(filters.text)
+	const itemsOut = items.filter(it => pattern.test(it.title))
+	return { items: itemsOut, filters }
+}
+
+const applyFilters: FilterFunc = (input: FilterContext) =>
+	applyFilterText(applyFilterDates(input))
+
 export const SubscriptionDetailsPage = () => {
 	const { ensureData } = useLayout()
 
@@ -42,33 +100,17 @@ export const SubscriptionDetailsPage = () => {
 
 	const isPulling = useIsPulling({ subscription })
 
-	const [filters, setFilters] = useState<{
-		text?: string
-		after?: string
-		before?: string
-	}>({})
+	const [filters, setFilters] = useState<Filters>({})
 
-	const [filtersComitted, setFiltersComitted] = useState<typeof filters>({})
+	const [filtersComitted, setFiltersComitted] = useState<Filters>({})
 
 	const filteredItems = useMemo(() => {
-		const items = subscription.items
-		if (!narrow({ after: 'string', before: 'string' }, filters)) {
-			return subscription.items
-		}
-
-		const earliestIndex = items.findIndex(
-			item => fromIso(filters.after) <= getPubDate(item),
-		)
-		const latestIndex = items.findIndex(
-			item => getPubDate(item) <= fromIso(filters.before),
-		)
-
-		return items.slice(earliestIndex, latestIndex + 1)
+		return applyFilters({ items: subscription.items, filters }).items
 	}, [filtersComitted, subscription.items])
 
 	const chunker = useChunker({ items: filteredItems, size: 15 })
 
-	const handleChange = (filterName: keyof typeof filters) => {
+	const handleChange = (filterName: keyof Filters) => {
 		return (event: ChangeEvent<HTMLInputElement>) =>
 			setFilters(prev => {
 				const filtersNext = {
