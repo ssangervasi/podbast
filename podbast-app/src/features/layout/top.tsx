@@ -1,20 +1,21 @@
 import { Button, HStack, Link, Text } from '@chakra-ui/react'
 
 import { useLayout } from './useLayout'
+import { isDev } from '/src/utils'
 
 export const Top = () => {
 	const { show } = useLayout()
 
 	return (
-		<Button variant="unstyled" onClick={() => show('subscriptions')}>
-			<HStack
-				justify="space-between"
-				bg="gray.700"
-				borderBottomWidth={2}
-				borderBottomColor="black"
-				paddingX={2}
-				paddingY={0.5}
-			>
+		<HStack
+			justify="space-between"
+			bg={isDev() ? "purple.400" : "gray.700"}
+			borderBottomWidth={2}
+			borderBottomColor="black"
+			paddingX={2}
+			paddingY={0.5}
+		>
+			<Button variant="unstyled" onClick={() => show('subscriptions')}>
 				<HStack as="header">
 					<Text
 						fontSize="3xl"
@@ -28,13 +29,14 @@ export const Top = () => {
 						podbast
 					</Text>
 				</HStack>
+			</Button>
 
-				<HStack>
-					<Link href="https://github.com/ssangervasi/podbast" isExternal>
-						source
-					</Link>
-				</HStack>
+			<HStack>
+				{isDev() ? <Text>dev dev dev dev dev dev dev</Text> : null}
+				<Link href="https://github.com/ssangervasi/podbast" isExternal>
+					source
+				</Link>
 			</HStack>
-		</Button>
+		</HStack>
 	)
 }

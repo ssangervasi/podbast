@@ -12,11 +12,16 @@ import { ExpandableLines } from '/src/ui/ExpandableLines'
 import { DateView, TimeView } from '/src/ui/units'
 
 import { EpisodeControls } from './EpisodeControls'
+import { EpisodePlayButton } from './EpisodePlayButton'
 
 export const EpisodeRow = memo(
 	({ episode }: { episode: Episode }) => (
 		<>
 			<RowWrapper>
+				<GridItem colSpan={1}>
+					<EpisodePlayButton episode={episode} />
+				</GridItem>
+
 				<GridItem colSpan={2}>
 					<SubscriptionTitle subscription={episode.subscription} />
 
@@ -29,7 +34,7 @@ export const EpisodeRow = memo(
 					</Text>
 				</GridItem>
 
-				<GridItem colSpan={5}>
+				<GridItem colSpan={4}>
 					<HCenter>
 						<ExpandableLines maxW="40ch" noOfLines={2}>
 							{episode.item.contentSnippet}

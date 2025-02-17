@@ -17,15 +17,20 @@ import { useMemo, useState } from 'preact/hooks'
 import { useLayout } from '/src/features/layout/useLayout'
 import { selectPullStatus } from '/src/features/rss/slice'
 import { EpisodeRow } from '/src/features/subscriptions/EpisodeRow'
-import { getPubDate, Subscription } from '/src/features/subscriptions/models'
+import {
+	getPubDate,
+	Subscription,
+	SubscriptionItem,
+} from '/src/features/subscriptions/models'
 import { useAppSelector } from '/src/store'
-import { HStack, PageGrid, PageStack, VStack } from '/src/ui'
-import { createThrottler, useChunker } from '/src/utils'
+import { EpisodesGrid, HStack, PageGrid, PageStack, VStack } from '/src/ui'
+import { CodeBlock } from '/src/ui/CodeBlock'
+import { Chunker, createThrottler, DevOnly, useChunker } from '/src/utils'
 import { fromIso } from '/src/utils/datetime'
 
 import { selectSubscriptionWithItems } from './slice'
 
-const filtersThrottler = createThrottler(200)
+const filterCommitThrottler = createThrottler(400, { trailing: true })
 
 export const SubscriptionDetailsPage = () => {
 	const { ensureData } = useLayout()
@@ -38,9 +43,12 @@ export const SubscriptionDetailsPage = () => {
 	const isPulling = useIsPulling({ subscription })
 
 	const [filters, setFilters] = useState<{
+		text?: string
 		after?: string
 		before?: string
 	}>({})
+
+	const [filtersComitted, setFiltersComitted] = useState<typeof filters>({})
 
 	const filteredItems = useMemo(() => {
 		const items = subscription.items
@@ -56,17 +64,21 @@ export const SubscriptionDetailsPage = () => {
 		)
 
 		return items.slice(earliestIndex, latestIndex + 1)
-	}, [filters, subscription.items])
+	}, [filtersComitted, subscription.items])
 
 	const chunker = useChunker({ items: filteredItems, size: 15 })
 
 	const handleChange = (filterName: keyof typeof filters) => {
 		return (event: ChangeEvent<HTMLInputElement>) =>
-			filtersThrottler(() => {
-				setFilters(prev => ({
+			setFilters(prev => {
+				const filtersNext = {
 					...prev,
 					[filterName]: event.currentTarget.value,
-				}))
+				}
+				filterCommitThrottler(() => {
+					setFiltersComitted(filtersNext)
+				})
+				return filtersNext
 			})
 	}
 
@@ -107,35 +119,22 @@ export const SubscriptionDetailsPage = () => {
 				<Heading as="h2">Episodes</Heading>
 
 				<PageGrid>
-					<GridItem colSpan={4}>
-						<HStack placeItems="center" height="full" wrap="wrap">
-							{isPulling ? (
-								<Spinner />
-							) : (
-								<>
-									<Text>
-										{chunker.chunkInfo.first} - {chunker.chunkInfo.last} of{' '}
-										{chunker.chunkInfo.total}
-									</Text>
-									<Button
-										size="sm"
-										aria-label="previous page"
-										onClick={chunker.prevChunk}
-									>
-										{'<<'}
-									</Button>
-									<Button
-										size="sm"
-										aria-label="next page"
-										onClick={chunker.nextChunk}
-									>
-										{'>>'}
-									</Button>
-								</>
-							)}
-						</HStack>
+					<GridItem colSpan={1}>
+						{isPulling ? <Spinner /> : <ChunkerControls chunker={chunker} />}
 					</GridItem>
-					<GridItem colSpan={8}>
+
+					<GridItem colSpan={3}>
+						<FormControl width="auto">
+							<FormLabel>search</FormLabel>
+							<Input
+								type="text"
+								value={filters.text ?? ''}
+								onChange={handleChange('text')}
+							/>
+						</FormControl>
+					</GridItem>
+
+					<GridItem colSpan={4}>
 						<HStack placeItems="center" width="full" wrap="wrap">
 							{/* <Button variant="link">Clear</Button> */}
 							<FormControl width="auto">
@@ -156,11 +155,15 @@ export const SubscriptionDetailsPage = () => {
 							</FormControl>
 						</HStack>
 					</GridItem>
+				</PageGrid>
 
+				<DebugFilters>{{ filters, filtersComitted }}</DebugFilters>
+
+				<EpisodesGrid>
 					{chunker.chunk.map(item => (
 						<EpisodeRow key={item.id} episode={{ subscription, item }} />
 					))}
-				</PageGrid>
+				</EpisodesGrid>
 			</PageStack>
 		</>
 	)
@@ -172,4 +175,42 @@ const useIsPulling = ({ subscription }: { subscription: Subscription }) => {
 	)
 
 	return status !== undefined
+}
+
+const ChunkerControls = ({
+	chunker,
+}: {
+	chunker: Chunker<SubscriptionItem>
+}) => {
+	return (
+		<VStack>
+			<chakra.div>
+				<Text>
+					{chunker.chunkInfo.first} - {chunker.chunkInfo.last} of{' '}
+					{chunker.chunkInfo.total}
+				</Text>
+			</chakra.div>
+
+			<HStack spacing={2}>
+				<Button
+					size="sm"
+					aria-label="previous page"
+					onClick={chunker.prevChunk}
+				>
+					{'<<'}
+				</Button>
+				<Button size="sm" aria-label="next page" onClick={chunker.nextChunk}>
+					{'>>'}
+				</Button>
+			</HStack>
+		</VStack>
+	)
+}
+
+const DebugFilters = ({ children }: { children: unknown }) => {
+	return (
+		<DevOnly>
+			<CodeBlock>{children}</CodeBlock>
+		</DevOnly>
+	)
 }

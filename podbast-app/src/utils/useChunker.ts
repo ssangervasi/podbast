@@ -8,6 +8,21 @@ type ChunkerState = {
 	start: number
 }
 
+export type Chunker<I> = {
+	chunk: I[]
+	end: number
+	itemsAfter: number
+	size: number
+	start: number
+	chunkInfo: {
+		first: number
+		last: number
+		total: number
+	}
+	prevChunk: () => void
+	nextChunk: () => void
+}
+
 export const useChunker = <I>({
 	items,
 	size: sizeOption,
@@ -15,7 +30,7 @@ export const useChunker = <I>({
 	items: readonly I[]
 
 	size?: number
-}) => {
+}): Chunker<I> => {
 	const size = useMemo(() => sizeOption ?? INIT_SIZE, [sizeOption])
 
 	const [state, dispatch] = useReducer(
@@ -71,6 +86,6 @@ export const useChunker = <I>({
 			chunkInfo,
 			prevChunk: () => dispatch('prev'),
 			nextChunk: () => dispatch('next'),
-		}
+		} satisfies Chunker<I>
 	}, [state, items])
 }

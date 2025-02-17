@@ -3,7 +3,7 @@ import { Alert, AlertIcon, Box, Button, Heading } from '@chakra-ui/react'
 import { selectPullsByStatus } from '/src/features/rss/slice'
 import { useSubscriptionManager } from '/src/features/subscriptions/manager'
 import { useAppSelector } from '/src/store'
-import { HStack, PageGrid, PageStack } from '/src/ui'
+import { EpisodesGrid, HStack, PageGrid, PageStack } from '/src/ui'
 
 import { EpisodeRow } from './EpisodeRow'
 import { selectRecentEpisodes } from './slice'
@@ -39,11 +39,11 @@ export const LatestPage = () => {
 				) : null}
 			</HStack>
 
-			<PageGrid>
+			<EpisodesGrid>
 				{episodes.map(episode => (
 					<EpisodeRow key={episode.item.id} episode={episode} />
 				))}
-			</PageGrid>
+			</EpisodesGrid>
 		</PageStack>
 	)
 }

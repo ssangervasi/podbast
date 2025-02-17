@@ -9,6 +9,14 @@ export const PageGrid = withDefaults(SimpleGrid, {
 	w: 'full',
 })
 
+export const EpisodesGrid = withDefaults(SimpleGrid, {
+	columns: 12,
+	spacing: 2,
+	w: 'full',
+	// First column designated for play button, which is meh.
+	gridTemplateColumns: 'max-content repeat(11, minmax(0, 1fr))',
+})
+
 export const RowWrapper = ({ children, ...rest }: PropsWithChildren) => {
 	return (
 		<chakra.div display="contents" role="group" {...rest}>

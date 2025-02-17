@@ -56,10 +56,12 @@ export const SubscriptionView = ({
 	return (
 		<>
 			<RowWrapper>
-				<GridItem colSpan={4}>
+				<GridItem colSpan={6}>
 					<SubscriptionTitle subscription={subscription} />
+				</GridItem>
 
-					<Text fontSize="x-small">
+				<GridItem colSpan={6}>
+					<Text>
 						Last fetched: <DateView isoDate={subscription.pulledIsoDate} />
 					</Text>
 
@@ -70,10 +72,8 @@ export const SubscriptionView = ({
 							{/* TODO: Add this in the feed page with ability to fix URL. */}
 						</Alert>
 					) : null}
-				</GridItem>
 
-				<GridItem colSpan={8}>
-					<Text>
+					{/* <Text>
 						Homepage:{' '}
 						<chakra.span fontFamily="monospace">
 							{subscription.link}
@@ -90,7 +90,7 @@ export const SubscriptionView = ({
 					<Text>
 						Subscription URL:{' '}
 						<chakra.span fontFamily="monospace">{subscription.url}</chakra.span>
-					</Text>
+					</Text> */}
 				</GridItem>
 			</RowWrapper>
 		</>

@@ -30,4 +30,5 @@ export const PageStack = withDefaults<StackProps>(CVStack, {
 		base: 'full',
 		xl: 'container.lg',
 	},
+	spacing: 4,
 })
