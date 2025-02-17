@@ -3,7 +3,7 @@ import { Alert, AlertIcon, Box, Button, Heading } from '@chakra-ui/react'
 import { selectPullsByStatus } from '/src/features/rss/slice'
 import { useSubscriptionManager } from '/src/features/subscriptions/manager'
 import { useAppSelector } from '/src/store'
-import { EpisodesGrid, HStack, PageGrid, PageStack } from '/src/ui'
+import { EpisodesGrid, HStack, PageStack } from '/src/ui'
 
 import { EpisodeRow } from './EpisodeRow'
 import { selectRecentEpisodes } from './slice'

@@ -1,11 +1,4 @@
-import {
-	Alert,
-	AlertIcon,
-	chakra,
-	GridItem,
-	Heading,
-	Text,
-} from '@chakra-ui/react'
+import { Alert, AlertIcon, GridItem, Heading, Text } from '@chakra-ui/react'
 
 import { selectPullStatus } from '/src/features/rss/slice'
 import { Subscription } from '/src/features/subscriptions/models'

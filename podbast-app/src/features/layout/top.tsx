@@ -1,7 +1,8 @@
 import { Button, HStack, Link, Text } from '@chakra-ui/react'
 
-import { useLayout } from './useLayout'
 import { isDev } from '/src/utils'
+
+import { useLayout } from './useLayout'
 
 export const Top = () => {
 	const { show } = useLayout()
@@ -9,7 +10,7 @@ export const Top = () => {
 	return (
 		<HStack
 			justify="space-between"
-			bg={isDev() ? "purple.400" : "gray.700"}
+			bg={isDev() ? 'purple.400' : 'gray.700'}
 			borderBottomWidth={2}
 			borderBottomColor="black"
 			paddingX={2}
