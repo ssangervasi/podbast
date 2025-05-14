@@ -13,6 +13,13 @@ export const useUpdatingRef = <V>(updatedValue: V) => {
 	return ref
 }
 
+export const usePrevious = <V>(updatedValue: V) => {
+	const ref = useRef(updatedValue)
+	const prev = ref.current
+	ref.current = updatedValue
+	return prev
+}
+
 /**
  *
  * @param cb The callback to invoke on each interval. This argument can be changed on repeated calls

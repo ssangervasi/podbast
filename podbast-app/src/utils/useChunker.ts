@@ -1,6 +1,8 @@
 import { produce } from 'immer'
 import { useEffect, useMemo, useReducer } from 'preact/hooks'
 
+import { usePrevious } from '/src/utils'
+
 const INIT_START = 0
 const INIT_SIZE = 10
 
@@ -55,10 +57,12 @@ export const useChunker = <I>({
 			}) satisfies ChunkerState,
 	)
 
+	const prevItems = usePrevious(items)
 	useEffect(() => {
-		// if (items.length <= state.start) {}
-		dispatch('first')
-	}, [items])
+		if (prevItems.length !== items.length) {
+			dispatch('first')
+		}
+	}, [items, prevItems])
 
 	return useMemo(() => {
 		const { start } = state

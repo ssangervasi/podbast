@@ -227,6 +227,9 @@ export const selectSubSummaries = createSelector([selectSubscriptions], subs =>
 	sorted(subs, (sl, sr) => (sl.title < sr.title ? -1 : 1)),
 )
 
+// I need a way to produce stable results even when the activity keeps updating the state. Ideas:
+// - Split the activity out of the items objects
+// - Create some kind of hash identifier of the array
 export const selectSubscriptionWithItems = createSelector(
 	[selectState, (_, feedUrl: string) => feedUrl],
 	(state, feedUrl) => {
