@@ -83,7 +83,11 @@ const applyFilterText: FilterFunc = input => {
 		return input
 	}
 	const pattern = makePattern(filters.text)
-	const itemsOut = items.filter(it => pattern.test(it.title))
+	const itemsOut = items.filter(
+		it =>
+			pattern.test(it.title) ||
+			(it.contentSnippet && pattern.test(it.contentSnippet)),
+	)
 	return { items: itemsOut, filters }
 }
 
