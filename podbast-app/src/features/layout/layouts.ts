@@ -1,8 +1,9 @@
 import { ImpExpPage } from '/src/features/impexp/ImpExpPage'
-import { QueuePage } from '/src/features/player/queue'
 import { AddFeedPage } from '/src/features/rss'
 import { LatestPage, SubscriptionsPage } from '/src/features/subscriptions'
 import { SubscriptionDetailsPage } from '/src/features/subscriptions/SubscriptionDetailsPage'
+
+import { QueuePage } from '../queue'
 
 export type Layout = {
 	main: () => JSX.Element | null
@@ -27,6 +28,12 @@ export const LAYOUTS = {
 		sideTitle: 'Latest episodes',
 		sideTiny: 'Eps',
 	},
+	queue: {
+		main: QueuePage,
+		sideTitle: 'Queue',
+		sideTiny: 'Q',
+		// devOnly: true,
+	},
 	rss: {
 		main: AddFeedPage,
 		sideTitle: 'Add feed',
@@ -36,12 +43,6 @@ export const LAYOUTS = {
 		main: ImpExpPage,
 		sideTitle: 'Import/Export',
 		sideTiny: 'I/E',
-	},
-	queue: {
-		main: QueuePage,
-		sideTitle: 'Queue',
-		sideTiny: 'Q',
-		devOnly: true,
 	},
 } satisfies {
 	[k: string]: Layout

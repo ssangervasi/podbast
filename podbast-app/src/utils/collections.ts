@@ -60,6 +60,7 @@ export const indexedToRecord = <T>(ind: Indexed<T>): Record<string, T> => {
 
 export const values = <T>(ind: Indexed<T>): ReadonlyArray<T> =>
 	compact(Object.values(ind))
+
 export const entries = <T>(ind: Indexed<T>): ReadonlyArray<[string, T]> =>
 	compact(Object.entries(ind).map(([k, v]) => (v ? [k, v] : undefined)))
 

@@ -4,7 +4,7 @@ import { narrow } from 'narrow-minded'
 import { _receiveMediaUpdate as player_receiveMediaUpdate } from '/src/features/player/slice'
 import { Feed } from '/src/features/rss/models'
 import { compact, isAround, log, sorted, values } from '/src/utils'
-import { cmpIsoDate, getNow } from '/src/utils/datetime'
+import { cmpIsoDate, fromIso, getNow } from '/src/utils/datetime'
 
 import {
 	Episode,
@@ -206,9 +206,9 @@ export const selectRecentEpisodes = createSelector(
 	[selectState],
 	(state): readonly Episode[] =>
 		sortEpisodes(
-			values(state.feedUrlToItemIdToItem).flatMap(items => {
+			values(state.feedUrlToItemIdToItem).flatMap(itemIdToItem => {
 				const subEps = sortEpisodes(
-					values(items).flatMap(item => {
+					values(itemIdToItem).flatMap(item => {
 						const { feedUrl } = item
 						const subscription = state.feedUrlToSubscription[feedUrl]!
 						return {
@@ -221,6 +221,42 @@ export const selectRecentEpisodes = createSelector(
 				return subEps.slice(0, 2)
 			}),
 		),
+)
+
+const firstItemsByActivity = (
+	items: readonly SubscriptionItem[],
+): SubscriptionItem[] =>
+	sorted(
+		items.filter(
+			(
+				item,
+			): item is SubscriptionItem & { activity: { playedIsoDate: string } } =>
+				item.activity.playedIsoDate !== undefined,
+		),
+		(a, b) =>
+			cmpIsoDate.desc(
+				fromIso(a.activity.playedIsoDate),
+				fromIso(b.activity.playedIsoDate),
+			),
+	).slice(0, 10)
+
+export const selectRecentlyPlayed = createSelector(
+	[selectState],
+	(state): readonly Episode[] => {
+		const episodes = firstItemsByActivity(
+			values(state.feedUrlToItemIdToItem).flatMap(itemIdToItem =>
+				values(itemIdToItem),
+			),
+		).map(item => {
+			const subscription = state.feedUrlToSubscription[item.feedUrl]!
+			return {
+				subscription,
+				item,
+			}
+		})
+
+		return episodes
+	},
 )
 
 export const selectSubSummaries = createSelector([selectSubscriptions], subs =>
