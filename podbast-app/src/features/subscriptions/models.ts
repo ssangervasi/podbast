@@ -17,17 +17,22 @@ import { optional } from '/src/utils/narrows'
 
 export type Subscription = {
 	/**
-	 * Unique ID
+	 * Unique ID, set to feedUrl on first load and then preserved from then on.
+	 */
+	feedKey: string
+	/**
+	 * Originally the unique ID, but apparently my server will follow redirects and change it,
+	 * or the host server will change the content.
+	 * So kind of redundant with url after all.
 	 */
 	feedUrl: string
-
 	/**
 	 * URL provided by the user, which may include auth params
 	 */
 	url: string
 
 	/**
-	 * Canonical website for the podcast
+	 * Canonical website for the podcast. Annoying this isn't always available.
 	 */
 	link?: string
 	title: string
@@ -62,6 +67,7 @@ export type SubscriptionActivity = {
 export type SubscriptionItem = {
 	/**
 	 * Parent's ID.
+	 * TODO: Actually should be feedKey.
 	 */
 	feedUrl: string
 	/**
@@ -115,6 +121,11 @@ export type SubscriptionsState = {
 	feedUrlToItemIdToItem: Indexed<Indexed<SubscriptionItem>>
 }
 
+export const getFeedKey = (subscription: Subscription | Feed): string =>
+	'feedKey' in subscription && subscription.feedKey
+		? subscription.feedKey
+		: subscription.feedUrl
+
 export const getFeedItemId = (feedItem: FeedItem): string =>
 	feedItem.guid ?? feedItem.enclosure.url
 
@@ -125,7 +136,7 @@ export const transformFeedItemToSubscriptionItem = (
 	feed: Feed,
 	feedItem: FeedItem,
 ): SubscriptionItem => {
-	const { feedUrl } = feed
+	const feedUrl = getFeedKey(feed)
 	const { guid, title, link, enclosure, contentSnippet, itunes } = feedItem
 
 	const id = getFeedItemId(feedItem)
@@ -164,6 +175,7 @@ export const transformFeedToSubscription = (feed: Feed): Subscription => {
 	const pulledIsoDate = getNow().toISO()
 
 	return {
+		feedKey: feedUrl,
 		feedUrl,
 		url: url ?? feedUrl,
 		link,
@@ -180,11 +192,15 @@ export const mergeFeedIntoState = (
 	draft: Draft<SubscriptionsState>,
 	feed: Feed,
 ): void => {
-	const { feedUrl } = feed
-	const existing = draft.feedUrlToSubscription[feedUrl]
+	const feedKey = getFeedKey(feed)
+	const existing = draft.feedUrlToSubscription[feedKey]
 
 	if (!existing) {
-		log.error('Updating feed that is not subscribed', feed.link)
+		log.error('Updating feed that is not subscribed', {
+			feedKey: feedKey,
+			feedUrl: feed.feedUrl,
+			link: feed.link,
+		})
 		return
 	}
 
@@ -211,8 +227,8 @@ export const mergeFeedIntoState = (
 	}
 
 	// Sync items
-	const existingItems = draft.feedUrlToItemIdToItem[feedUrl] ?? {}
-	draft.feedUrlToItemIdToItem[feedUrl] = existingItems
+	const existingItems = draft.feedUrlToItemIdToItem[feedKey] ?? {}
+	draft.feedUrlToItemIdToItem[feedKey] = existingItems
 
 	const items = transformFeedToSubscriptionItems(feed)
 	entries(items).forEach(([id, item]) => {
@@ -239,6 +255,7 @@ export const ExportableGuard = Guard.narrow({
 					feedUrl: 'string',
 				},
 			],
+			feedKey: optional('string'),
 			feedUrl: 'string',
 			url: optional('string'),
 			title: 'string',
@@ -254,16 +271,16 @@ export const ExportableGuard = Guard.narrow({
 export const mergeSubscriptionActivityIntoState = (
 	draft: Draft<SubscriptionsState>,
 	{
-		feedUrl,
+		feedKey,
 		activity,
 	}: {
-		feedUrl: string
+		feedKey: string
 		activity: SubscriptionActivity
 	},
 ): void => {
-	const existing = draft.feedUrlToSubscription[feedUrl]
+	const existing = draft.feedUrlToSubscription[feedKey]
 	if (!existing) {
-		log.error('Subscription does not exist for activity', feedUrl)
+		log.error('Subscription does not exist for activity', feedKey)
 		return
 	}
 

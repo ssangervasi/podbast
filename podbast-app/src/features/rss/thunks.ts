@@ -12,23 +12,10 @@ type FFArg = {
 
 export const fetchFeed = createAppAsyncThunk(
 	'rss/fetchFeed',
-	async ({ url }: FFArg, _thunkAPI) => {
+	async ({ requestedBy, url }: FFArg, _thunkAPI) => {
 		const response = await getFeed(buildUrl(url))
 
+		response['feedKey'] = requestedBy
 		return response
 	},
 )
-
-// export const fetchFeed = cat(
-// 	'rss/fetchFeed',
-// 	async ({ url }: FFArg, _thunkAPI) => {
-// 		_thunkAPI.getState()
-// 		const response = await getFeed(buildUrl(url))
-// 		return response
-// 	},
-// 	{
-// 		getPendingMeta: meta => {
-// 			return { urlParts: buildUrlParts(meta.arg.url) }
-// 		},
-// 	},
-// )

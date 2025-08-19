@@ -23,10 +23,14 @@ export const useSubscriptionManager = () => {
 	const subscriptions = useAppSelector(selectSubscriptions)
 
 	const refreshOne = useCallback(
-		({ feedUrl }: { feedUrl: string }) => {
-			const sub = feedUrlToSubscription[feedUrl]!
+		({ feedKey }: { feedKey: string }) => {
+			const sub = feedUrlToSubscription[feedKey]!
 			dispatch(
-				fetchFeed({ url: sub.url, mode: 'auto', requestedBy: sub.feedUrl }),
+				fetchFeed({
+					url: sub.url,
+					mode: 'auto',
+					requestedBy: sub.feedKey,
+				}),
 			)
 		},
 		[dispatch, feedUrlToSubscription],
@@ -38,7 +42,7 @@ export const useSubscriptionManager = () => {
 				fetchFeed({
 					url: sub.url,
 					mode: 'auto',
-					requestedBy: sub.feedUrl,
+					requestedBy: sub.feedKey,
 				}),
 			)
 		})
@@ -57,7 +61,11 @@ export const useSubscriptionManager = () => {
 
 			if (diff.as('hours') > 1) {
 				dispatch(
-					fetchFeed({ url: sub.url, mode: 'auto', requestedBy: sub.feedUrl }),
+					fetchFeed({
+						url: sub.url,
+						mode: 'auto',
+						requestedBy: sub.feedKey,
+					}),
 				)
 			}
 		})
@@ -103,17 +111,17 @@ export const Manager = () => {
 	}, [])
 
 	onLayout('subscriptionDetails', layoutData => {
-		const { feedUrl } = layoutData
+		const { feedUrl: feedKey } = layoutData
 		dispatch(
 			updateActivity({
-				feedUrl,
+				feedKey,
 				activity: {
 					catalogueIsoDate: getEpoch().toISODate(),
 				},
 			}),
 		)
 
-		refreshOne({ feedUrl })
+		refreshOne({ feedKey })
 	})
 
 	return <></>

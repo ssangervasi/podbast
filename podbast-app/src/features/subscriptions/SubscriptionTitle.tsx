@@ -7,9 +7,9 @@ import { HStack } from '/src/ui'
 export const SubscriptionTitle = ({
 	subscription,
 }: {
-	subscription: Pick<Subscription, 'title' | 'image' | 'feedUrl'>
+	subscription: Pick<Subscription, 'title' | 'image' | 'feedKey'>
 }) => {
-	const { title, image, feedUrl } = subscription
+	const { title, image, feedKey } = subscription
 	const { show } = useLayout()
 
 	return (
@@ -17,7 +17,7 @@ export const SubscriptionTitle = ({
 			<Box>
 				<Button
 					variant="none"
-					onClick={() => show('subscriptionDetails', { feedUrl })}
+					onClick={() => show('subscriptionDetails', { feedUrl: feedKey })}
 				>
 					<Image
 						src={image?.url}

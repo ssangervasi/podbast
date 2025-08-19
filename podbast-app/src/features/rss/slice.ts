@@ -89,8 +89,11 @@ export const slice = createSlice({
 					return
 				}
 
-				if (requestedBy && feed.feedUrl !== requestedBy) {
-					logger.error('Fulfilled feedUrl does not match requested feedUrl')
+				if (
+					(requestedBy && feed.feedUrl !== requestedBy) ||
+					feed.feedKey !== requestedBy
+				) {
+					logger.error('Fulfilled feedKey does not match requested feedKey')
 				}
 
 				existing.status = 'ready'

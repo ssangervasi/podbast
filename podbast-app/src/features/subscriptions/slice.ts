@@ -9,6 +9,7 @@ import { cmpIsoDate, fromIso, getNow } from '/src/utils/datetime'
 import {
 	Episode,
 	Exportable,
+	getFeedKey,
 	getPubDate,
 	mergeFeedIntoState,
 	mergeSubscriptionActivityIntoState,
@@ -34,19 +35,22 @@ export const slice = createSlice({
 	reducers: create => ({
 		subscribe: create.reducer<Feed>((draft, action) => {
 			const feed = action.payload
-			const { feedUrl } = feed
-			const existing = draft.feedUrlToSubscription[feedUrl]
+			const feedKey = getFeedKey(feed)
+			const existing = draft.feedUrlToSubscription[feedKey]
 
 			if (existing) {
-				logger.debug('Subscribe to existing feed', feed.feedUrl)
+				logger.debug('Subscribe to existing feed', {
+					feedKey,
+					feedUrl: feed.feedUrl,
+				})
 				mergeFeedIntoState(draft, feed)
 				return
 			}
 
 			const subscription = transformFeedToSubscription(feed)
 			const items = transformFeedToSubscriptionItems(feed)
-			draft.feedUrlToSubscription[feedUrl] = subscription
-			draft.feedUrlToItemIdToItem[feedUrl] = items
+			draft.feedUrlToSubscription[feedKey] = subscription
+			draft.feedUrlToItemIdToItem[feedKey] = items
 		}),
 
 		updateSubscriptionFeed: create.reducer<Feed>((draft, action) => {
@@ -55,7 +59,7 @@ export const slice = createSlice({
 		}),
 
 		updateActivity: create.reducer<{
-			feedUrl: string
+			feedKey: string
 			activity: SubscriptionActivity
 		}>((draft, action) => {
 			mergeSubscriptionActivityIntoState(draft, action.payload)
@@ -83,6 +87,7 @@ export const slice = createSlice({
 				const existingSub = draft.feedUrlToSubscription[expSub.feedUrl]
 				if (!existingSub) {
 					const sub: Subscription = {
+						feedKey: expSub.feedKey ?? expSub.feedUrl,
 						feedUrl: expSub.feedUrl,
 						url: expSub.url,
 						link: (expSub as any)?.link,
@@ -291,7 +296,7 @@ export const selectExportableSubscriptions = createSelector(
 		return compact(
 			values(state.feedUrlToSubscription).map(sub => {
 				const items = compact(
-					values(state.feedUrlToItemIdToItem[sub.feedUrl] ?? {}).map(item => {
+					values(state.feedUrlToItemIdToItem[sub.feedKey] ?? {}).map(item => {
 						const { playedIsoDate } = item.activity
 						if (!playedIsoDate) {
 							return undefined

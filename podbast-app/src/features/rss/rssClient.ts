@@ -3,7 +3,7 @@ import { diffNarrow } from 'narrow-minded'
 import { apiFetch } from '/src/features/rss/apiClient'
 import { buildUrl, isDev, log, stall, UrlIsh } from '/src/utils'
 
-import { FeedResponseGuard, FeedResponseNarrower } from './models'
+import { Feed, FeedResponseGuard, FeedResponseNarrower } from './models'
 
 // Yay single thread, can just do this.
 const counters = {
@@ -13,7 +13,7 @@ const counters = {
 
 const logger = log.with({ prefix: 'rssClient' })
 
-export const getFeed = async (urlish: UrlIsh) => {
+export const getFeed = async (urlish: UrlIsh): Promise<Feed> => {
 	const url = buildUrl(urlish).toString()
 	if (!url) {
 		throw new Error('getFeed: Invalid feed url')

@@ -79,8 +79,11 @@ const migrateSubscriptionItemCleanup: Migrator = draft => {
 }
 
 const migrateSubscriptionValid: Migrator = draft => {
-	values(draft.subscriptions?.feedUrlToSubscription ?? {}).forEach(
-		subscription => {
+	entries(draft.subscriptions?.feedUrlToSubscription ?? {}).forEach(
+		([feedKey, subscription]) => {
+			if (!subscription.feedKey) {
+				subscription.feedKey = feedKey
+			}
 			if (!subscription.url) {
 				subscription.url = subscription.feedUrl
 			}

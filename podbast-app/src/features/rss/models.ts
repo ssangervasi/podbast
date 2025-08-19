@@ -9,6 +9,8 @@ export const FeedResponseNarrower = {
 		title: 'string',
 		description: 'string',
 		feedUrl: 'string',
+		// Added by me
+		feedKey: optional('string'),
 
 		items: [
 			{
