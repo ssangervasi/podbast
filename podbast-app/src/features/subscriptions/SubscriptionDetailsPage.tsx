@@ -141,25 +141,29 @@ export const SubscriptionDetailsPage = () => {
 					<Heading as="h1">{subscription.title}</Heading>
 				</HStack>
 
-				<VStack>
+				<VStack maxWidth="50%" overflowX="scroll">
 					<Text>
 						Homepage:{' '}
 						<chakra.span fontFamily="monospace">
-							{subscription.link}
+							{subscription.link ?? '(Unknown)'}
 						</chakra.span>
 					</Text>
 					<Text>
-						Feed URL:{' '}
-						<chakra.span fontFamily="monospace">
-							{subscription.feedUrl}
-						</chakra.span>
-					</Text>
-					<Text>
-						Subscription URL:{' '}
-						<chakra.span fontFamily="monospace">{subscription.url}</chakra.span>
+						Subscription URL (Includes authentication parameters, if any)
 						<br />
-						(Includes authentication parameters, if any)
+						<chakra.span fontFamily="monospace">{subscription.url}</chakra.span>
 					</Text>
+					<DevOnly>
+						<Text>
+							Feed URL:
+							<br />
+							<chakra.span fontFamily="monospace">
+								{subscription.feedUrl !== subscription.url
+									? subscription.feedUrl
+									: '(same)'}
+							</chakra.span>
+						</Text>
+					</DevOnly>
 				</VStack>
 
 				<Heading as="h2">Episodes</Heading>
@@ -203,7 +207,9 @@ export const SubscriptionDetailsPage = () => {
 					</GridItem>
 				</PageGrid>
 
-				<DebugFilters>{{ filters, filtersComitted }}</DebugFilters>
+				<DebugFilters>
+					{{ filters, filtersComitted, chunker: chunker.chunkInfo }}
+				</DebugFilters>
 
 				<EpisodesGrid>
 					{chunker.chunk.map(item => (
@@ -231,7 +237,11 @@ const ChunkerControls = ({
 	return (
 		<VStack>
 			<chakra.div>
-				<Text>
+				<Text
+					fontVariantNumeric="tabular-nums"
+					// Ensure no wrap when up to 3 digits
+					minW={`${'100 - 200 of 999'.length}ch`}
+				>
 					{chunker.chunkInfo.first} - {chunker.chunkInfo.last} of{' '}
 					{chunker.chunkInfo.total}
 				</Text>
