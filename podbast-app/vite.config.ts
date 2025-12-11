@@ -1,5 +1,5 @@
 import preact from '@preact/preset-vite'
-import path from 'node:path'
+// import path from 'node:path'
 import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
@@ -24,10 +24,10 @@ export default defineConfig({
 	resolve: {
 		alias: [
 			// Actually already supports absolute imports
-			{
-				find: 'src',
-				replacement: path.resolve(process.cwd(), 'src'),
-			},
+			// {
+			// 	find: 'src',
+			// 	replacement: path.resolve(process.cwd(), 'src'),
+			// },
 		],
 	},
 })
