@@ -46,9 +46,9 @@ export const FeedResponseNarrower = {
 		link: optional('string'),
 		url: optional('string'),
 		image: optional({
-			link: 'string',
+			link: optional('string'),
 			url: 'string',
-			title: 'string',
+			title: optional('string'),
 		}),
 		pubDate: optional('string'),
 		language: optional('string'),

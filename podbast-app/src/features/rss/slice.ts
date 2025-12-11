@@ -90,8 +90,8 @@ export const slice = createSlice({
 				}
 
 				if (
-					(requestedBy && feed.feedUrl !== requestedBy) ||
-					feed.feedKey !== requestedBy
+					requestedBy &&
+					(feed.feedUrl !== requestedBy || feed.feedKey !== requestedBy)
 				) {
 					logger.error('Fulfilled feedKey does not match requested feedKey')
 				}
@@ -101,7 +101,7 @@ export const slice = createSlice({
 			})
 			.addCase(fetchFeed.rejected, (draft, action) => {
 				const { url: urlParts } = action.meta.arg
-				logger.error('fetchFeed.rejected', { urlParts })
+				logger.error('fetchFeed.rejected', { urlParts, error: action.error })
 
 				const url = buildUrl(urlParts).toString()
 

@@ -49,8 +49,8 @@ export type Subscription = {
 
 	image?: {
 		url: string
-		title: string
-		link: string
+		title?: string
+		link?: string
 	}
 
 	activity: SubscriptionActivity

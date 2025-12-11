@@ -35,10 +35,12 @@ export const getFeed = async (urlish: UrlIsh): Promise<Feed> => {
 	counters.fetching -= 1
 
 	if (!FeedResponseGuard.satisfied(json)) {
+		let modelDiff
 		if (isDev()) {
-			logger.debug(diffNarrow(FeedResponseNarrower, json))
+			modelDiff = diffNarrow(FeedResponseNarrower, json)
+			logger.debug('getFeed: model diff', { modelDiff, json })
 		}
-		throw new Error('getFeed: Invalid feed JSON')
+		throw new Error('getFeed: Invalid feed JSON', { cause: { modelDiff } })
 	}
 
 	// Inject URL used for actual request
