@@ -641,6 +641,7 @@ dependencies = [
 name = "stors"
 version = "0.1.0"
 dependencies = [
+ "bytes",
  "log",
  "pretty_env_logger",
  "tokio",
