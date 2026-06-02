@@ -34,14 +34,45 @@ fn becho() -> BoxedFilter<(impl Reply,)> {
     routes.boxed()
 }
 
+struct WithFPath {
+    f_path: &'static str,
+}
+
 fn store() -> BoxedFilter<(impl Reply,)> {
     let route_path = warp::path("store");
 
-    let get = route_path.and(warp::get()).map(|| {
-        let f_path = Path::new("./data/latest");
-        let s = fs::read_to_string(f_path).expect("file not found");
-        s
-    });
+    // let get = route_path.and(warp::get()).map(|| {
+    //     let f_path = Path::new("./data/latest");
+    //     let s = fs::read_to_string(f_path).expect("file not found");
+    //     s
+    // });
+
+    // let get = route_path
+    //     .and(warp::get())
+    //     .map(|| {
+    //         // let f_path = Path::new("./data/latest");
+    //         WithFPath {
+    //             f_path: "./data/latest",
+    //         }
+    //     })
+    //     .map(|with_f_path: WithFPath| warp::fs::file(with_f_path.f_path));
+
+    // let get = route_path
+    //     .and(warp::get())
+    //     .and(warp::fs::file("./data/latest"));
+
+    let get = route_path
+        .and(warp::get())
+        //
+        .and(
+            warp::any()
+                .map(|| {
+                    debug!(">>> sub chain");
+                    ()
+                })
+                .untuple_one()
+                .and(warp::fs::file("./data/latest")),
+        );
 
     let post = route_path
         .and(warp::post())
