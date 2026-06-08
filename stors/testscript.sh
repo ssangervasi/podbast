@@ -31,6 +31,23 @@ yaddy
 # curl -v $HOST/store
 
 
+store_get() {
+	curl -vv -H "X-Req-N: $1", $HOST/store
+}
+
+store_get_n() {
+	n=$1
+	
+	for i in $(eval echo {1..$n}); do
+		(
+			echo "req #$i"
+			store_get $i
+		)&
+	done
+}
+
+store_get_n 5
+
 # echo ----------
 # echo POST /store
 # curl -v --data-raw "{data:[]}" $HOST/store

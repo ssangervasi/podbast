@@ -4,6 +4,10 @@ use log::debug;
 use std::env;
 use warp::Filter;
 
+mod file_store;
+
+// use file_store;
+
 /// Adapted from https://github.com/seanmonstar/warp/blob/master/converts/todos.rs
 ///
 /// Routes:
@@ -42,7 +46,9 @@ mod filters {
     pub fn combine(
         context: Context,
     ) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
-        info_get(context.clone()).or(echo_post(context.clone()))
+        info_get(context.clone())
+            .or(echo_post(context.clone()))
+            .or(store_get(context.clone()))
     }
 
     /// GET /info
@@ -64,6 +70,19 @@ mod filters {
             .and_then(handlers::echo_post)
     }
 
+    /// - `GET /store`: Read `data/latest`
+
+    pub fn store_get(
+        context: Context,
+    ) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
+        warp::path!("store")
+            .and(with_context(context))
+            .and_then(handlers::store_get)
+    }
+
+    ///
+    ///
+
     fn with_context(
         context: Context,
     ) -> impl Filter<Extract = (Context,), Error = std::convert::Infallible> + Clone {
@@ -82,7 +101,10 @@ mod filters {
             })
     }
 }
+
 mod handlers {
+    use crate::file_store::FileStore;
+
     use super::models::{Context, HandlerOptions};
     use std::convert::Infallible;
     // use warp::http::StatusCode;
@@ -104,6 +126,19 @@ mod handlers {
         }
 
         Ok(format!("\nGotten\n{}\n", s))
+    }
+
+    /// - `GET /store`: Read `data/latest`
+    pub async fn store_get(context: Context) -> Result<impl warp::Reply, Infallible> {
+        let latest_content = FileStore::read_latest().await.unwrap_or("".to_string());
+
+        let mut context_inner = context.lock().await;
+        context_inner.incr();
+
+        Ok(format!(
+            "store_count = {}\n\nlatest:\n{}",
+            context_inner.store_count, latest_content,
+        ))
     }
 
     // pub async fn create_todo(create: Todo, db: Db) -> Result<impl warp::Reply, Infallible> {
@@ -140,6 +175,12 @@ mod models {
     #[derive(Debug, Clone)]
     pub struct ContextInner {
         pub store_count: u32,
+    }
+
+    impl ContextInner {
+        pub fn incr(&mut self) {
+            self.store_count += 1;
+        }
     }
 
     // #[derive(Debug, Deserialize)]
