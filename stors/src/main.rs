@@ -49,6 +49,7 @@ mod filters {
         info_get(context.clone())
             .or(echo_post(context.clone()))
             .or(store_get(context.clone()))
+            .or(store_post(context.clone()))
     }
 
     /// GET /info
@@ -56,6 +57,7 @@ mod filters {
         context: Context,
     ) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
         warp::path!("info")
+            .and(warp::get())
             .and(with_context(context))
             .and_then(handlers::info_get)
     }
@@ -64,6 +66,7 @@ mod filters {
         context: Context,
     ) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
         warp::path!("echo")
+            .and(warp::post())
             .and(with_context(context))
             .and(with_options())
             .and(warp::body::bytes())
@@ -71,13 +74,24 @@ mod filters {
     }
 
     /// - `GET /store`: Read `data/latest`
-
     pub fn store_get(
         context: Context,
     ) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
         warp::path!("store")
+            .and(warp::get())
             .and(with_context(context))
             .and_then(handlers::store_get)
+    }
+
+    /// - `POST /store`: Read `data/latest`
+    pub fn store_post(
+        context: Context,
+    ) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
+        warp::path!("store")
+            .and(warp::post())
+            .and(with_context(context))
+            .and(warp::body::bytes())
+            .and_then(handlers::store_post)
     }
 
     ///
@@ -103,11 +117,11 @@ mod filters {
 }
 
 mod handlers {
-    use crate::file_store::FileStore;
+    use http::StatusCode;
+    use log::debug;
 
     use super::models::{Context, HandlerOptions};
     use std::convert::Infallible;
-    // use warp::http::StatusCode;
 
     pub async fn info_get(context: Context) -> Result<impl warp::Reply, Infallible> {
         let context_inner = context.lock().await;
@@ -128,17 +142,40 @@ mod handlers {
         Ok(format!("\nGotten\n{}\n", s))
     }
 
-    /// - `GET /store`: Read `data/latest`
     pub async fn store_get(context: Context) -> Result<impl warp::Reply, Infallible> {
-        let latest_content = FileStore::read_latest().await.unwrap_or("".to_string());
+        // let latest_content = FileStore::read_latest().await.unwrap_or("".to_string());
 
-        let mut context_inner = context.lock().await;
-        context_inner.incr();
+        let context_inner = context.lock().await;
+        // context_inner.incr();
+
+        let latest_content = context_inner
+            .file_store
+            .read_latest()
+            .await
+            .unwrap_or("".to_string());
 
         Ok(format!(
             "store_count = {}\n\nlatest:\n{}",
             context_inner.store_count, latest_content,
         ))
+    }
+
+    pub async fn store_post(
+        context: Context,
+        body: bytes::Bytes,
+    ) -> Result<impl warp::Reply, Infallible> {
+        let mut context_inner = context.lock().await;
+
+        match context_inner.file_store.write_latest(body).await {
+            Ok(_) => {
+                context_inner.incr();
+                Ok(StatusCode::CREATED)
+            }
+            Err(e) => {
+                debug!("store_post error: {}", e);
+                Ok(StatusCode::INTERNAL_SERVER_ERROR)
+            }
+        }
     }
 
     // pub async fn create_todo(create: Todo, db: Db) -> Result<impl warp::Reply, Infallible> {
@@ -166,15 +203,21 @@ mod models {
     use std::sync::Arc;
     use tokio::sync::Mutex;
 
+    use crate::file_store::FileStore;
+
     pub type Context = Arc<Mutex<ContextInner>>;
 
     pub fn context() -> Context {
-        Arc::new(Mutex::new(ContextInner { store_count: 0 }))
+        Arc::new(Mutex::new(ContextInner {
+            store_count: 0,
+            file_store: FileStore::new(),
+        }))
     }
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct ContextInner {
         pub store_count: u32,
+        pub file_store: FileStore,
     }
 
     impl ContextInner {

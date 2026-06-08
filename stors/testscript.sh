@@ -26,13 +26,12 @@ yaddy
 
 
 
-# echo ----------
-# echo GET /store
-# curl -v $HOST/store
+echo ----------
+echo GET /store
 
 
 store_get() {
-	curl -vv -H "X-Req-N: $1", $HOST/store
+	curl -vv -H "X-Req-N: $1" $HOST/store
 }
 
 store_get_n() {
@@ -48,13 +47,38 @@ store_get_n() {
 
 store_get_n 5
 
-# echo ----------
-# echo POST /store
-# curl -v --data-raw "{data:[]}" $HOST/store
+wait
+
+echo ----------
+echo POST /store
 
 
+store_post() {
+	local n=$1
+	local t=$(date +'%s')
+	
+	curl -vv -H "X-Req-N: $1" \
+		--data-raw "\
+This is write #$n
+At time $t
+"\
+	$HOST/store
+}
 
+store_post_n() {
+	n=$1
+	
+	for i in $(eval echo {1..$n}); do
+		(
+			echo "store_post req $i"
+			store_post $i
+		)&
+	done
+}
 
+store_post_n 5
+
+wait
 
 echo ----------
 echo END

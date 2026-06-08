@@ -642,6 +642,7 @@ name = "stors"
 version = "0.1.0"
 dependencies = [
  "bytes",
+ "http",
  "log",
  "pretty_env_logger",
  "tokio",
